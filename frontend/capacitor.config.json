@@ -1,0 +1,10 @@
+{
+  "appId": "com.pixelshopsns.app",
+  "appName": "PixelTeamSNS",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "hostname": "localhost",
+    "allowMixedContent": true
+  }
+}

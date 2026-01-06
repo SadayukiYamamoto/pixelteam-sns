@@ -1,0 +1,187 @@
+import React, { useEffect, useState } from "react";
+import axiosClient from "../api/axiosClient";
+import * as LucideIcons from "lucide-react"; // アイコン動的読み込み
+import Header from "../components/Header";
+import Navigation from "../components/Navigation";
+import { logInteraction } from "../utils/analytics";
+import "../components/tasks/TaskPage.css";
+
+// ★ ローディングスピナー（ぐるぐる）
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center h-[60vh]">
+    <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+  </div>
+);
+
+// ★ 業務カード（PokéPokéスタイル適用）
+const BusinessCard = ({ item }) => {
+  // item.icon_name から Lucide アイコンを取得
+  const Icon = LucideIcons[item.icon_name] || LucideIcons.HelpCircle;
+  const spanClass = ""; // 必要なら item.size などを追加して制御
+
+  const triggerMission = async (actionType) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await axiosClient.post(`missions/trigger/`,
+        { action_type: actionType }
+      );
+      console.log("📥 Mission Trigger API Response:", res.data); // Log mission trigger response
+    } catch (err) {
+      console.error("Mission trigger error:", err);
+    }
+  };
+
+  const handleClick = () => {
+    logInteraction('task', item.id, item.title);
+
+    // ✅ ミッショントリガー
+    if (item.title === '健康観察') triggerMission('health_check_click');
+    if (item.title === '個人実績報告') triggerMission('individual_report_click');
+
+    if (!item.url) return;
+    if (item.url.startsWith("/")) {
+      window.location.href = item.url;
+    } else {
+      window.open(item.url, "_blank");
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className={`w-full flex flex-col items-center justify-center p-4 h-32 pokepoke-card relative ${spanClass}`}
+    >
+      <div className={`mb-3 flex items-center justify-center p-3 bg-gray-50/50 rounded-2xl shadow-inner ${item.color}`}>
+        <Icon size={32} />
+      </div>
+
+      <p className="text-[13px] font-black text-gray-800 text-center leading-tight">
+        {item.title}
+      </p>
+    </button>
+  );
+};
+
+
+
+const TaskPage = () => {
+  const [team, setTeam] = useState(null); // null → 読み込み中
+  const [tasks, setTasks] = useState([]); // APIから取得したタスク
+  const [loading, setLoading] = useState(true);
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        // 1. チーム取得
+        const teamRes = await axiosClient.get(`mypage/${userId}/`);
+        const userTeam = teamRes.data.team;
+        setTeam(userTeam);
+
+        // 2. タスク一覧取得 (チームでフィルタ)
+        // training は全部見れるとか、ロジックがあればここで調整
+        // Backend側で ?team=xxx を受けてフィルタしている前提
+        let query = "";
+        if (userTeam === "event") query = "?team=event";
+        if (userTeam === "shop") query = "?team=shop";
+
+        const tasksRes = await axiosClient.get(`task_buttons/${query}`);
+        console.log("📥 Tasks API Response:", tasksRes.data);
+        setTasks(tasksRes.data);
+
+      } catch (err) {
+        console.error(err);
+        setTeam("");
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+  }, []);
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <LoadingSpinner />
+        <Navigation />
+      </>
+    );
+  }
+
+  // カテゴリグループ化 (parent_category でグループ化)
+  const grouped = tasks.reduce((acc, item) => {
+    const sectionName = item.parent_category || "その他";
+    (acc[sectionName] = acc[sectionName] || []).push(item);
+    return acc;
+  }, {});
+
+  // 表示順序の定義
+  const sectionOrder = [
+    "申請・報告",
+    "実績・確認",
+    "実績・管理",
+    "お知らせ・情報",
+    "シフト・ツール",
+    "関連サイト",
+    "その他"
+  ];
+
+  const sortedKeys = Object.keys(grouped).sort((a, b) => {
+    const indexA = sectionOrder.indexOf(a);
+    const indexB = sectionOrder.indexOf(b);
+    // 定義にないものは最後に
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+
+  return (
+    <div className="home-container">
+      <div className="home-wrapper">
+        <Header />
+
+        <div
+          className="overflow-y-auto p-5 pb-32 max-w-[1600px] mx-auto"
+          style={{ height: "calc(100vh - 120px)" }}
+        >
+          <div className="flex justify-center -mb-2">
+            <div className="pokepoke-label scale-110 shadow-lg px-8">
+              業務一覧
+            </div>
+          </div>
+
+          {Object.keys(grouped).length === 0 && (
+            <div className="text-center text-gray-400 py-10">
+              表示できる業務メニューがありません
+            </div>
+          )}
+
+          {sortedKeys.map((sectionName) => (
+            <div key={sectionName} className="space-y-4">
+              {/* セクションタイトル */}
+              <div className="flex items-center space-x-3 px-2">
+                <div className="w-1.5 h-6 bg-green-500 rounded-full"></div>
+                <p className="text-lg font-black text-gray-800">
+                  {sectionName}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                {grouped[sectionName].map((item) => (
+                  <BusinessCard key={item.id} item={item} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <Navigation activeTab="tasks" />
+      </div>
+    </div>
+  );
+};
+
+export default TaskPage;

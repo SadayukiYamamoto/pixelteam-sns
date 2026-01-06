@@ -1,0 +1,363 @@
+/* --- VideoTestPage.css --- */
+
+.test-page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+  padding-bottom: 80px;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ヘッダー */
+.test-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.test-header h2 {
+  font-size: 28px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.test-header p {
+  color: #666;
+  font-size: 14px;
+}
+
+/* 問題カード */
+.question-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+}
+
+.question-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #444;
+}
+
+.q-num {
+  background: #eef2ff;
+  color: #4f46e5;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+.choices-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.choice-item:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.choice-item.selected {
+  border-color: #4f46e5;
+  background: #eef2ff;
+}
+
+.radio-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #94a3b8;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.choice-item.selected .radio-circle {
+  border-color: #4f46e5;
+  background: #4f46e5;
+  box-shadow: inset 0 0 0 4px #fff;
+}
+
+/* アンケート */
+.survey-container {
+  background: #fdfdfd;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 40px;
+}
+
+.survey-container h3 {
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.survey-desc {
+  color: #666;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.survey-item {
+  margin-bottom: 20px;
+}
+
+.survey-q {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.survey-choices {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.survey-choice-btn {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.survey-choice-btn:hover {
+  background: #f3f4f6;
+}
+
+.survey-choice-btn.active {
+  background: #4f46e5;
+  color: #fff;
+  border-color: #4f46e5;
+}
+
+.survey-text-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* フッターアクション */
+.footer-actions {
+  margin-top: 40px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-link {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.submit-main-btn {
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: white;
+  font-weight: bold;
+  border-radius: 50px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.submit-main-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+}
+
+.submit-main-btn:disabled {
+  background: #9ca3af;
+  transform: none;
+}
+
+/* --- 結果オーバーレイ --- */
+.result-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.result-card {
+  background: #fff;
+  padding: 40px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 480px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-top: 6px solid #ccc;
+}
+
+.result-card.passed {
+  border-color: #22c55e;
+}
+
+.result-card.passed h1 {
+  color: #22c55e;
+}
+
+.result-card.failed {
+  border-color: #ef4444;
+}
+
+.result-card.failed h1 {
+  color: #ef4444;
+}
+
+/* --- 円グラフ (Circular Progress) 追加 --- */
+.score-graph-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.circular-chart {
+  display: block;
+  margin: 0 auto;
+  max-width: 80%;
+  max-height: 250px;
+}
+
+.circle-bg {
+  fill: none;
+  stroke: #eee;
+  stroke-width: 3.8;
+}
+
+.circle {
+  fill: none;
+  stroke-width: 3.8;
+  stroke-linecap: round;
+  animation: progress 1s ease-out forwards;
+}
+
+.circle.pass {
+  stroke: #22c55e;
+}
+
+.circle.fail {
+  stroke: #ef4444;
+}
+
+.percentage {
+  fill: #333;
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 8px;
+  /* SVG座標系 (36x36) に合わせたサイズ */
+  text-anchor: middle;
+  dominant-baseline: middle;
+  /* 中央揃えの補正 */
+}
+
+.score-label {
+  margin-top: -10px;
+  font-size: 14px;
+  color: #666;
+  font-weight: bold;
+}
+
+@keyframes progress {
+  0% {
+    stroke-dasharray: 0 100;
+  }
+}
+
+.message {
+  color: #555;
+  line-height: 1.5;
+  margin-bottom: 30px;
+}
+
+.result-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.btn-primary {
+  padding: 12px 24px;
+  background: #333;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-retry {
+  padding: 12px 24px;
+  background: #fff;
+  color: #ef4444;
+  border: 2px solid #ef4444;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-retry:hover {
+  background: #fef2f2;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

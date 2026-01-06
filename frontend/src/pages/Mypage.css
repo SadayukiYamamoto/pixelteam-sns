@@ -1,0 +1,338 @@
+/* === ベースレイアウト === */
+.home-container {
+  background-color: #f8f9fb;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.home-wrapper {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+/* === マイページ全体 === */
+.mypage-content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  margin-bottom: 70px;
+  /* 下のNavigation分 */
+}
+
+.mypage-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* === タブメニュー === */
+.mypage-tabs {
+  display: flex;
+  justify-content: space-around;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.mypage-tab {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  cursor: pointer;
+  font-weight: 500;
+  color: #555;
+  transition: all 0.2s ease;
+}
+
+.mypage-tab.active {
+  background-color: #4285f4;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* === タブ内容エリア === */
+.mypage-tab-content {
+  margin-top: 10px;
+}
+
+/* === 投稿カード === */
+.post-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.post-user-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover;
+}
+
+/* === 投稿本文（3行制限）=== */
+/* 投稿本文 */
+.post-content {
+  cursor: pointer;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  position: relative;
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 8px;
+  line-height: 1.6;
+  transition: all 0.3s ease;
+  background-color: #fff;
+  padding-bottom: 16px;
+  /* ✅ 下に余白をつけて文字が隠れないように */
+}
+
+/* 展開時 */
+.post-content.expanded {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
+/* === さらに表示ボタン === */
+.show-more-btn {
+  background: none;
+  border: none;
+  color: #4285f4;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+/* ✅ さらに表示テキスト */
+.show-more-text {
+  color: #1a73e8;
+  /* Googleブルーに近い色 */
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  text-align: center;
+  /* ✅ 真ん中に表示 */
+  background: linear-gradient(to top, #fff 50%, transparent 100%);
+  /* ✅ 目立たせる */
+  padding: 4px 0;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+/* === リアクションバー === */
+.reaction-bar {
+  display: flex;
+  gap: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 8px;
+}
+
+.reaction-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  color: #666;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.reaction-btn:hover {
+  color: #f44336;
+}
+
+/* === プロフィール === */
+.mypage-profile-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.mypage-profile-icon {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  margin-bottom: 10px;
+}
+
+.mypage-team {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+.mypage-shop {
+  font-size: 0.85rem;
+  color: #3b82f6;
+  font-weight: 600;
+  margin-top: -8px;
+  margin-bottom: 12px;
+}
+
+/* === プロフィールボタン並び === */
+.mypage-btn-group {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  box-sizing: border-box;
+}
+
+/* ✅ 統一ボタン共通スタイル */
+.mypage-btn {
+  height: 40px;
+  flex: 1;
+  border: none;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
+}
+
+.mypage-btn:active {
+  transform: scale(0.98);
+}
+
+/* 各ボタン固有の色設定 */
+.mypage-edit-button {
+  background-color: #4285f4;
+  color: white;
+}
+
+.mypage-edit-button:hover {
+  background-color: #3b74d7;
+}
+
+.mypage-mission-button {
+  background-color: #22c55e !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2) !important;
+}
+
+.mypage-mission-button:hover {
+  background-color: #1ea34d !important;
+}
+
+.mypage-logout-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.mypage-logout-button:hover {
+  background-color: #d32f2f;
+}
+
+/* === バッジ・ポイント === */
+.mypage-stats {
+  margin-top: 15px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.badge-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.badge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.badge-image {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.badge-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+
+.level-box {
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.level-header {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.level-number {
+  color: #10b981 !important;
+  font-weight: 800;
+}
+
+.exp-bar {
+  height: 12px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 10px 0;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.exp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #34d399, #6ee7b7) !important;
+  border-radius: 6px;
+  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+.exp-text {
+  font-size: 12px;
+  color: #444;
+}

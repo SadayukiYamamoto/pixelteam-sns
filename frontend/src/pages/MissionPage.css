@@ -1,0 +1,142 @@
+/* ======= 全体 ======= */
+.mission-container {
+    background: #f3f3f3;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+  
+  /* ======= ヘッダー ======= */
+  .mission-header {
+    background-color: #25a94b;
+    padding: 40px 20px 60px;
+    text-align: center;
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+  }
+  
+  .mission-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  
+  /* progress bar */
+  .progress-bar-bg {
+    width: 70%;
+    height: 12px;
+    background-color: #bdbdbd;
+    border-radius: 20px;
+    margin: 0 auto;
+  }
+  .progress-bar-fill {
+    height: 12px;
+    background: white;
+    border-radius: 20px;
+  }
+  
+  /* ======= カード一覧 ======= */
+  .mission-list {
+    padding: 0 20px 160px;
+    margin-top: 20px;
+    transition: all 0.35s ease;
+  }
+  
+  /* フェードアウト */
+  .mission-list.fade-out {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  
+  /* フェードイン */
+  .mission-list.fade-in {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+  
+  /* ======= カード ======= */
+  .mission-card,
+  .mission-card-active {
+    min-height: 150px;
+    background: white;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    padding: 20px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  .mission-card-active {
+    background: #25a94b;
+    color: white;
+  }
+  
+  .mission-clear-btn {
+    position: absolute;
+    right: 20px;
+    bottom: 16px;
+    background: white;
+    color: #25a94b;
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+  
+  /* ======= 下部白背景 ======= */
+  .mission-footer-bg {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 160px;
+    background: white;
+    z-index: 0;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+  }
+  
+  /* ======= タブ ======= */
+  .mission-tab-container {
+    position: fixed;
+    bottom: 90px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    z-index: 2;
+  }
+  
+  .mission-tab {
+    padding: 6px 20px;
+    border-radius: 20px;
+    border: 1.5px solid #25a94b;
+    background: white;
+    color: #25a94b;
+    font-weight: 600;
+  }
+  .mission-tab.active {
+    background: #25a94b;
+    color: white;
+  }
+  
+  /* ======= × ======= */
+  .mission-close-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 3;
+  }
+  

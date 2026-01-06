@@ -1,0 +1,136 @@
+/* モーダル背景（黒幕） */
+.preview-modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 40px;
+  }
+  
+  /* モーダル本体 */
+  .preview-modal {
+    width: 90%;
+    max-width: 480px;
+    max-height: 90vh;
+    background: white;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    overflow-y: auto;
+  }
+  
+  /* ヘッダー */
+  .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .preview-close {
+    background: none;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+  }
+  
+  .notice-card-preview {
+    margin-top: 10px;
+  }
+  
+  /* カテゴリラベル */
+  .preview-category-label {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  /* カテゴリ別色 */
+  .preview-category-label.事務局だより { background: #f5dd42; color: #000; }
+  .preview-category-label.イベント { background: #ff66cc; color: #fff; }
+  .preview-category-label.キャンペーン { background: #42a5f5; color: #fff; }
+  .preview-category-label.PixelDrop { background: #6e8efb; color: #fff; }
+  .preview-category-label.商品情報 { background: #58c6a6; color: #fff; }
+  .preview-category-label.アップデート { background: #b47cff; color: #fff; }
+  .preview-category-label.その他 { background: #ccc; color: #000; }
+  
+  /* タイトル */
+  .preview-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
+  
+  /* ヘッダー文字 */
+  .preview-header-text {
+    font-size: 15px;
+    margin-bottom: 12px;
+    color: #444;
+  }
+  
+  /* 画像（位置別） */
+  .preview-img-header,
+  .preview-img-top,
+  .preview-img-bottom {
+    width: 100%;
+    border-radius: 14px;
+    margin: 12px 0;
+    object-fit: cover;
+  }
+  
+  /* 本文 */
+  .preview-body {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  
+  /* 注意事項 */
+  .preview-notes {
+    margin-top: 20px;
+    background: #fff8d2;
+    padding: 12px;
+    border-radius: 10px;
+  }
+  
+  /* === X風リンクカード === */
+.x-card {
+  border: 1px solid #ddd;
+  border-radius: 14px;
+  padding: 12px;
+  margin: 14px 0;
+  background: #fff;
+  transition: 0.2s;
+}
+
+.x-card:hover {
+  background: #f7f9f9;
+}
+
+.x-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+.x-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.x-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f1419;
+}
+
+.x-card-desc {
+  font-size: 13px;
+  color: #536471;
+}

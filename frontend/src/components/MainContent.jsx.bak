@@ -1,0 +1,207 @@
+import React from 'react';
+import { Archive, Play } from 'lucide-react';
+import axiosClient from '../api/axiosClient';
+import PostItem from './PostItem';
+import { logInteraction } from '../utils/analytics';
+
+
+const MainContent = ({ setActiveTab }) => {
+  const [data, setData] = React.useState({
+    news: [],
+    shorts: [],
+    featured_posts: [],
+    trending_hashtags: [],
+    active_users: []
+  });
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    fetchHomeContent();
+  }, []);
+
+  const fetchHomeContent = async () => {
+    try {
+      const res = await axiosClient.get('admin/home/content/');
+      if (res.data) {
+        setData({
+          news: res.data.news || [],
+          shorts: res.data.shorts || [],
+          featured_posts: res.data.featured_posts || [],
+          trending_hashtags: res.data.trending_hashtags || [],
+          active_users: res.data.active_users || []
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching home content:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLike = async (postId) => {
+    try {
+      const res = await axiosClient.post(`posts/${postId}/like/`, {});
+      setData(prev => ({
+        ...prev,
+        featured_posts: prev.featured_posts.map(p =>
+          p.id === postId ? { ...p, likes_count: res.data.likes_count, liked: res.data.liked } : p
+        )
+      }));
+    } catch (error) {
+      console.error('Error liking post:', error);
+    }
+  };
+
+  const handleComment = (postId) => {
+    window.location.href = `/posts?post_id=${postId}`;
+  };
+
+  // 過去ボタン共通スタイル
+  const historyButtonStyle = `
+    w-full h-14 bg-white rounded-3xl shadow-md border border-gray-100/50
+    flex items-center justify-center text-[15px] font-black
+    text-gray-700 hover:bg-gray-50 transition-all active:scale-95
+    hover:shadow-lg hover:translate-y-[-1px]
+  `;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-10">
+      {/* 1. 事務局おすすめの投稿 */}
+      <div className="space-y-6">
+        <div className="flex justify-center -mb-2">
+          <div className="pokepoke-label z-10 shadow-lg px-6">
+            事務局おすすめの投稿
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {data.featured_posts.map((post) => (
+            <PostItem
+              key={post.id}
+              post={{
+                id: post.id,
+                content: post.content,
+                time: new Date(post.created_at).toLocaleDateString(),
+                image: post.image_url || post.image,
+                user: post.display_name || "名無しさん",
+                user_uid: post.user_uid,
+                profileImage: post.profile_image,
+                likes: post.likes_count,
+                comments: post.comments_count,
+                liked: post.liked
+              }}
+              onLike={handleLike}
+              onComment={handleComment}
+            />
+          ))}
+          {data.featured_posts.length === 0 && (
+            <div className="pokepoke-card py-20 text-center bg-white/50 rounded-[40px] border-2 border-dashed border-gray-100">
+              <p className="text-gray-400 font-black">おすすめの投稿はありません</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 2. 事務局だより＆ショート */}
+      <div className="space-y-10">
+        {/* 事務局だより */}
+        <div className="flex flex-col space-y-4">
+          <div className="flex justify-center -mb-6 relative z-10">
+            <div className="pokepoke-label scale-90 px-6">事務局だより</div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            {data.news.map((n) => (
+              <a
+                key={n.id}
+                href={n.external_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => logInteraction('news', n.id, n.title)}
+                className="pokepoke-card block group bg-white shadow-xl"
+              >
+                <div className="aspect-[4/3] w-full overflow-hidden border-b border-gray-50">
+                  {n.thumbnail ? (
+                    <img src={n.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-green-50/50">
+                      <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                        <Archive size={20} className="text-green-600" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="p-3 bg-white min-h-[4.5rem] flex items-center">
+                  <h3 className="text-[12px] font-black text-gray-800 leading-tight line-clamp-2 text-center w-full">{n.title}</h3>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <button
+            onClick={() => {
+              logInteraction('news', 'archive_news', '過去の事務局だより');
+              window.open('https://drive.google.com/drive/u/0/folders/1UZLCOUok0lKeMwyOw0SXKO4yTKpcvKcZ', '_blank');
+            }}
+            className={historyButtonStyle}
+          >
+            <Archive size={16} className="mr-2 text-gray-300" />
+            過去の事務局だより
+          </button>
+        </div>
+
+        {/* ショート動画 */}
+        <div className="flex flex-col space-y-4">
+          <div className="flex justify-center -mb-6 relative z-10">
+            <div className="pokepoke-label scale-90 px-6">最新の動画</div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            {data.shorts.map((v) => (
+              <div
+                key={v.id}
+                onClick={() => {
+                  logInteraction('video', v.id, v.title);
+                  window.location.href = `/video/${v.id}`;
+                }}
+                className="pokepoke-card block group bg-white shadow-xl cursor-pointer"
+              >
+                <div className="aspect-[4/3] w-full overflow-hidden relative border-b border-gray-50">
+                  <img src={v.thumb} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 backdrop-blur-[2px]">
+                    <div className="bg-white/95 p-3 rounded-full shadow-lg text-green-600 active:scale-90 transition-transform"><Play size={20} fill="currentColor" /></div>
+                  </div>
+                </div>
+                <div className="p-3 bg-white min-h-[4.5rem] flex items-center">
+                  <h3 className="text-[12px] font-black text-gray-800 leading-tight line-clamp-2 text-center w-full">{v.title}</h3>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={() => {
+              logInteraction('video', 'archive_videos', '過去の動画');
+              window.location.href = '/videos';
+            }}
+            className={historyButtonStyle}
+          >
+            <Archive size={16} className="mr-2 text-gray-300" />
+            過去のショート動画
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+export default MainContent;

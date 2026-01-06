@@ -1,0 +1,130 @@
+.notice-detail-container {
+  padding: 20px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.notice-back-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  color: #1e90ff;
+  font-weight: bold;
+}
+
+.notice-detail-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+}
+
+.notice-detail-category {
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: bold;
+  display: inline-block;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+/* カテゴリ色 */
+.notice-detail-category.事務局だより { background: #f5dd42; color: #000; }
+.notice-detail-category.イベント { background: #ff66cc; color: #fff; }
+.notice-detail-category.キャンペーン { background: #42a5f5; color: #fff; }
+.notice-detail-category.PixelDrop { background: #6e8efb; color: #fff; }
+.notice-detail-category.商品情報 { background: #58c6a6; color: #fff; }
+.notice-detail-category.アップデート { background: #b47cff; color: #fff; }
+.notice-detail-category.その他 { background: #ccc; color: #000; }
+
+.notice-detail-title {
+  font-size: 24px;
+  font-weight: 800;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.notice-detail-header {
+  font-size: 16px;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.notice-detail-header.bold {
+  font-weight: 800;
+}
+
+.notice-detail-img {
+  width: 100%;
+  border-radius: 14px;
+  margin: 14px 0;
+  object-fit: cover;
+}
+
+.notice-detail-body {
+  line-height: 1.7;
+  margin-bottom: 18px;
+  font-size: 16px;
+}
+
+.notice-detail-notes {
+  background: #fff8b8;
+  padding: 12px;
+  border-radius: 12px;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.notice-detail-period {
+  margin-top: 20px;
+  color: #444;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.notice-detail-loading {
+  text-align: center;
+  padding: 40px;
+}
+
+/* === X風リンクカード === */
+.x-card {
+  border: 1px solid #ddd;
+  border-radius: 14px;
+  padding: 12px;
+  margin: 14px 0;
+  background: #fff;
+  transition: 0.2s;
+}
+
+.x-card:hover {
+  background: #f7f9f9;
+}
+
+.x-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+.x-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.x-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f1419;
+}
+
+.x-card-desc {
+  font-size: 13px;
+  color: #536471;
+}
+

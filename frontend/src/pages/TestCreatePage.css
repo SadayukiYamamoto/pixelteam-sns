@@ -1,0 +1,309 @@
+/* TestCreatePage.css */
+
+/* 全体のラッパー（スクロールエリア） */
+.test-create-wrapper {
+    background-color: #f0ebf8;
+    /* 薄い紫がかったグレー */
+    min-height: 100%;
+}
+
+/* ヘッダー部分 */
+.test-create-header {
+    background: linear-gradient(135deg, #673ab7, #512da8);
+    /* Google Formsっぽい紫 */
+    color: white;
+    padding: 40px 20px 80px 20px;
+    /* カードが重なるように下余白を多めに */
+    text-align: center;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.test-create-header h1 {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.test-create-header p {
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+/* コンテンツコンテナ */
+.test-create-container {
+    max-width: 720px;
+    margin: -50px auto 40px auto;
+    /* ヘッダーに重ねる */
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* 共通カードスタイル */
+.form-section,
+.question-card,
+.survey-edit-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-top: 8px solid transparent;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-section {
+    border-top-color: #673ab7;
+    /* 紫のアクセント */
+}
+
+.question-card {
+    border-left: 6px solid #4f46e5;
+    /* 青のアクセント */
+}
+
+.survey-edit-card {
+    border-left: 6px solid #10b981;
+    /* 緑のアクセント（アンケート） */
+}
+
+.form-section:hover,
+.question-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* セクションタイトル */
+.section-title,
+.section-header {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 12px;
+}
+
+/* フォームグループ */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    background: #fafafa;
+    transition: 0.2s;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+    border-color: #673ab7;
+    background: #fff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(103, 58, 183, 0.1);
+}
+
+/* カードヘッダー（削除ボタンなど） */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.card-header h3 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #444;
+}
+
+.badge {
+    background: #e0f2f1;
+    color: #00695c;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.delete-btn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+/* 質問入力 */
+.question-input {
+    width: 100%;
+    font-size: 16px;
+    padding: 12px;
+    border: none;
+    border-bottom: 2px solid #eee;
+    /* 下線スタイル */
+    background: transparent;
+    margin-bottom: 20px;
+    transition: 0.3s;
+}
+
+.question-input:focus {
+    outline: none;
+    border-bottom-color: #673ab7;
+    background: #fdfdfd;
+}
+
+/* 選択肢リスト */
+.choices-list,
+.survey-choices-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.choice-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.choice-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.choice-input:focus {
+    border-color: #4f46e5;
+    outline: none;
+}
+
+.correct-badge {
+    font-size: 12px;
+    color: #10b981;
+    font-weight: bold;
+    background: #d1fae5;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.sub-label {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+/* 追加ボタン類 */
+.add-question-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px;
+    background: white;
+    border: 2px dashed #ccc;
+    border-radius: 12px;
+    color: #666;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-top: 10px;
+}
+
+.add-question-btn:hover {
+    border-color: #673ab7;
+    color: #673ab7;
+    background: #f3e5f5;
+}
+
+.add-question-btn.secondary {
+    border-color: #10b981;
+    color: #059669;
+    font-size: 14px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.add-question-btn.secondary:hover {
+    background: #ecfdf5;
+}
+
+.add-choice-sm-btn {
+    background: none;
+    border: none;
+    color: #2563eb;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 0;
+    text-align: left;
+    margin-top: 4px;
+}
+
+.add-choice-sm-btn:hover {
+    text-decoration: underline;
+}
+
+.add-survey-buttons {
+    display: flex;
+    gap: 16px;
+}
+
+/* 保存エリア */
+.actions {
+    text-align: right;
+    margin-top: 20px;
+    padding-bottom: 40px;
+}
+
+.save-test-btn {
+    background: linear-gradient(135deg, #673ab7, #512da8);
+    color: white;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: 0 4px 14px rgba(81, 45, 168, 0.4);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.save-test-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(81, 45, 168, 0.5);
+}

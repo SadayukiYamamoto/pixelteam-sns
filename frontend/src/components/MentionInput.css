@@ -1,0 +1,137 @@
+/* MentionInput.css */
+/* MentionInput.css */
+.mention-input-container {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  position: relative;
+  /* Suggestionsの絶対配置の基準 */
+}
+
+.mentions-input {
+  width: 100%;
+  min-height: 120px;
+  font-size: 16px;
+}
+
+/* テキストエリア本体 (react-mentionsの構造上、controlとinputのスタイルを合わせる) */
+.mentions-input__control {
+  background-color: transparent;
+  min-height: 120px;
+  padding: 12px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.mentions-input__highlighter {
+  padding: 12px;
+  min-height: 120px;
+}
+
+.mentions-input__input {
+  outline: none;
+  min-height: 120px;
+  color: #1f2937;
+  line-height: 1.5;
+  padding: 12px;
+  width: 100%;
+  border: none;
+  /* 親のdivで枠線管理するか、ここでつけるか */
+}
+
+/* 外枠等は親コンポーネントで管理するか、ここで指定 */
+.mention-input-container textarea {
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.mention-input-container textarea:focus {
+  background-color: #fff;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* ハイライト（メンション） */
+.mention-highlight {
+  color: #1d9bf0;
+  /* X Blue */
+  background-color: rgba(29, 155, 240, 0.1);
+  border-radius: 2px;
+  font-weight: 500;
+  z-index: 10;
+  position: relative;
+}
+
+/* ハイライト（ハッシュタグ） */
+.hashtag-highlight {
+  color: #1d9bf0;
+  /* X Blue */
+  font-weight: 500;
+}
+
+/* 候補リスト */
+.mentions-input__suggestions {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* Soft premium shadow */
+  margin-top: 8px;
+  z-index: 9999;
+  overflow: hidden;
+  min-width: 240px;
+}
+
+.mentions-input__suggestions__list {
+  background-color: white;
+  font-size: 14px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.mentions-input__suggestions__item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mentions-input__suggestions__item:last-child {
+  border-bottom: none;
+}
+
+.mentions-input__suggestions__item--focused {
+  background-color: #f3f9ff;
+  border-left: 3px solid #1d9bf0;
+}
+
+/* アイコンやサブテキスト用（JS側でHTML構造作る場合に利用） */
+.suggestion-user-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #ddd;
+}
+
+.suggestion-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.suggestion-display-name {
+  font-weight: 600;
+  color: #111;
+}
+
+.suggestion-user-id {
+  color: #666;
+  font-size: 0.9em;
+}

@@ -1,0 +1,144 @@
+/* === 背景（黒幕） === */
+.notice-popup-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    justify-content: center;      /* 中央寄せ */
+    align-items: flex-start;      /* 上寄せ */
+    padding: 20px;
+    z-index: 99999;
+    overflow-y: auto;
+  }
+  
+  /* === ポップアップ本体 === */
+  .notice-popup-large {
+    width: 92%;
+    max-width: 480px;
+    max-height: 85vh;            /* Popupの最大高さ */
+    background: #fff;
+    border-radius: 22px;
+    padding: 16px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+    overflow-y: auto;
+    animation: slideDown 0.25s ease-out;
+  }
+  
+  /* === ヘッダー === */
+  .notice-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  
+  .close-btn {
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  /* === カード一覧 === */
+  .notice-popup-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  
+  /* === 縮小版カード（NoticePage のコピー） === */
+  .notice-card-mini {
+    max-width: 1120px;
+    max-height: 450px;
+    display: block;
+    background: #fff;
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    text-decoration: none;
+    color: #000;
+    transform: scale(0.92); /* ← ここで縮小 */
+    transform-origin: top center;
+  }
+  
+  /* 画像を大きく表示しつつ枠内に収める */
+  .notice-card-mini-img {
+    max-width: 1120px;
+    max-height: 450px;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    object-fit: cover;
+  }
+
+  /* === 1120×450 の比率を強制するコンテナ === */
+.aspect-1120-450 {
+  position: relative;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-top: calc(450 / 1120 * 100%); /* 40.178% */
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+/* 中の画像はカバー表示 */
+.aspect-1120-450 img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+  
+  /* カテゴリラベル */
+  .notice-card-mini-label {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 6px;
+  }
+  
+  /* ラベルカラー例 */
+  .notice-card-mini-label.事務局だより { background: #f5dd42; color: #000; }
+  .notice-card-mini-label.アップデート { background: #ff66cc; color: #fff; }
+  .notice-card-mini-label.new { background: #42a5f5; color: #fff; }
+  
+  /* タイトル */
+  .notice-card-mini-title {
+    font-size: 15px;
+    font-weight: bold;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+  
+  /* 日付 */
+  .notice-card-mini-date {
+    font-size: 12px;
+    color: #777;
+  }
+  
+  /* 一覧リンク */
+  .notice-popup-more {
+    text-align: center;
+    margin-top: 16px;
+  }
+  
+  .notice-popup-more a {
+    color: #0a84ff;
+    font-weight: bold;
+    text-decoration: none;
+  }
+  
+  /* アニメ */
+  @keyframes slideDown {
+    from { transform: translateY(-10px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  

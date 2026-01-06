@@ -1,0 +1,22 @@
+# Environment
+.env
+.venv
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend
+**/node_modules/
+**/dist/
+**/.firebase/
+**/build/
+
+# Backend
+**/db.sqlite3
+**/users.json

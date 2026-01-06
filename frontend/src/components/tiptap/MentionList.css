@@ -1,0 +1,65 @@
+.mention-list {
+    background: #FFF;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #E1E8ED;
+    padding: 0.5rem 0;
+    overflow: hidden;
+    font-size: 0.9rem;
+    min-width: 200px;
+}
+
+.mention-item {
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    color: #0F1419;
+}
+
+.mention-item:hover,
+.mention-item.is-selected {
+    background: #F7F9F9;
+    border-left: 2px solid #1DA1F2;
+    /* X Blue */
+}
+
+.mention-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+}
+
+.mention-avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background-color: #AAB8C2;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.mention-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.mention-name {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.mention-id {
+    color: #536471;
+    font-size: 0.8rem;
+}

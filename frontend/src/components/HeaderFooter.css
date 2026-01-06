@@ -1,0 +1,45 @@
+@reference "tailwindcss";
+
+/* 共通 */
+.header {
+  padding: calc(var(--spacing, .25rem) * 4);
+  padding-top: calc(var(--spacing, .25rem) * 6);
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
+}
+
+/* 
+  .header-icon and other utility classes moved to index.css 
+  to ensure pixel-perfect consistency across the app.
+*/
+
+.navbar {
+  @apply fixed bottom-0 left-0 right-0 z-10;
+}
+
+.navbar-inner {
+  @apply mx-auto max-w-md bg-white border-t border-gray-200 shadow-2xl rounded-t-3xl p-2;
+}
+
+.nav-item {
+  @apply flex flex-col items-center justify-center p-2 rounded-xl transition-all w-full text-gray-400 hover:text-green-500;
+}
+
+.nav-item-active {
+  @apply text-green-600 font-bold scale-110;
+}
+
+
+/* --- NotificationModal --- */
+.notification-card {
+  @apply bg-white p-4 mb-4 rounded-xl shadow-lg border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors;
+}
+
+.tag-yellow {
+  @apply inline-block px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full mb-1;
+}
+
+.tag-blue {
+  @apply inline-block px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full mb-1;
+}

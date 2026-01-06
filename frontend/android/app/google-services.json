@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "237007524936",
+    "project_id": "pixelshopsns",
+    "storage_bucket": "pixelshopsns.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:237007524936:android:09a8ac92d03ddedbb9b47d",
+        "android_client_info": {
+          "package_name": "com.pixelshopsns.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "237007524936-cglimuthved1b2rg19pnm73qo1k8eofq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATAMR7IPO8graOgcJBkLgVIDTxhdnZAm8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "237007524936-cglimuthved1b2rg19pnm73qo1k8eofq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

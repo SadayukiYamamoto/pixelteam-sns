@@ -1,0 +1,379 @@
+/* TreasurePostForm.css - Green Premium Design */
+
+:root {
+    --treasure-primary: #10b981;
+    /* Emerald-500 */
+    --treasure-primary-hover: #059669;
+    /* Emerald-600 */
+    --treasure-bg: #f8fafc;
+    --treasure-card-bg: #ffffff;
+    --treasure-text: #1e293b;
+    --treasure-text-muted: #64748b;
+    --treasure-border: #e2e8f0;
+    --treasure-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06);
+    --treasure-shadow-lg: 0 10px 15px -3px rgba(16, 185, 129, 0.1), 0 4px 6px -2px rgba(16, 185, 129, 0.05);
+    --treasure-radius: 16px;
+}
+
+.treasure-form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--treasure-bg);
+    min-height: 100vh;
+    padding: 24px 16px 100px;
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+}
+
+.treasure-form-card {
+    width: 100%;
+    max-width: 640px;
+    background: var(--treasure-card-bg);
+    border-radius: var(--treasure-radius);
+    box-shadow: var(--treasure-shadow-lg);
+    padding: 32px;
+    box-sizing: border-box;
+}
+
+.treasure-form-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--treasure-text);
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.form-field {
+    margin-bottom: 24px;
+}
+
+.field-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--treasure-text-muted);
+    margin-bottom: 8px;
+}
+
+.treasure-input,
+.treasure-select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid #f1f5f9;
+    background: #f8fafc;
+    font-size: 1rem;
+    color: var(--treasure-text);
+    transition: all 0.2s ease;
+    outline: none;
+    box-sizing: border-box;
+    /* ✅ Fix sizing issue */
+}
+
+.treasure-textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid #f1f5f9;
+    background: #f8fafc;
+    font-size: 1rem;
+    color: var(--treasure-text);
+    transition: all 0.2s ease;
+    outline: none;
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.5;
+    box-sizing: border-box;
+    /* ✅ Fix sizing issue */
+}
+
+.treasure-textarea:focus {
+    border-color: var(--treasure-primary);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 640px) {
+
+    .form-row,
+    .form-grid-3,
+    .form-grid-2 {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+        display: flex;
+    }
+}
+
+.treasure-input:focus,
+.treasure-select:focus {
+    border-color: var(--treasure-primary);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+/* Tiptap Toolbar */
+.treasure-editor-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #fff;
+    border: 2px solid #f1f5f9;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    padding: 12px;
+}
+
+.t-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--treasure-text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+}
+
+.t-btn:hover {
+    background: #ecfdf5;
+    color: var(--treasure-primary);
+}
+
+.t-btn.is-active {
+    background: var(--treasure-primary);
+    color: white;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: #e2e8f0;
+    margin: 0 4px;
+}
+
+/* Tiptap Editor Content */
+.treasure-editor-wrapper {
+    min-height: 300px;
+    border: 2px solid #f1f5f9;
+    border-radius: 0 0 12px 12px;
+    padding: 16px 20px;
+    background: #fcfdfe;
+    transition: all 0.2s ease;
+}
+
+.treasure-editor-wrapper:focus-within {
+    border-color: var(--treasure-primary);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.treasure-editor-content .tiptap {
+    outline: none !important;
+    min-height: 260px;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.treasure-editor-content .tiptap blockquote {
+    border-left: 5px solid var(--treasure-primary);
+    background: #f0fdf4;
+    padding: 16px 24px;
+    margin: 24px 0;
+    border-radius: 4px 12px 12px 4px;
+    font-style: italic;
+    color: #065f46;
+}
+
+.treasure-editor-content .tiptap pre {
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 24px;
+    border-radius: 12px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.95rem;
+    margin: 24px 0;
+    overflow-x: auto;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.treasure-editor-content .tiptap code:not(pre code) {
+    background: #f1f5f9;
+    color: #ef4444;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: 500;
+}
+
+/* OGP Cards - Card Layout (X style) */
+.ogp-wrapper {
+    margin: 24px 0;
+    border: 1px solid var(--treasure-border);
+    border-radius: 16px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.ogp-wrapper:hover {
+    border-color: var(--treasure-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.1);
+}
+
+.ogp-header {
+    background: #f8fafc;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--treasure-border);
+}
+
+.ogp-header-link {
+    font-size: 0.85rem;
+    color: var(--treasure-text-muted);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.ogp-card a {
+    display: flex;
+    text-decoration: none;
+    color: inherit;
+    min-height: 160px;
+}
+
+.ogp-thumb {
+    width: 200px;
+    flex-shrink: 0;
+    background: #f1f5f9;
+}
+
+.ogp-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    max-height: 200px;
+}
+
+.ogp-info {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.ogp-title {
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: var(--treasure-text);
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ogp-desc {
+    font-size: 0.95rem;
+    color: var(--treasure-text-muted);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Color Dots */
+.color-palette {
+    display: flex;
+    gap: 6px;
+}
+
+.color-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px #e2e8f0;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.color-dot:hover {
+    transform: scale(1.2);
+}
+
+/* Submit Button */
+.treasure-submit-btn {
+    width: 100%;
+    background: var(--treasure-primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);
+    margin-top: 12px;
+}
+
+.treasure-submit-btn:hover {
+    background: var(--treasure-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.treasure-submit-btn:disabled {
+    background: #cbd5e1;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 640px) {
+    .treasure-form-card {
+        padding: 20px;
+    }
+}

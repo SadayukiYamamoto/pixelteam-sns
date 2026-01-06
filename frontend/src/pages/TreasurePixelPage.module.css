@@ -1,0 +1,136 @@
+.pixelPageContainer {
+  min-height: 100vh;
+  background-color: #f0fdf4;
+  /* Very light green bg */
+  padding-bottom: 120px;
+  /* Space for footer to avoid overlap */
+}
+
+/* グリーンの大きい Pixel バナー */
+/* グリーンの大きい Pixel バナー */
+.hero {
+  width: 100%;
+  height: 35vh;
+  /* Fixed height, not full screen */
+  min-height: 280px;
+  /* Simple Yellow-Green */
+  background-color: #84cc16;
+  /* Lime-500 equivalent */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
+  box-shadow: 0 10px 20px -5px rgba(132, 204, 22, 0.4);
+  /* Softer matching shadow */
+  margin-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+}
+
+.heroTitle {
+  font-size: 42px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Lighter shadow */
+  margin-bottom: 0;
+}
+
+.heroSubtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+/* カードのグリッド */
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 0 16px;
+  /* Slightly overlap the hero for a modern look, or just place below */
+  margin-top: -60px;
+  position: relative;
+  z-index: 20;
+  box-sizing: border-box;
+}
+
+/* カード本体 - Glassmorphism & Float */
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  /* More opaque */
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 24px 12px;
+  /* More vertical padding */
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 20px 40px -10px rgba(0, 0, 0, 0.15),
+    0 10px 10px -5px rgba(0, 0, 0, 0.1),
+    inset 0 0 20px rgba(255, 255, 255, 0.8);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1.1;
+}
+
+.card:hover {
+  transform: translateY(-12px) scale(1.03);
+  box-shadow:
+    0 30px 60px -12px rgba(16, 185, 129, 0.3),
+    0 0 0 4px rgba(16, 185, 129, 0.15);
+  background: white;
+}
+
+.card:active {
+  transform: scale(0.96);
+}
+
+/* アイコン */
+.cardIcon img {
+  width: 80px;
+  /* Reduced for responsiveness */
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 24px;
+  display: block;
+  filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.15));
+  transition: transform 0.3s ease;
+}
+
+.card:hover .cardIcon img {
+  transform: rotate(-3deg) scale(1.1);
+}
+
+/* タイトル */
+.cardTitle {
+  font-size: 18px;
+  /* Larger */
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+/* サブテキスト */
+.cardSubtitle {
+  font-size: 15px;
+  color: #6b7280;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}

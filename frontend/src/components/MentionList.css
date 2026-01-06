@@ -1,0 +1,46 @@
+/* MentionList.css */
+.items {
+    padding: 0.2rem;
+    position: relative;
+    border-radius: 0.5rem;
+    background: #FFF;
+    color: rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    font-size: 0.9rem;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    gap: 8px;
+}
+
+.item.is-selected {
+    background: #f3f4f6;
+    color: #4f46e5;
+}
+
+.item-img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.item-label {
+    font-weight: bold;
+}
+
+.item-id {
+    color: #999;
+    font-size: 0.8em;
+}
