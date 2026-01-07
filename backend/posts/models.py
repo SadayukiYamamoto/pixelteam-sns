@@ -33,7 +33,9 @@ class Post(models.Model):
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     user_name = models.CharField(max_length=100)
+    user_uid = models.CharField(max_length=200, blank=True, null=True)
     content = models.TextField()
+    image_url = models.URLField(max_length=1000, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -121,7 +123,9 @@ class TreasurePost(models.Model):
 class TreasureComment(models.Model):
     post = models.ForeignKey(TreasurePost, on_delete=models.CASCADE, related_name='comments')
     user_name = models.CharField(max_length=100)
+    user_uid = models.CharField(max_length=200, blank=True, null=True)
     content = models.TextField()
+    image_url = models.URLField(max_length=1000, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

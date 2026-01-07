@@ -326,7 +326,7 @@ def get_user_badges(request, user_id):
 @permission_classes([IsAuthenticated])
 def get_all_users(request):
     # 簡易的な管理者チェック (is_staff or 特定ID)
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     users = User.objects.all().order_by("-date_joined")
@@ -338,7 +338,7 @@ def get_all_users(request):
 @api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def admin_user_detail(request, user_id):
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     try:
@@ -404,7 +404,7 @@ def admin_user_detail(request, user_id):
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def badge_list_create(request):
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     if request.method == 'GET':
@@ -424,7 +424,7 @@ def badge_list_create(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def assign_badge(request):
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     user_id = request.data.get('user_id')
@@ -550,7 +550,7 @@ def admin_user_analytics(request):
     """
     管理者用：ユーザー別統計（投稿数、視聴時間、テスト数、ノウハウ投稿数）
     """
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     users = User.objects.all().order_by('-date_joined')
@@ -594,9 +594,8 @@ def admin_shop_analytics(request):
     """
     管理者用：店舗別・週報＆ノウハウ提出状況 (8週分)
     """
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
-        # return Response({"detail": "権限がありません"}, status=403)
-        pass # テスト用
+    if not request.user.is_admin_or_secretary:
+        return Response({"detail": "権限がありません"}, status=403)
 
     from datetime import datetime, timedelta
     from django.utils import timezone
@@ -691,7 +690,7 @@ def admin_update_points(request):
     }
     """
     # 簡易権限チェック
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
          return Response({"detail": "権限がありません"}, status=403)
 
     target_user_id = request.data.get("user_id")
@@ -730,7 +729,7 @@ def admin_login_popup_setting(request):
     from posts.models import Notice, LoginPopupSetting
     from posts.serializers import NoticeSerializer
 
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     if request.method == 'GET':

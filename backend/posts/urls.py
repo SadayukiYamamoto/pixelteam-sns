@@ -6,7 +6,7 @@ urlpatterns = [
     path("tests/create/", views.create_test),
     path("posts/", views.posts_list_create, name="posts_list_create"),
     path('posts_with_user/', posts_with_user, name='posts_with_user'),
-    path('posts/<int:pk>/update/', views.update_post, name='update_post'),
+    path('posts/<uuid:pk>/update/', views.update_post, name='update_post'),
     path("posts/<uuid:pk>/delete/", views.delete_post, name="delete_post"),
     path('posts/<uuid:pk>/', views.post_detail, name='post_detail'),
     path("posts/<uuid:pk>/likes/", views.get_likes_list, name="get_likes_list"),

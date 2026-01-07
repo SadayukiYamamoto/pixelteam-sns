@@ -5,6 +5,7 @@ import axiosClient from "../api/axiosClient";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { signInAnonymously } from "firebase/auth";
 import { app, auth } from "../firebase";
+import { optimizeImage } from "../utils/imageOptimizer";
 
 // 🟦 Tiptap 必要最低限
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -173,72 +174,40 @@ export default function PostPage() {
     return await getDownloadURL(fileRef);
   };
 
-  // WebP変換 & リサイズ
-  const convertToWebP = (file) => {
-    return new Promise((resolve) => {
-      const img = new window.Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-        const maxDim = 1000; // 投稿用なら1000pxあれば十分
-
-        if (width > height) {
-          if (width > maxDim) {
-            height *= maxDim / width;
-            width = maxDim;
-          }
-        } else {
-          if (height > maxDim) {
-            width *= maxDim / height;
-            height = maxDim;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(
-          (blob) => {
-            const fileName = file.name.replace(/\.[^/.]+$/, "") + ".webp";
-            const webpFile = new File([blob], fileName, { type: "image/webp" });
-            resolve(webpFile);
-          },
-          "image/webp",
-          0.8 // 品質
-        );
-      };
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
+  // handleInsertImage
   const handleInsertImage = async (e) => {
     let file = e.target.files[0];
     if (!file) return;
 
-    // WebPへ変換
-    file = await convertToWebP(file);
+    try {
+      setUploading(true);
+      // WebPへ変換 & リサイズ (1000px)
+      file = await optimizeImage(file, 1000);
 
-    const tempId = `temp-${Date.now()}`;
+      const tempId = `temp-${Date.now()}`;
 
-    // プレースホルダー（imgとして挿入）
-    editor
-      .chain()
-      .focus()
-      .setImage({
-        src: "",
-        alt: tempId,
-        style: "width:100%;height:230px;background:#e5e7eb;border-radius:12px;object-fit:cover;"
-      })
-      .run();
+      // プレースホルダー（imgとして挿入）
+      editor
+        .chain()
+        .focus()
+        .setImage({
+          src: "",
+          alt: tempId,
+          style: "width:100%;height:230px;background:#e5e7eb;border-radius:12px;object-fit:cover;"
+        })
+        .run();
 
-    // Firebase アップロード
-    const url = await uploadImage(file);
+      // Firebase アップロード
+      const url = await uploadImage(file);
 
-    // プレースホルダー置換
-    replacePlaceholderImage(editor, tempId, url);
+      // プレースホルダー置換
+      replacePlaceholderImage(editor, tempId, url);
+    } catch (err) {
+      console.error("画像アップロード失敗:", err);
+      alert("画像のアップロードに失敗しました");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const replacePlaceholderImage = (editor, tempId, realUrl) => {
@@ -371,12 +340,13 @@ export default function PostPage() {
             <div className="category-select-wrapper">
               <FiLayout className="category-icon" />
               <select
-                className="premium-category-select"
+                className="premium-category-select notranslate"
+                translate="no"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
-                <option value="雑談">☕ 雑談</option>
-                <option value="個人報告">📊 個人報告</option>
+                <option value="雑談">雑談</option>
+                <option value="個人報告">個人報告</option>
               </select>
             </div>
           </div>
@@ -427,12 +397,12 @@ export default function PostPage() {
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            style={{ display: "none" }}
+            className="hidden-mobile-input"
             onChange={handleInsertImage}
           />
 
           {/* エディタ */}
-          <div className="editor-wrapper-premium">
+          <div className="editor-wrapper-premium notranslate" translate="no">
             <EditorContent editor={editor} className="premium-editor-content" />
           </div>
 

@@ -40,6 +40,8 @@ export default function NoticeAdminEditor() {
   const [imageUrl, setImageUrl] = useState("");
   const [imagePosition, setImagePosition] = useState("header");
   const [body, setBody] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isThumbUploading, setIsThumbUploading] = useState(false);
 
   const fileRef = useRef(null);
 
@@ -108,20 +110,36 @@ export default function NoticeAdminEditor() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const url = await uploadImageToFirebase(file, "notice-body-images");
-    editor.chain().focus().setImage({ src: url }).run();
+    try {
+      const url = await uploadImageToFirebase(file, "notice-body-images", 1000);
+      editor.chain().focus().setImage({ src: url }).run();
+    } catch (err) {
+      alert("画像の挿入に失敗しました");
+    }
   };
 
   // サムネイルアップロード
   const handleThumbnailUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const url = await uploadImageToFirebase(file, "notice-thumbnails");
-    setImageUrl(url);
+    setIsThumbUploading(true);
+    try {
+      const url = await uploadImageToFirebase(file, "notice-thumbnails", 1000);
+      setImageUrl(url);
+    } catch (err) {
+      alert("サムネイルのアップロードに失敗しました");
+    } finally {
+      setIsThumbUploading(false);
+    }
   };
 
   // 投稿 or 更新
   const handleSubmit = async () => {
+    if (!title || !body) {
+      alert("タイトルと本文を入力してください");
+      return;
+    }
+    setIsSubmitting(true);
     const payload = {
       title,
       category,
@@ -144,6 +162,8 @@ export default function NoticeAdminEditor() {
     } catch (err) {
       console.error(err);
       alert("投稿に失敗しました");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -161,11 +181,18 @@ export default function NoticeAdminEditor() {
                   <h1>{isEdit ? "お知らせを編集" : "お知らせを作成"}</h1>
                 </div>
                 <div className="editor-actions">
-                  <button onClick={() => setShowPreview(true)} className="action-btn btn-preview">
+                  <button onClick={() => setShowPreview(true)} className="action-btn btn-preview" disabled={isSubmitting}>
                     <FiEye size={18} /> プレビュー
                   </button>
-                  <button onClick={handleSubmit} className="action-btn btn-publish">
-                    <FiSave size={18} /> {isEdit ? "更新を保存" : "今すぐ公開"}
+                  <button onClick={handleSubmit} className="action-btn btn-publish" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        保存中...
+                      </div>
+                    ) : (
+                      <><FiSave size={18} /> {isEdit ? "更新を保存" : "今すぐ公開"}</>
+                    )}
                   </button>
                 </div>
               </div>
@@ -265,12 +292,12 @@ export default function NoticeAdminEditor() {
                         ref={fileRef}
                         type="file"
                         accept="image/*"
-                        style={{ display: "none" }}
+                        className="hidden-mobile-input"
                         onChange={handleInsertImage}
                       />
                     </div>
 
-                    <div className="tiptap-editor-content">
+                    <div className="tiptap-editor-content notranslate" translate="no">
                       <EditorContent editor={editor} className="prose prose-slate max-w-none" />
                     </div>
                   </div>
@@ -280,7 +307,8 @@ export default function NoticeAdminEditor() {
                   <div className="sidebar-card">
                     <h3>カテゴリー</h3>
                     <select
-                      className="premium-select"
+                      className="premium-select notranslate"
+                      translate="no"
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                     >
@@ -300,7 +328,12 @@ export default function NoticeAdminEditor() {
                       className="sidebar-thumb-picker"
                       onClick={() => document.getElementById('thumb-upload').click()}
                     >
-                      {imageUrl ? (
+                      {isThumbUploading ? (
+                        <div className="flex flex-col items-center">
+                          <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mb-2" />
+                          <span className="text-[10px] text-emerald-500 font-bold">Uploading...</span>
+                        </div>
+                      ) : imageUrl ? (
                         <div className="sidebar-thumb-preview">
                           <img src={imageUrl} alt="notice thumnail" />
                           <div className="thumb-change-overlay">画像を更新する</div>
@@ -312,7 +345,7 @@ export default function NoticeAdminEditor() {
                         </>
                       )}
                     </div>
-                    <input id="thumb-upload" type="file" accept="image/*" onChange={handleThumbnailUpload} className="hidden" />
+                    <input id="thumb-upload" type="file" accept="image/*" onChange={handleThumbnailUpload} className="hidden-mobile-input" disabled={isThumbUploading} />
 
                     {imageUrl && (
                       <div className="mt-6">

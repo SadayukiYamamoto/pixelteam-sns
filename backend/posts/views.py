@@ -108,13 +108,16 @@ def comments_view(request, pk):
 
     elif request.method == 'POST':
         content = request.data.get('content')
+        image_url = request.data.get('image_url')
         user_name = request.user.display_name  # ✅ Userモデルのdisplay_nameを取得
 
-        # Commentモデルに合わせて user_name で登録
+        # Commentモデルに合わせて user_name, user_uid で登録
         comment = Comment.objects.create(
             post=post,
             user_name=user_name,
-            content=content
+            user_uid=str(request.user.user_id),
+            content=content,
+            image_url=image_url
         )
 
         # --- 通知の作成 ---
@@ -250,14 +253,14 @@ def update_post(request, pk):
 def delete_post(request, pk):
     try:
         post = Post.objects.get(id=pk)
-        # 投稿者だけが削除できるようにチェック
-        if post.user_uid != request.user.user_id and not request.user.is_staff:
+        # 投稿者または事務局だけが削除できるようにチェック
+        if post.user_uid != request.user.user_id and not request.user.is_admin_or_secretary:
             return Response({"error": "この投稿を削除する権限がありません。"}, status=status.HTTP_403_FORBIDDEN)
 
         print(f"🗑 Deleting post: {pk} (user: {request.user.user_id})")
         post.delete()
         print(f"✅ Successfully deleted post: {pk}")
-        return Response({"message": "投稿を削除しました。"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "投稿を削除しました。"}, status=status.HTTP_200_OK)
     except Post.DoesNotExist:
         return Response({"error": "投稿が見つかりませんでした。"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
@@ -483,7 +486,7 @@ def video_detail(request, video_id):
 
     if request.method == 'DELETE':
         # 管理者チェック
-        if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+        if not request.user.is_admin_or_secretary:
              return Response({"detail": "権限がありません"}, status=403)
 
         try:
@@ -659,7 +662,7 @@ def treasure_post_detail(request, pk):
             # 🔹 user_uid が存在しない場合（＝投稿時にnullだった場合）は全員削除可
             if not post.user_uid:
                 post.delete()
-                return Response({'message': '投稿を削除しました（全員削除可）'}, status=204)
+                return Response({'message': '投稿を削除しました（全員削除可）'}, status=200)
 
             # 🔹 投稿者チェック
             if not user_uid:
@@ -668,7 +671,7 @@ def treasure_post_detail(request, pk):
                 return Response({'error': '削除権限がありません'}, status=403)
 
             post.delete()
-            return Response({'message': '投稿を削除しました'}, status=204)
+            return Response({'message': '投稿を削除しました'}, status=200)
 
         except Exception as e:
             import traceback
@@ -792,24 +795,42 @@ def treasure_comments_view(request, pk):
 
     if request.method == 'GET':
         comments = post.comments.order_by('-created_at')
-        data = [
-            {
-                "user_name": c.user_name,
+        data = []
+        for c in comments:
+            profile_image = None
+            display_name = c.user_name or "匿名"
+            if c.user_uid:
+                user = User.objects.filter(user_id=c.user_uid).first()
+                if user:
+                    profile_image = user.profile_image
+                    display_name = user.display_name or display_name
+            
+            data.append({
+                "user_name": display_name,
+                "display_name": display_name,
                 "content": c.content,
+                "image_url": c.image_url,
                 "created_at": c.created_at,
-            }
-            for c in comments
-        ]
+                "profile_image": profile_image,
+                "user_uid": c.user_uid,
+            })
         return Response(data, status=200)
 
     elif request.method == 'POST':
         user = request.user if request.user.is_authenticated else None
         user_name = request.data.get("user_name", "匿名")
         content = request.data.get("content")
+        image_url = request.data.get("image_url")
         if not content:
             return Response({"error": "content is required"}, status=400)
 
-        comment = TreasureComment.objects.create(post=post, user_name=user_name, content=content)
+        comment = TreasureComment.objects.create(
+            post=post, 
+            user_name=user_name, 
+            user_uid=str(user.user_id) if user else None,
+            content=content,
+            image_url=image_url
+        )
 
         # --- 通知の作成 ---
         # 1. 投稿者への通知（自分以外）
@@ -1031,8 +1052,10 @@ from rest_framework import status
 from .models import VideoViewLog
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def video_view_logs(request):
+    if not request.user.is_admin_or_secretary:
+        return Response({"detail": "権限がありません"}, status=403)
     logs = VideoViewLog.objects.all().order_by("-last_watched_at")
 
     # フィルタリング
@@ -1095,7 +1118,7 @@ def toggle_featured_video(request, pk):
     """
     動画の「注目の動画」ステータスを切り替える (Admin Only)
     """
-    if not request.user.is_staff:
+    if not request.user.is_admin_or_secretary:
        return Response({"error": "管理者権限が必要です"}, status=403)
 
     # Django Video オブジェクトを取得 (なければ作成)
@@ -1137,7 +1160,7 @@ def task_button_list_create(request):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        if not request.user.is_staff:
+        if not request.user.is_admin_or_secretary:
             return Response({"error": "管理者権限が必要です"}, status=403)
         
         serializer = TaskButtonSerializer(data=request.data)
@@ -1161,13 +1184,13 @@ def task_button_detail(request, pk):
     
     if request.method == 'GET':
         # Admin editing retrieval
-        if not request.user.is_staff:
+        if not request.user.is_admin_or_secretary:
             return Response({"error": "管理者権限が必要です"}, status=403)
         serializer = TaskButtonSerializer(task)
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        if not request.user.is_staff:
+        if not request.user.is_admin_or_secretary:
             return Response({"error": "管理者権限が必要です"}, status=403)
         
         serializer = TaskButtonSerializer(task, data=request.data, partial=True)
@@ -1177,7 +1200,7 @@ def task_button_detail(request, pk):
         return Response(serializer.errors, status=400)
 
     elif request.method == 'DELETE':
-        if not request.user.is_staff:
+        if not request.user.is_admin_or_secretary:
             return Response({"error": "管理者権限が必要です"}, status=403)
         
         task.delete()
@@ -1230,8 +1253,10 @@ def save_view_log(request):
 # 視聴マトリクス
 # ---------------------------
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def watch_matrix(request):
+    if not request.user.is_admin_or_secretary:
+        return Response({"detail": "権限がありません"}, status=403)
     from users.models import User  # ← これも必要
 
     # 全ユーザー取得
@@ -1632,7 +1657,7 @@ def get_home_content(request):
 @permission_classes([IsAuthenticated])
 def office_news_list_create(request):
     """事務局だよりの一覧取得・新規作成"""
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     if request.method == 'GET':
@@ -1651,7 +1676,7 @@ def office_news_list_create(request):
 @permission_classes([IsAuthenticated])
 def office_news_detail(request, pk):
     """事務局だよりの詳細・更新・削除"""
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     news = get_object_or_404(OfficeNews, pk=pk)
@@ -1676,7 +1701,7 @@ def office_news_detail(request, pk):
 @permission_classes([IsAuthenticated])
 def toggle_featured_post(request, pk):
     """管理者用: 投稿を「ピックアップ」にする"""
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
         
     post = get_object_or_404(Post, pk=pk)
@@ -1688,7 +1713,7 @@ def toggle_featured_post(request, pk):
 @permission_classes([IsAuthenticated])
 def toggle_short_video(request, pk):
     """管理者用: 動画を「ショート」にする (Firestoreから同期)"""
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
         
     video = Video.objects.filter(id=pk).first()
@@ -1730,7 +1755,7 @@ def admin_post_list(request):
     """
     管理者用：全投稿取得（フィルタリング対応）
     """
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     posts = Post.objects.all().order_by('-created_at')
@@ -1774,7 +1799,7 @@ def admin_video_list(request):
     """
     管理者用：全動画取得（テスト有無フラグ付き）
     """
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     # Djangoに保存されている動画のみ対象（基本的にはすべてVideoモデルにあるはず）
@@ -1800,7 +1825,7 @@ def admin_video_list(request):
 @permission_classes([IsAuthenticated])
 def toggle_featured_video(request, pk):
     """管理者用: 動画を「おすすめ」にする"""
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
         
     video = get_object_or_404(Video, pk=pk)
@@ -1841,7 +1866,7 @@ def log_interaction(request):
 def admin_interaction_logs(request):
     """管理者用: 操作ログ取得 (フィルタリング対応)"""
     # 管理者チェック
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     logs = UserInteractionLog.objects.select_related('user').all().order_by("-created_at")

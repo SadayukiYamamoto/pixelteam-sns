@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from users.models import User
-from .models import Post, Comment, Video, TreasurePost, Notice, VideoTest, Question, Choice, Survey, SurveyQuestion, SurveyChoice, OfficeNews, TaskButton
+from .models import Post, Comment, Video, TreasurePost, TreasureComment, Notice, VideoTest, Question, Choice, Survey, SurveyQuestion, SurveyChoice, OfficeNews, TaskButton
 
 
 
@@ -98,20 +98,21 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'post', 'user_name', 'content', 'created_at', 'display_name', 'profile_image']
+        fields = ['id', 'post', 'user_name', 'user_uid', 'content', 'image_url', 'created_at', 'display_name', 'profile_image']
 
     def get_display_name(self, obj):
-        # user_name と display_name を同一扱いにする場合
+        if obj.user_uid:
+            user = User.objects.filter(user_id=obj.user_uid).first()
+            if user:
+                return user.display_name or obj.user_name or "匿名"
         return obj.user_name or "匿名"
 
     def get_profile_image(self, obj):
-        # コメントしたユーザーの画像を Post から取得するなどして仮表示
-        post = getattr(obj, "post", None)
-        if not post:
-            return None
-        # Postのuser_uidからUserを検索
-        user = User.objects.filter(user_id=post.user_uid).first()
-        return getattr(user, "profile_image", None)
+        if obj.user_uid:
+            user = User.objects.filter(user_id=obj.user_uid).first()
+            if user:
+                return user.profile_image
+        return None
 
 
 
@@ -282,3 +283,26 @@ class TaskButtonSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskButton
         fields = '__all__'
+
+class TreasureCommentSerializer(serializers.ModelSerializer):
+    display_name = serializers.SerializerMethodField()
+    profile_image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TreasureComment
+        fields = ['id', 'post', 'user_name', 'user_uid', 'content', 'image_url', 'created_at', 'display_name', 'profile_image']
+
+    def get_display_name(self, obj):
+        if obj.user_uid:
+            user = User.objects.filter(user_id=obj.user_uid).first()
+            if user:
+                return user.display_name or obj.user_name or "匿名"
+        return obj.user_name or "匿名"
+
+    def get_profile_image(self, obj):
+        if obj.user_uid:
+            user = User.objects.filter(user_id=obj.user_uid).first()
+            if user:
+                return user.profile_image
+        return None
+

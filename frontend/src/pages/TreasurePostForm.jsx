@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { app } from "../firebase";
+import { app, auth } from "../firebase";
+import { optimizeImage } from "../utils/imageOptimizer";
 
 // 🟦 Tiptap
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -142,54 +143,14 @@ export default function TreasurePostForm() {
     return await getDownloadURL(fileRef);
   };
 
-  // WebP conversion & Resize
-  const convertToWebP = (file) => {
-    return new Promise((resolve) => {
-      const img = new window.Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-        const maxDim = 1200; // Increased for better horizontal visibility
-
-        if (width > height) {
-          if (width > maxDim) {
-            height *= maxDim / width;
-            width = maxDim;
-          }
-        } else {
-          if (height > maxDim * 0.8) { // Prefer wider images
-            width *= (maxDim * 0.8) / height;
-            height = maxDim * 0.8;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(
-          (blob) => {
-            const fileName = file.name.replace(/\.[^/.]+$/, "") + ".webp";
-            const webpFile = new File([blob], fileName, { type: "image/webp" });
-            resolve(webpFile);
-          },
-          "image/webp",
-          0.85
-        );
-      };
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
+  // WebP conversion & Resize (using optimizer)
   const handleInsertImage = async (e) => {
     let file = e.target.files[0];
     if (!file || !editor) return;
 
     try {
       setLoading(true);
-      file = await convertToWebP(file);
+      file = await optimizeImage(file, 1200);
 
       const tempId = `temp-${Date.now()}`;
       // Placeholder with shimmer-like appearance
@@ -217,6 +178,7 @@ export default function TreasurePostForm() {
       editor.view.dispatch(tr);
     } catch (err) {
       console.error("Upload error:", err);
+      alert("画像の挿入に失敗しました");
     } finally {
       setLoading(false);
     }
@@ -289,7 +251,8 @@ export default function TreasurePostForm() {
             <div className="form-field-item">
               <label className="field-label">カテゴリー</label>
               <select
-                className="treasure-select"
+                className="treasure-select notranslate"
+                translate="no"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 required
@@ -426,12 +389,12 @@ export default function TreasurePostForm() {
               </div>
             </div>
 
-            <div className="treasure-editor-wrapper">
+            <div className="treasure-editor-wrapper notranslate" translate="no">
               <EditorContent editor={editor} className="treasure-editor-content" />
             </div>
           </div>
 
-          <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleInsertImage} />
+          <input type="file" ref={fileInputRef} className="hidden-mobile-input" accept="image/*" onChange={handleInsertImage} />
 
           <button type="submit" className="treasure-submit-btn" disabled={loading}>
             {loading ? <div className="loading-spinner"></div> : (id ? "更新する" : "投稿する")}

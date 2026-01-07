@@ -203,7 +203,7 @@ const MissionBottomSheet = ({ isOpen, onClose }) => {
                             position: 'fixed',
                             inset: 0,
                             backgroundColor: 'rgba(15, 23, 42, 0.6)',
-                            zIndex: 100,
+                            zIndex: 2000,
                             backdropFilter: 'blur(8px)'
                         }}
                     />
@@ -224,7 +224,7 @@ const MissionBottomSheet = ({ isOpen, onClose }) => {
                             backgroundColor: '#ffffff',
                             borderTopLeftRadius: '48px',
                             borderTopRightRadius: '48px',
-                            zIndex: 101,
+                            zIndex: 2001,
                             display: 'flex',
                             flexDirection: 'column',
                             overflow: 'hidden',

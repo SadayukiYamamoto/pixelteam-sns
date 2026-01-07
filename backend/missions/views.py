@@ -88,7 +88,7 @@ from .models import LevelReward
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def admin_level_reward_list_create(request):
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     if request.method == 'GET':
@@ -107,7 +107,7 @@ def admin_level_reward_list_create(request):
 @api_view(['PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def admin_level_reward_detail(request, pk):
-    if not request.user.is_staff and request.user.user_id != "Xx7gnfTCPQMXlNS5ceM4uUltoD03":
+    if not request.user.is_admin_or_secretary:
         return Response({"detail": "権限がありません"}, status=403)
 
     try:

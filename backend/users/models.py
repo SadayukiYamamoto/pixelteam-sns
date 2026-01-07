@@ -72,6 +72,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "user_id"
     REQUIRED_FIELDS = ["email"]
 
+    @property
+    def is_admin_or_secretary(self):
+        # 特定のUIDも管理者扱い
+        admin_uids = ["Xx7gnfTCPQMXlNS5ceM4uUltoD03"]
+        return self.is_staff or self.is_superuser or self.is_secretary or self.user_id in admin_uids
+
     def __str__(self):
         return self.display_name or self.user_id
 

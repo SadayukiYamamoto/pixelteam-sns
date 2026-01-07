@@ -158,8 +158,8 @@ const MyPage = () => {
             )}
           </div>
 
-          {/* Admin Menu (Only for Admin) */}
-          {isOwnProfile && profile.user_id === ADMIN_UID && (
+          {/* Admin Menu (Only for Admin/Secretary) */}
+          {isOwnProfile && (profile.user_id === ADMIN_UID || profile.is_secretary || profile.is_staff) && (
             <div style={{ padding: "0 16px 16px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <button
                 onClick={() => navigate("/admin/videos")}
@@ -279,9 +279,6 @@ const MyPage = () => {
             {activeTab === "points" && (
               <div className="py-6">
                 <PointCard points={points} />
-                <p className="text-center text-xs text-gray-400 mt-6">
-                  ポイントは動画視聴や投稿で獲得できます。
-                </p>
               </div>
             )}
 

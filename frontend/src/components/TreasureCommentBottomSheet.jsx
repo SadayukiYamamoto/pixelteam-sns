@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { IoClose } from "react-icons/io5";
+import { IoClose, IoImageOutline } from "react-icons/io5";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { storage, auth } from "../firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { signInAnonymously } from "firebase/auth";
+import { optimizeImage } from "../utils/imageOptimizer";
 
 // 🟦 Tiptap
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -17,6 +21,9 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editorContent, setEditorContent] = useState("");
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = React.useRef(null);
     const API_URL = import.meta.env.VITE_API_URL || "";
     const user = JSON.parse(localStorage.getItem("user")) || {};
     const navigate = useNavigate();
@@ -80,6 +87,33 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
         }
     };
 
+    // 🔹 画像選択ハンドラ
+    const handleImageSelect = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        try {
+            // ユーザー要望により240pxに制限
+            const optimizedFile = await optimizeImage(file, 240);
+
+            if (!auth.currentUser) {
+                await signInAnonymously(auth);
+            }
+
+            const storageRef = ref(storage, `treasure_comments/${Date.now()}_${file.name}`);
+            await uploadBytes(storageRef, optimizedFile);
+            const url = await getDownloadURL(storageRef);
+
+            setSelectedImage(url);
+        } catch (err) {
+            console.error("画像アップロードエラー:", err);
+            alert("画像のアップロードに失敗しました");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     useEffect(() => {
         fetchComments();
     }, [postId]);
@@ -97,7 +131,8 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
                 `${API_URL}/api/treasure_posts/${postId}/comments/`,
                 {
                     content: htmlContent,
-                    user_name: user.displayName || "匿名"
+                    user_name: user.displayName || "匿名",
+                    image_url: selectedImage
                 },
                 {
                     headers: { Authorization: `Token ${token}` }
@@ -106,6 +141,7 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
 
             editor.commands.clearContent();
             setEditorContent("");
+            setSelectedImage(null);
             await fetchComments();
             if (onCommentAdded) onCommentAdded();
         } catch (err) {
@@ -187,6 +223,16 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
                                                     onClick={handleCommentClick}
                                                     dangerouslySetInnerHTML={{ __html: c.content }}
                                                 />
+                                                {c.image_url && (
+                                                    <div className="mt-2 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] max-w-[200px] border-none">
+                                                        <img
+                                                            src={c.image_url}
+                                                            alt="comment attachment"
+                                                            className="w-full h-auto cursor-pointer"
+                                                            onClick={() => window.open(c.image_url, '_blank')}
+                                                        />
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -202,17 +248,56 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
                     </div>
 
                     {/* コメント入力 */}
-                    <div className="flex items-end gap-3 bg-green-50/50 p-2 rounded-2xl border border-green-100 focus-within:border-green-300 focus-within:bg-white transition-all">
-                        <div className="flex-1 min-h-[44px] tiptap-treasure-editor">
-                            <EditorContent editor={editor} />
+                    <div className="flex flex-col gap-3">
+                        {selectedImage && (
+                            <div className="animate-in fade-in slide-in-from-bottom-2 px-1 mb-4">
+                                <div className="relative inline-block group">
+                                    <div className="relative rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.15)] border-none">
+                                        <img src={selectedImage} alt="preview" className="w-[140px] h-[140px] object-cover" />
+                                    </div>
+                                    <button
+                                        onClick={() => setSelectedImage(null)}
+                                        className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 bg-white text-slate-500 hover:text-red-500 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] border-none p-1.5 transition-all active:scale-90 z-30"
+                                    >
+                                        <IoClose size={20} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex items-end gap-3 bg-green-50/50 p-2 rounded-2xl border border-green-100 focus-within:border-green-300 focus-within:bg-white transition-all relative">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden-mobile-input"
+                                accept="image/*"
+                                onChange={handleImageSelect}
+                            />
+
+                            <button
+                                onClick={() => fileInputRef.current.click()}
+                                disabled={isUploading}
+                                className="p-2.5 text-green-500 transition-all shrink-0 outline-none mb-0.5 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] rounded-full hover:shadow-md border-none"
+                            >
+                                {isUploading ? (
+                                    <div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    <IoImageOutline size={28} />
+                                )}
+                            </button>
+
+                            <div className="flex-1 min-h-[44px] tiptap-treasure-editor notranslate" translate="no">
+                                <EditorContent editor={editor} />
+                            </div>
+
+                            <button
+                                onClick={handleSubmit}
+                                disabled={!editor || (editor.isEmpty && editorContent === "")}
+                                className="bg-green-500 text-white font-black px-6 py-2.5 rounded-xl hover:bg-green-600 disabled:opacity-30 disabled:grayscale transition-all transform active:scale-95 shadow-lg shadow-green-200 text-sm border-none mb-0.5 min-w-[70px]"
+                            >
+                                送信
+                            </button>
                         </div>
-                        <button
-                            onClick={handleSubmit}
-                            disabled={!editor || (editor.isEmpty && editorContent === "")}
-                            className="bg-green-500 text-white font-bold px-6 py-2.5 rounded-xl hover:bg-green-600 disabled:opacity-30 disabled:grayscale transition-all transform active:scale-95 shadow-lg shadow-green-200 text-sm border-none mb-1"
-                        >
-                            送信
-                        </button>
                     </div>
                 </motion.div>
             </motion.div>
