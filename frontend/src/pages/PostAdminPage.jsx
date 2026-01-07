@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { CheckSquare, Square, Search } from 'lucide-react';
+import { FiCheck, FiSearch } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Navigation from '../components/Navigation';
+import '../admin/AdminCommon.css';
 import './PostAdminPage.css';
 
 const PostAdminPage = () => {
+    const navigate = useNavigate();
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +26,7 @@ const PostAdminPage = () => {
             const res = await axios.get(`${API_BASE}/posts/`, {
                 headers: { Authorization: `Token ${token}` }
             });
+            // Some API might return differently, adjust if needed
             setPosts(res.data);
         } catch (error) {
             console.error('Error fetching posts:', error);
@@ -42,54 +46,84 @@ const PostAdminPage = () => {
         }
     };
 
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+    };
+
     const filteredPosts = posts.filter(post =>
         (post.content && post.content.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (post.display_name && post.display_name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
-    if (loading) return <div className="admin-loading">読み込み中...</div>;
-
     return (
-        <div className="home-container">
-            <div className="admin-wrapper">
-                <Header title="投稿ピックアップ" />
-                <div className="max-w-7xl mx-auto p-4 md:p-10">
-                    <header className="admin-header">
+        <div className="admin-page-container">
+            <Header title="管理" />
+            <div className="admin-wrapper bg-[#f8fafc]">
+                <div className="post-pickup-container">
+
+                    {/* Header with Search */}
+                    <div className="post-pickup-header">
                         <h1>投稿ピックアップ</h1>
-                        <div className="search-bar">
-                            <Search size={20} className="search-icon" />
+                        <div className="pickup-search-wrapper">
+                            <FiSearch className="search-icon-fixed" size={18} />
                             <input
                                 type="text"
+                                className="pickup-search-input"
                                 placeholder="投稿内容やユーザー名で検索..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                    </header>
-
-                    <div className="posts-admin-list">
-                        {filteredPosts.map((post) => (
-                            <div key={post.id} className={`post-admin-card ${post.is_featured ? 'featured' : ''}`}>
-                                <div className="post-admin-checkbox" onClick={() => toggleFeatured(post)}>
-                                    {post.is_featured ? <CheckSquare size={24} color="#10b981" fill="#10b981" fillOpacity={0.1} /> : <Square size={24} color="#cbd5e1" />}
-                                </div>
-
-                                <div className="post-admin-main">
-                                    <div className="post-user">
-                                        <img src={post.profile_image || '/default-avatar.png'} alt="" />
-                                        <span className="user-name">{post.display_name}</span>
-                                        <span className="post-date">{new Date(post.created_at).toLocaleDateString()}</span>
-                                    </div>
-                                    <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content }}></div>
-                                    {post.image_url && <img src={post.image_url} alt="" className="post-image-preview" />}
-                                </div>
-
-                                <div className="post-admin-badge">
-                                    {post.is_featured && <span className="featured-badge">ピックアップ中</span>}
-                                </div>
-                            </div>
-                        ))}
                     </div>
+
+                    {loading ? (
+                        <div className="p-20 text-center text-gray-400 font-bold">読み込み中...</div>
+                    ) : filteredPosts.length === 0 ? (
+                        <div className="p-20 text-center text-gray-300 font-black tracking-widest uppercase">投稿が見つかりません</div>
+                    ) : (
+                        <div className="pickup-list">
+                            {filteredPosts.map((post) => (
+                                <div
+                                    key={post.id}
+                                    className={`pickup-card ${post.is_featured ? 'is-featured' : ''}`}
+                                    onClick={() => toggleFeatured(post)}
+                                >
+                                    <div className="pickup-checkbox">
+                                        {post.is_featured && <FiCheck size={18} />}
+                                    </div>
+
+                                    <div className="pickup-card-body">
+                                        <div className="pickup-user-row">
+                                            <img
+                                                src={post.profile_image || "https://ui-avatars.com/api/?name=" + encodeURIComponent(post.display_name || "User") + "&background=random"}
+                                                className="pickup-avatar"
+                                                alt=""
+                                            />
+                                            <div className="pickup-user-info">
+                                                <span className="pickup-username">{post.display_name}</span>
+                                                <span className="pickup-date">{formatDate(post.created_at)}</span>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            className="pickup-content"
+                                            dangerouslySetInnerHTML={{ __html: post.content }}
+                                        />
+
+                                        {post.media && post.media.length > 0 && (
+                                            <div className="pickup-media-grid">
+                                                {post.media.map((item, idx) => (
+                                                    <img key={idx} src={item.url} className="pickup-media-item" alt="" />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
             <Navigation activeTab="mypage" />

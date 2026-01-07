@@ -1,0 +1,96 @@
+/* --- AdminCommon.css - Shared Premium Styles --- */
+
+.admin-page-container {
+    background-color: #F8FAFC;
+    min-height: 100vh;
+    padding-top: 72px;
+    /* Space for fixed header */
+}
+
+.admin-page-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px 120px;
+}
+
+.admin-page-header {
+    margin-bottom: 32px;
+}
+
+.admin-page-header h1 {
+    font-size: 28px;
+    font-weight: 900;
+    color: #111827;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.025em;
+}
+
+.admin-page-header p {
+    font-size: 14px;
+    color: #64748B;
+    margin: 0;
+}
+
+/* Premium Card */
+.premium-card {
+    background: #FFFFFF;
+    border-radius: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+    border: 1px solid #F1F5F9;
+    overflow: hidden;
+}
+
+/* Premium Table */
+.premium-table-container {
+    overflow-x: auto;
+}
+
+.premium-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.premium-table thead th {
+    background: #F8FAFC;
+    padding: 16px 24px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.premium-table tbody td {
+    padding: 20px 24px;
+    font-size: 14px;
+    color: #334155;
+    border-bottom: 1px solid #F8FAFC;
+    vertical-align: middle;
+}
+
+.premium-table tbody tr:hover {
+    background-color: rgba(241, 245, 249, 0.3);
+}
+
+.premium-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Utility Classes */
+.text-accent {
+    color: #84CC16;
+}
+
+.bg-accent {
+    background-color: #84CC16;
+}
+
+.rounded-premium {
+    border-radius: 24px;
+}
+
+.shadow-premium {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}

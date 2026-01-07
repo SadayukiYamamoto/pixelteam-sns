@@ -1,0 +1,249 @@
+/* --- PointManagementPage.css --- */
+
+.point-mgmt-container {
+    background-color: #F8FAFC;
+    min-height: 100vh;
+}
+
+.point-mgmt-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 60px 24px 120px;
+}
+
+/* Header Section */
+.point-mgmt-header {
+    margin-bottom: 40px;
+}
+
+.point-mgmt-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.title-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.title-icon-box {
+    width: 48px;
+    height: 48px;
+    background: #FFFBEB;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #F59E0B;
+}
+
+.point-mgmt-header h1 {
+    font-size: 32px;
+    font-weight: 900;
+    color: #111827;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.refresh-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #FFFFFF;
+    border: 1.5px solid #F1F5F9;
+    border-radius: 16px;
+    color: #64748B;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.refresh-action-btn:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    color: #1E293B;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+}
+
+/* Search Section */
+.point-search-container {
+    margin-bottom: 40px;
+}
+
+.point-search-box {
+    position: relative;
+    background: #FFFFFF;
+    border-radius: 24px;
+    padding: 4px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 20px 40px -10px rgba(0, 0, 0, 0.03);
+    border: 1px solid #F1F5F9;
+}
+
+.search-input-icon {
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #CBD5E1;
+}
+
+.point-premium-search {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 20px 20px 20px 64px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1E293B;
+    outline: none;
+}
+
+.point-premium-search::placeholder {
+    color: #CBD5E1;
+}
+
+/* List/Table Design */
+.point-list-card {
+    background: #FFFFFF;
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 20px 40px -10px rgba(0, 0, 0, 0.03);
+    border: 1px solid #F1F5F9;
+}
+
+.point-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.point-table th {
+    padding: 24px 32px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 800;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1.5px solid #F8FAFC;
+}
+
+.point-table td {
+    padding: 28px 32px;
+    border-bottom: 1.5px solid #F8FAFC;
+    vertical-align: middle;
+}
+
+.point-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Cell Styles */
+.user-info-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-display-name {
+    font-size: 16px;
+    font-weight: 900;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.user-uid-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: #CBD5E1;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.shop-badge-sm {
+    padding: 8px 16px;
+    background: #F8FAFC;
+    color: #64748B;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    border: 1px solid #F1F5F9;
+    display: inline-block;
+}
+
+.points-display-cell {
+    font-size: 20px;
+    font-weight: 950;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.points-display-cell.has-points {
+    color: #F59E0B;
+}
+
+.points-display-cell.no-points {
+    color: #E2E8F0;
+}
+
+.pt-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #CBD5E1;
+    margin-left: 6px;
+    text-transform: uppercase;
+}
+
+/* Action Controls */
+.point-edit-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.point-input-pill {
+    width: 120px;
+    padding: 12px 20px;
+    background: #F8FAFC;
+    border: 1.5px solid #F1F5F9;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 900;
+    color: #1E293B;
+    text-align: right;
+    outline: none;
+    transition: all 0.2s;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.point-input-pill:focus {
+    background: #FFFFFF;
+    border-color: #84CC16;
+    box-shadow: 0 0 0 4px rgba(132, 204, 22, 0.1);
+}
+
+.point-save-btn {
+    padding: 12px 28px;
+    background: #84CC16;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 10px 15px -3px rgba(132, 204, 22, 0.3);
+}
+
+.point-save-btn:hover {
+    background: #65A30D;
+    transform: translateY(-1px);
+    box-shadow: 0 15px 20px -5px rgba(132, 204, 22, 0.4);
+}
+
+.point-save-btn:active {
+    transform: translateY(0);
+}

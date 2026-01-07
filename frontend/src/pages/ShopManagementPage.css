@@ -1,0 +1,256 @@
+/* --- ShopManagementPage.css --- */
+
+.shop-mgmt-container {
+    background-color: #F8FAFC;
+    min-height: 100vh;
+}
+
+.shop-mgmt-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 60px 24px 120px;
+}
+
+.shop-mgmt-header {
+    margin-bottom: 48px;
+}
+
+.shop-mgmt-header h1 {
+    font-size: 32px;
+    font-weight: 900;
+    color: #111827;
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
+}
+
+.shop-mgmt-header p {
+    font-size: 15px;
+    font-weight: 600;
+    color: #94A3B8;
+    margin: 0;
+}
+
+/* Shop Tabs */
+.shop-tabs-container {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 4px;
+    margin-bottom: 32px;
+}
+
+.shop-tab-btn {
+    padding: 16px 32px;
+    background: #FFFFFF;
+    border: 1.5px solid #F1F5F9;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #64748B;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.shop-tab-btn.active {
+    background: #84CC16;
+    color: #FFFFFF;
+    border-color: #84CC16;
+    box-shadow: 0 10px 15px -3px rgba(132, 204, 22, 0.3);
+}
+
+.shop-tab-btn:hover:not(.active) {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+}
+
+/* Report Card */
+.report-card {
+    background: #FFFFFF;
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 20px 40px -10px rgba(0, 0, 0, 0.03);
+    border: 1px solid #F1F5F9;
+}
+
+.report-card-header {
+    padding: 32px;
+    border-bottom: 1.5px solid #F8FAFC;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.report-shop-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 18px;
+    font-weight: 900;
+    color: #1E293B;
+}
+
+.title-indicator {
+    width: 6px;
+    height: 32px;
+    background: #84CC16;
+    border-radius: 10px;
+}
+
+.report-period-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: #CBD5E1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Table Design */
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table th {
+    padding: 24px 32px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 800;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1.5px solid #F8FAFC;
+}
+
+.report-table td {
+    padding: 32px;
+    border-bottom: 1.5px solid #F8FAFC;
+    vertical-align: middle;
+}
+
+/* Period Column */
+.cell-period {
+    display: flex;
+    flex-direction: column;
+}
+
+.period-label {
+    font-size: 16px;
+    font-weight: 900;
+    color: #1E293B;
+    margin-bottom: 4px;
+}
+
+.week-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94A3B8;
+}
+
+/* Personal Report Column */
+.report-item-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #EFF6FF;
+    color: #2563EB;
+    border: 1.5px solid #DBEAFE;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 900;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.report-item-link:hover {
+    background: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
+}
+
+.no-report-placeholder {
+    width: 100%;
+    padding: 24px;
+    background: #F8FAFC;
+    border: 1.5px dashed #E2E8F0;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #CBD5E1;
+}
+
+/* Know-how column */
+.status-badge-container {
+    display: flex;
+    align-items: center;
+    /* Centered horizontally next to the icon */
+    gap: 12px;
+}
+
+.status-icon-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.status-icon-box.success {
+    background: #F0FDF4;
+    color: #22C55E;
+    border: 1.5px solid #DCFCE7;
+}
+
+.status-icon-box.error {
+    background: #FEF2F2;
+    color: #EF4444;
+    border: 1.5px solid #FEE2E2;
+}
+
+.mgmt-status-text {
+    font-size: 15px;
+    font-weight: 900;
+    margin: 0;
+    transform: none !important;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.mgmt-status-text.success {
+    color: #16A34A;
+}
+
+.mgmt-status-text.error {
+    color: #DC2626;
+}
+
+.submission-detail-card {
+    margin-top: 12px;
+    padding: 16px;
+    background: #FFFFFF;
+    border: 1.5px solid #F1F5F9;
+    border-radius: 16px;
+}
+
+.submitter-name {
+    font-size: 11px;
+    font-weight: 800;
+    color: #1E293B;
+    margin-bottom: 4px;
+}
+
+.submission-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #3B82F6;
+    text-decoration: underline;
+    display: block;
+}

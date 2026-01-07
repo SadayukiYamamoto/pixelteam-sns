@@ -18,9 +18,8 @@
 
 /* === マイページ全体 === */
 .mypage-content {
-  flex: 1;
-  padding: 16px;
-  overflow-y: auto;
+  padding: 88px 16px 16px;
+  /* 72px (header) + 16px spacing */
   margin-bottom: 70px;
   /* 下のNavigation分 */
 }

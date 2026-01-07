@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaPlusCircle, FaTrash, FaVideo, FaGamepad, FaClipboardList, FaSave, FaArrowLeft } from "react-icons/fa";
+import { FiTrash2, FiSave, FiArrowLeft, FiPlus, FiCheck } from "react-icons/fi";
+import { FaGamepad } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 import Header from "../components/Header";
 import Navigation from "../components/Navigation";
+import "./TestCreatePage.css";
 
 export default function TestCreatePage() {
   const { videoId: paramVideoId } = useParams();
@@ -14,7 +17,7 @@ export default function TestCreatePage() {
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // テスト問題（デフォルト1問）
+  // テスト問題
   const [questions, setQuestions] = useState([
     {
       text: "",
@@ -33,23 +36,19 @@ export default function TestCreatePage() {
     { type: "text", text: "感想やご意見があればご記入ください", choices: [] }
   ]);
 
-  // 🔥 動画リスト取得 & 編集時のデータ取得
   useEffect(() => {
     const init = async () => {
       try {
         const token = localStorage.getItem("token");
         const headers = { Authorization: `Token ${token}` };
 
-        // 1. 動画リスト取得
         const res = await axios.get("/api/videos/");
         setVideos(res.data);
 
-        // 2. 編集モードならデータ取得
         if (paramVideoId) {
           setVideoId(paramVideoId);
           setLoading(true);
 
-          // テスト取得
           try {
             const testRes = await axios.get(`/api/videos/${paramVideoId}/test/`, { headers });
             if (testRes.data) {
@@ -57,14 +56,9 @@ export default function TestCreatePage() {
               setQuestions(testRes.data.questions);
             }
           } catch (e) {
-            if (e.response && e.response.status === 404) {
-              console.log("既存のテストはありません。新規作成します。");
-            } else {
-              console.error("テスト取得エラー", e);
-            }
+            console.log("既存のテストなし");
           }
 
-          // アンケート取得
           try {
             const surveyRes = await axios.get(`/api/videos/${paramVideoId}/survey/`, { headers });
             if (surveyRes.data && surveyRes.data.questions) {
@@ -75,16 +69,10 @@ export default function TestCreatePage() {
               })));
             }
           } catch (e) {
-            if (e.response && e.response.status === 404) {
-              console.log("既存のアンケートはありません。デフォルトを表示します。");
-            } else {
-              console.error("アンケート取得エラー", e);
-            }
+            console.log("既存のアンケートなし");
           }
-
           setLoading(false);
         }
-
       } catch (e) {
         console.error("初期化エラー", e);
       }
@@ -92,231 +80,162 @@ export default function TestCreatePage() {
     init();
   }, [paramVideoId]);
 
-  // --- テスト問題操作 ---
-  const addQuestion = () => {
-    setQuestions([
-      ...questions,
-      {
-        text: "",
-        choices: [
-          { text: "", is_correct: false },
-          { text: "", is_correct: false },
-        ],
-      },
-    ]);
+  // --- Handlers ---
+  const addQuestion = () => setQuestions([...questions, { text: "", choices: [{ text: "", is_correct: false }, { text: "", is_correct: false }] }]);
+  const removeQuestion = (idx) => {
+    if (questions.length <= 1) return alert("最低1問必要です");
+    setQuestions(questions.filter((_, i) => i !== idx));
+  };
+  const updateQuestionText = (idx, text) => {
+    const q = [...questions]; q[idx].text = text; setQuestions(q);
+  };
+  const updateChoice = (qi, ci, text) => {
+    const q = [...questions]; q[qi].choices[ci].text = text; setQuestions(q);
+  };
+  const setCorrectChoice = (qi, ci) => {
+    const q = [...questions];
+    q[qi].choices.forEach((c, i) => c.is_correct = (i === ci));
+    setQuestions(q);
+  };
+  const addChoice = (qi) => {
+    const q = [...questions]; q[qi].choices.push({ text: "", is_correct: false }); setQuestions(q);
+  };
+  const removeChoice = (qi, ci) => {
+    const q = [...questions];
+    if (q[qi].choices.length <= 1) return;
+    q[qi].choices = q[qi].choices.filter((_, i) => i !== ci);
+    setQuestions(q);
   };
 
-  const removeQuestion = (index) => {
-    if (questions.length <= 1) return alert("少なくとも1つの問題が必要です");
-    const updated = [...questions];
-    updated.splice(index, 1);
-    setQuestions(updated);
+  const addSurveyQuestion = (type) => setSurveyQuestions([...surveyQuestions, { type, text: "", choices: type === 'choice' ? ["選択肢1"] : [] }]);
+  const removeSurveyQuestion = (idx) => setSurveyQuestions(surveyQuestions.filter((_, i) => i !== idx));
+  const updateSurveyQuestion = (idx, field, val) => {
+    const s = [...surveyQuestions]; s[idx][field] = val; setSurveyQuestions(s);
+  };
+  const updateSurveyChoice = (si, ci, val) => {
+    const s = [...surveyQuestions]; s[si].choices[ci] = val; setSurveyQuestions(s);
+  };
+  const addSurveyChoice = (si) => {
+    const s = [...surveyQuestions]; s[si].choices.push("新しい選択肢"); setSurveyQuestions(s);
+  };
+  const removeSurveyChoice = (si, ci) => {
+    const s = [...surveyQuestions]; s[si].choices = s[si].choices.filter((_, i) => i !== ci); setSurveyQuestions(s);
   };
 
-  const updateQuestionText = (index, text) => {
-    const updated = [...questions];
-    updated[index].text = text;
-    setQuestions(updated);
-  };
-
-  const updateChoice = (qIndex, cIndex, value) => {
-    const updated = [...questions];
-    updated[qIndex].choices[cIndex].text = value;
-    setQuestions(updated);
-  };
-
-  const setCorrectChoice = (qIndex, cIndex) => {
-    const updated = [...questions];
-    updated[qIndex].choices.forEach((c, idx) => {
-      c.is_correct = idx === cIndex;
-    });
-    setQuestions(updated);
-  };
-
-  const addChoice = (qIndex) => {
-    const updated = [...questions];
-    updated[qIndex].choices.push({ text: "", is_correct: false });
-    setQuestions(updated);
-  };
-
-  const removeChoice = (qIndex, cIndex) => {
-    const updated = [...questions];
-    if (updated[qIndex].choices.length <= 2) return alert("選択肢は最低2つ必要です");
-    updated[qIndex].choices.splice(cIndex, 1);
-    setQuestions(updated);
-  };
-
-  // --- アンケート質問操作 ---
-  const addSurveyQuestion = (type) => {
-    setSurveyQuestions([
-      ...surveyQuestions,
-      {
-        type: type, // "text" or "choice"
-        text: "",
-        choices: type === "choice" ? ["選択肢1", "選択肢2"] : []
-      }
-    ]);
-  };
-
-  const removeSurveyQuestion = (index) => {
-    const updated = [...surveyQuestions];
-    updated.splice(index, 1);
-    setSurveyQuestions(updated);
-  };
-
-  const updateSurveyQuestion = (index, field, value) => {
-    const updated = [...surveyQuestions];
-    updated[index][field] = value;
-    setSurveyQuestions(updated);
-  };
-
-  const updateSurveyChoice = (qIndex, cIndex, value) => {
-    const updated = [...surveyQuestions];
-    updated[qIndex].choices[cIndex] = value;
-    setSurveyQuestions(updated);
-  };
-
-  const addSurveyChoice = (qIndex) => {
-    const updated = [...surveyQuestions];
-    updated[qIndex].choices.push("新しい選択肢");
-    setSurveyQuestions(updated);
-  };
-
-  const removeSurveyChoice = (qIndex, cIndex) => {
-    const updated = [...surveyQuestions];
-    if (updated[qIndex].choices.length <= 1) return alert("選択肢は最低1つ必要です");
-    updated[qIndex].choices.splice(cIndex, 1);
-    setSurveyQuestions(updated);
-  };
-
-  // 🔥 保存処理
   const saveTest = async () => {
     if (!videoId) return alert("動画を選択してください");
-    if (!title.trim()) return alert("テストタイトルを入力してください");
+    if (!title.trim()) return alert("テスト名を入力してください");
+    if (questions.some(q => !q.choices.some(c => c.is_correct))) return alert("全ての設問に正解を設定してください");
 
-    const invalidQuestion = questions.some((q) => !q.choices.some((c) => c.is_correct));
-    if (invalidQuestion) return alert("すべてのテスト問題に「正解」を設定してください");
-
-    // ペイロード作成
     const payload = {
-      video_id: videoId,
-      title,
-      questions: questions.map((q, qIndex) => ({
-        order: qIndex + 1,
-        text: q.text,
-        choices: q.choices,
-      })),
-      survey_questions: surveyQuestions.map((q, qIndex) => ({
-        order: qIndex + 1,
-        type: q.type,
-        text: q.text,
-        choices: q.choices
-      }))
+      video_id: videoId, title,
+      questions: questions.map((q, i) => ({ order: i + 1, text: q.text, choices: q.choices })),
+      survey_questions: surveyQuestions.map((s, i) => ({ order: i + 1, type: s.type, text: s.text, choices: s.choices }))
     };
 
     try {
       const token = localStorage.getItem("token");
-      await axios.post(
-        "/api/tests/create/",
-        payload,
-        {
-          headers: { Authorization: `Token ${token}` },
-        }
-      );
-
-      alert("テストとアンケートを保存しました！");
-      navigate("/admin/tests"); // 一覧に戻る
-
+      await axios.post("/api/tests/create/", payload, { headers: { Authorization: `Token ${token}` } });
+      alert("保存しました！");
+      navigate("/admin/tests");
     } catch (err) {
-      console.error("テスト作成エラー:", err);
       alert("保存に失敗しました");
     }
   };
 
   return (
-    <div className="home-container">
-      <div className="admin-wrapper">
-        <Header />
-        <div className="max-w-4xl mx-auto p-4 md:p-10">
-          <button
-            onClick={() => navigate("/admin/tests")}
-            className="mb-8 bg-white text-gray-400 hover:text-gray-600 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md transition-all font-bold flex items-center gap-2 text-sm border-none"
-          >
-            <FaArrowLeft /> テスト一覧に戻る
-          </button>
-
-          <div className="flex justify-between items-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-              <span className="p-3 bg-lime-100 text-[#84cc16] rounded-2xl shadow-inner">
-                <FaGamepad size={28} />
-              </span>
-              {paramVideoId ? "テストの編集" : "テスト新規作成"}
-            </h2>
+    <div className="test-create-container">
+      <Header />
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="test-create-wrapper"
+      >
+        {/* Header Section */}
+        <div className="test-create-header">
+          <div className="header-left">
+            <button onClick={() => navigate("/admin/tests")} className="back-btn">
+              <FiArrowLeft size={18} /> テスト一覧に戻る
+            </button>
+            <div className="page-main-title">
+              <div className="title-icon-box">
+                <FaGamepad size={32} />
+              </div>
+              <h1>{paramVideoId ? "テストの編集" : "テスト新規作成"}</h1>
+            </div>
           </div>
+        </div>
 
-          {loading ? (
-            <div className="text-center py-32 text-gray-400 font-bold">読み込み中...</div>
-          ) : (
-            <div className="space-y-12">
-
-              {/* 1. 基本設定 */}
-              <div className="bg-white rounded-[40px] shadow-xl shadow-gray-200/50 p-10 hover:shadow-2xl transition-all duration-500 border-none">
-                <div className="flex items-center gap-3 text-2xl font-black text-gray-800 mb-8 pb-4 border-b border-gray-50">
-                  <span className="text-[#84cc16]">01.</span> 基本設定
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">対象動画</label>
-                    <select
-                      value={videoId}
-                      onChange={(e) => setVideoId(e.target.value)}
-                      className="w-full bg-gray-50/50 rounded-2xl p-4 border-none shadow-inner focus:ring-2 focus:ring-[#84cc16] focus:bg-white outline-none transition-all cursor-pointer font-bold text-gray-700"
-                      disabled={!!paramVideoId}
-                    >
-                      <option value="">動画を選択してください</option>
-                      {videos.map((v) => (
-                        <option key={v.id} value={v.id}>
-                          {v.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">テスト名</label>
-                    <input
-                      type="text"
-                      placeholder="例: 接客マナー 初級編"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className="w-full bg-gray-50/50 rounded-2xl p-4 border-none shadow-inner focus:ring-2 focus:ring-[#84cc16] focus:bg-white outline-none transition-all font-bold text-gray-700"
-                    />
-                  </div>
-                </div>
+        {loading ? (
+          <div className="py-20 text-center font-black text-[#CBD5E1] uppercase tracking-[0.3em] text-xl">Loading...</div>
+        ) : (
+          <div className="space-y-8">
+            {/* 01. 基本設定 */}
+            <section className="test-section-card">
+              <div className="section-label">
+                <span className="label-number">01</span>
+                <h2 className="label-text">基本設定</h2>
               </div>
 
-              {/* 2. テスト問題 */}
-              <div className="bg-white rounded-[40px] shadow-xl shadow-gray-200/50 p-10 hover:shadow-2xl transition-all duration-500 border-none">
-                <div className="flex items-center gap-3 text-2xl font-black text-gray-800 mb-10 pb-4 border-b border-gray-50">
-                  <span className="text-[#84cc16]">02.</span> テスト問題 ({questions.length})
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="premium-input-group">
+                  <label>対象動画</label>
+                  <select
+                    value={videoId}
+                    onChange={(e) => setVideoId(e.target.value)}
+                    disabled={!!paramVideoId}
+                    className="premium-select"
+                  >
+                    <option value="">動画を選択してください</option>
+                    {videos.map(v => <option key={v.id} value={v.id}>{v.title}</option>)}
+                  </select>
                 </div>
+                <div className="premium-input-group">
+                  <label>テスト名</label>
+                  <input
+                    type="text"
+                    placeholder="例: 接客マナー 初級編"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      padding: '18px 40px',
+                      borderRadius: '18px',
+                      fontSize: '15px',
+                      fontWeight: '700',
+                      backgroundColor: '#F8FAFC',
+                      border: '1.5px solid #F1F5F9',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+              </div>
+            </section>
 
-                <div className="space-y-16">
-                  {questions.map((q, qIndex) => (
-                    <div key={qIndex} className="relative group">
-                      <div className="flex justify-between items-center mb-6">
-                        <div className="flex items-center gap-4">
-                          <span className="bg-[#84cc16] text-white font-black w-10 h-10 flex items-center justify-center rounded-xl text-lg shadow-lg shadow-lime-200">
-                            {qIndex + 1}
-                          </span>
-                          <span className="text-xs font-black text-gray-300 uppercase tracking-widest">Question Content</span>
+            {/* 02. テスト問題 */}
+            <section className="test-section-card">
+              <div className="section-label">
+                <span className="label-number">02</span>
+                <h2 className="label-text">テスト問題 ({questions.length})</h2>
+              </div>
+
+              <div className="space-y-12">
+                <AnimatePresence>
+                  {questions.map((q, qi) => (
+                    <motion.div
+                      key={qi}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="question-item"
+                    >
+                      <div className="question-header">
+                        <div className="q-badge">
+                          <div className="q-number">{qi + 1}</div>
+                          <span className="q-meta">Question Content</span>
                         </div>
-                        <button
-                          onClick={() => removeQuestion(qIndex)}
-                          className="w-10 h-10 flex items-center justify-center rounded-full bg-white text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all shadow-sm hover:shadow-md border-none"
-                          title="問題を削除"
-                        >
-                          <FaTrash size={14} />
+                        <button onClick={() => removeQuestion(qi)} className="trash-btn">
+                          <FiTrash2 size={20} />
                         </button>
                       </div>
 
@@ -325,167 +244,176 @@ export default function TestCreatePage() {
                           type="text"
                           placeholder="例：お客様が入店された時の最初の挨拶は？"
                           value={q.text}
-                          onChange={(e) => updateQuestionText(qIndex, e.target.value)}
-                          className="w-full bg-gray-50/50 rounded-[20px] p-5 border-none shadow-inner focus:ring-2 focus:ring-[#84cc16] focus:bg-white outline-none font-bold text-xl transition-all text-gray-800"
+                          onChange={(e) => updateQuestionText(qi, e.target.value)}
+                          style={{
+                            width: '100%',
+                            boxSizing: 'border-box',
+                            padding: '24px 40px',
+                            borderRadius: '20px',
+                            fontSize: '18px',
+                            fontWeight: '900',
+                            backgroundColor: '#F8FAFC',
+                            border: 'none',
+                            outline: 'none',
+                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)'
+                          }}
                         />
 
-                        <div className="space-y-4 pl-4 pt-2">
-                          {q.choices.map((choice, cIndex) => (
-                            <div key={cIndex} className="flex items-center gap-4 group/choice">
-                              <div className="relative">
-                                <input
-                                  type="radio"
-                                  name={`correct-${qIndex}`}
-                                  checked={choice.is_correct}
-                                  onChange={() => setCorrectChoice(qIndex, cIndex)}
-                                  className="peer sr-only"
-                                  id={`q${qIndex}-c${cIndex}`}
-                                />
-                                <label
-                                  htmlFor={`q${qIndex}-c${cIndex}`}
-                                  className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all ${choice.is_correct ? 'bg-[#84cc16] text-white shadow-lg shadow-lime-300/50 transform scale-110' : 'bg-gray-100 text-transparent hover:bg-gray-200'}`}
-                                >
-                                  ✔
-                                </label>
-                              </div>
-
+                        <div className="choice-grid">
+                          {q.choices.map((choice, ci) => (
+                            <div key={ci} className={`choice-item ${choice.is_correct ? 'correct' : ''}`}>
+                              <button
+                                onClick={() => setCorrectChoice(qi, ci)}
+                                className={`choice-radio ${choice.is_correct ? 'active' : ''}`}
+                              >
+                                <FiCheck size={16} className="stroke-[4]" />
+                              </button>
                               <input
                                 type="text"
-                                placeholder={`選択肢 ${cIndex + 1}`}
+                                placeholder={`選択肢 ${ci + 1}`}
                                 value={choice.text}
-                                onChange={(e) => updateChoice(qIndex, cIndex, e.target.value)}
-                                className={`flex-1 rounded-2xl p-4 text-sm border-none shadow-sm outline-none transition-all font-bold ${choice.is_correct ? 'bg-lime-50 text-lime-900 ring-2 ring-lime-100' : 'bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-gray-100'}`}
+                                onChange={(e) => updateChoice(qi, ci, e.target.value)}
+                                className="choice-input"
                               />
-
-                              <button
-                                onClick={() => removeChoice(qIndex, cIndex)}
-                                className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-gray-200 hover:text-red-400 hover:bg-red-50 transition-all opacity-0 group-hover/choice:opacity-100 border-none"
-                                title="選択肢を削除"
-                              >
-                                <FaTrash size={12} />
+                              <button onClick={() => removeChoice(qi, ci)} className="trash-btn !p-1 opacity-40 hover:opacity-100">
+                                <FiTrash2 size={14} />
                               </button>
                             </div>
                           ))}
-
-                          <button
-                            onClick={() => addChoice(qIndex)}
-                            className="text-xs font-black text-[#84cc16] hover:text-[#a3e635] bg-lime-50/50 hover:bg-lime-50 px-6 py-3 rounded-2xl transition-all flex items-center gap-2 mt-4 mx-auto shadow-sm uppercase tracking-widest border-none"
-                          >
-                            <FaPlusCircle /> Add Choice
-                          </button>
                         </div>
-                      </div>
-                      <div className="h-px bg-gray-50 my-12 mx-auto w-1/2"></div>
-                    </div>
-                  ))}
-                </div>
 
-                <button
-                  onClick={addQuestion}
-                  className="mt-8 w-full py-5 bg-white border-none text-gray-400 hover:text-[#84cc16] hover:bg-lime-50/30 rounded-[24px] font-black transition-all flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-sm shadow-md hover:shadow-xl hover:shadow-lime-100/50 active:scale-95"
-                >
-                  <FaPlusCircle className="text-xl" /> Add New Question
-                </button>
-              </div>
-
-              {/* 3. アンケート設定 */}
-              <div className="bg-white rounded-[40px] shadow-xl shadow-gray-200/50 p-10 hover:shadow-2xl transition-all duration-500 border-none">
-                <div className="flex items-center gap-3 text-2xl font-black text-gray-800 mb-10 pb-4 border-b border-gray-50">
-                  <span className="text-blue-400">03.</span> アンケート設定 <span className="text-xs font-bold text-gray-300 ml-2">(Optional)</span>
-                </div>
-
-                <div className="space-y-12">
-                  {surveyQuestions.map((sq, index) => (
-                    <div key={index} className="relative">
-                      <div className="flex justify-between items-center mb-6">
-                        <div className="flex items-center gap-4">
-                          <span className="bg-gray-800 text-white font-black w-8 h-8 flex items-center justify-center rounded-lg text-sm">
-                            S{index + 1}
-                          </span>
-                          <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest ${sq.type === 'text' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600'}`}>
-                            {sq.type === 'text' ? 'Text Box' : 'Multiple Choice'}
-                          </span>
-                        </div>
                         <button
-                          onClick={() => removeSurveyQuestion(index)}
-                          className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all border-none"
+                          onClick={() => addChoice(qi)}
+                          className="mx-auto flex items-center gap-2 px-10 py-4 bg-[#F8FAFC] hover:bg-[#F0FDF4] text-[#22C55E] rounded-full text-[11px] font-black uppercase tracking-widest transition-all border-none"
                         >
-                          <FaTrash size={12} />
+                          <FiPlus /> その他の選択肢を追加
                         </button>
                       </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
 
+              <button onClick={addQuestion} className="add-btn-v2">
+                <FiPlus size={20} /> 新しい問題を追加
+              </button>
+            </section>
+
+            {/* 03. アンケート設定 */}
+            <section className="test-section-card">
+              <div className="section-label">
+                <span className="label-number">03</span>
+                <h2 className="label-text">アンケート設定 (任意)</h2>
+              </div>
+
+              <div className="space-y-12">
+                {surveyQuestions.map((sq, si) => (
+                  <div key={si} className="question-item">
+                    <div className="question-header">
+                      <div className="q-badge">
+                        <div className="q-number bg-[#475569]">S{si + 1}</div>
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${sq.type === 'choice' ? 'bg-[#FFF7ED] text-[#F97316]' : 'bg-[#F0F9FF] text-[#0EA5E9]'}`}>
+                          {sq.type === 'choice' ? '複数選択式' : '自由記述式'}
+                        </span>
+                      </div>
+                      <button onClick={() => removeSurveyQuestion(si)} className="trash-btn">
+                        <FiTrash2 size={18} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-6">
                       <input
                         type="text"
-                        placeholder="アンケートの質問文を入力"
+                        placeholder="アンケートの項目内容を入力"
                         value={sq.text}
-                        onChange={(e) => updateSurveyQuestion(index, 'text', e.target.value)}
-                        className="w-full bg-gray-50/50 rounded-[20px] p-5 mb-6 border-none shadow-inner focus:ring-2 focus:ring-blue-100 focus:bg-white outline-none font-bold transition-all text-gray-700"
+                        onChange={(e) => updateSurveyQuestion(si, 'text', e.target.value)}
+                        className="!border-none !shadow-inner"
+                        style={{
+                          width: '100%',
+                          boxSizing: 'border-box',
+                          padding: '24px 60px',
+                          borderRadius: '24px',
+                          fontSize: '18px',
+                          fontWeight: '900',
+                          backgroundColor: '#F8FAFC',
+                          color: '#334155'
+                        }}
                       />
 
                       {sq.type === 'choice' && (
-                        <div className="pl-6 space-y-3">
-                          <div className="space-y-3">
-                            {sq.choices.map((choice, cIndex) => (
-                              <div key={cIndex} className="flex items-center gap-3 group/survey">
-                                <span className="w-2 h-2 rounded-full bg-orange-300"></span>
-                                <input
-                                  type="text"
-                                  value={choice}
-                                  onChange={(e) => updateSurveyChoice(index, cIndex, e.target.value)}
-                                  className="flex-1 bg-white rounded-xl p-3 text-sm border-none shadow-sm focus:ring-2 focus:ring-orange-100 outline-none transition-all font-bold text-gray-600"
-                                />
-                                <button
-                                  onClick={() => removeSurveyChoice(index, cIndex)}
-                                  className="w-8 h-8 flex items-center justify-center rounded-full text-gray-200 hover:text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover/survey:opacity-100 border-none"
-                                >
-                                  <FaTrash size={12} />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
+                        <div className="pl-6 space-y-4">
+                          {sq.choices.map((choice, ci) => (
+                            <div key={ci} className="flex items-center gap-3">
+                              <div className="w-2 h-2 rounded-full bg-[#FDBA74]" />
+                              <input
+                                type="text"
+                                value={choice}
+                                onChange={(e) => updateSurveyChoice(si, ci, e.target.value)}
+                                className="flex-1 bg-white border border-[#F1F5F9] shadow-sm outline-none"
+                                style={{ padding: '18px 40px', borderRadius: '16px', fontSize: '15px', fontWeight: '700' }}
+                              />
+                              <button onClick={() => removeSurveyChoice(si, ci)} className="trash-btn !p-1 opacity-40 hover:opacity-100">
+                                <FiTrash2 size={14} />
+                              </button>
+                            </div>
+                          ))}
                           <button
-                            onClick={() => addSurveyChoice(index)}
-                            className="mt-6 mx-auto px-6 py-2.5 bg-orange-50/50 text-orange-600 rounded-full hover:bg-orange-100 font-black transition-all flex items-center gap-2 text-[10px] uppercase tracking-widest border-none"
+                            onClick={() => addSurveyChoice(si)}
+                            className="mt-4 bg-[#FFF7ED] hover:bg-[#FFEDD5] text-[#F97316] font-black uppercase tracking-widest transition-all border-none flex items-center gap-2"
+                            style={{ padding: '16px 40px', borderRadius: '30px', fontSize: '12px' }}
                           >
-                            <FaPlusCircle /> Add Option
+                            <FiPlus /> 選択肢を追加
                           </button>
                         </div>
                       )}
-                      <div className="h-px bg-gray-50 my-12 mx-auto w-1/3"></div>
                     </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-6 mt-10">
-                  <button
-                    onClick={() => addSurveyQuestion('choice')}
-                    className="flex-1 py-4 bg-orange-50/50 text-orange-600 rounded-2xl hover:bg-orange-100 font-bold transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow-md border-none text-sm"
-                  >
-                    <FaPlusCircle /> 選択式を追加
-                  </button>
-                  <button
-                    onClick={() => addSurveyQuestion('text')}
-                    className="flex-1 py-4 bg-blue-50/30 text-blue-500 rounded-2xl hover:bg-blue-100/40 font-bold transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow-md border-none text-sm"
-                  >
-                    <FaPlusCircle /> 記述式を追加
-                  </button>
-                </div>
+                  </div>
+                ))}
               </div>
 
-              {/* 保存ボタン */}
-              <div className="sticky bottom-10 z-10 mx-auto max-w-sm pt-10">
+              <div className="flex gap-4" style={{ marginTop: '100px' }}>
                 <button
-                  onClick={saveTest}
-                  className="w-full bg-gradient-to-r from-[#84cc16] to-emerald-500 hover:from-[#a3e635] hover:to-emerald-600 text-white font-black py-5 rounded-[24px] shadow-2xl shadow-lime-200/50 hover:shadow-lime-300/50 transition-all transform hover:-translate-y-2 flex items-center justify-center gap-4 text-xl border-none tracking-widest"
+                  onClick={() => addSurveyQuestion('choice')}
+                  className="flex-1 bg-[#FFF7ED] text-[#F97316] font-black text-xs uppercase tracking-widest hover:bg-[#FFEDD5] transition-all flex items-center justify-center gap-4 border-none"
+                  style={{ padding: '24px 48px', borderRadius: '24px', minHeight: '80px' }}
                 >
-                  <FaSave /> 保存して公開する
+                  <FiPlus size={24} /> 選択式項目を追加
+                </button>
+                <button
+                  onClick={() => addSurveyQuestion('text')}
+                  className="flex-1 bg-[#F0F9FF] text-[#0EA5E9] font-black text-xs uppercase tracking-widest hover:bg-[#E0F2FE] transition-all flex items-center justify-center gap-4 border-none"
+                  style={{ padding: '24px 48px', borderRadius: '24px', minHeight: '80px' }}
+                >
+                  <FiPlus size={24} /> 記述式項目を追加
                 </button>
               </div>
+            </section>
 
+            {/* Footer Save Button */}
+            <div className="flex justify-center pt-12 pb-20">
+              <motion.button
+                whileHover={{ scale: 1.02, translateY: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={saveTest}
+                className="bg-[#22C55E] text-white font-black shadow-[0_20px_50px_-10px_rgba(34,197,94,0.4)] border-none whitespace-nowrap active:bg-[#16A34A] transition-all"
+                style={{
+                  padding: '24px 80px',
+                  borderRadius: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  fontSize: '20px',
+                  letterSpacing: '0.05em'
+                }}
+              >
+                <FiSave size={24} />
+                <span>テストを保存して公開する</span>
+              </motion.button>
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        )}
+      </motion.div>
+      <Navigation activeTab="mypage" />
     </div>
   );
 }

@@ -154,117 +154,138 @@ const HomeAdminPage = () => {
             <div className="admin-wrapper">
                 <Header />
                 <div className="max-w-7xl mx-auto p-4 md:p-10">
-                    <header className="flex justify-between items-center mb-8">
-                        <h1 className="text-2xl font-bold text-gray-800">ホーム管理</h1>
+                    <header className="home-admin-header">
+                        <h1 className="home-admin-title">ホーム管理</h1>
                         <button
-                            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${hasChanges ? 'bg-[#84cc16] text-white shadow-lg shadow-lime-200/50 hover:shadow-xl' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                            className={`save-all-btn ${hasChanges ? 'active' : ''}`}
                             onClick={handleSaveAll}
                             disabled={!hasChanges || saving}
                         >
-                            {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+                            {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                             {saving ? '保存中...' : 'すべての変更を保存'}
                         </button>
                     </header>
 
-                    <section className="bg-white p-8 rounded-[32px] shadow-xl shadow-gray-200/50 mb-8">
-                        <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                            <span className="p-2 bg-lime-100 text-[#84cc16] rounded-lg">
+                    <section className="admin-content-section">
+                        <div className="section-header">
+                            <div className="section-icon-bg news-accent">
                                 <Plus size={20} />
-                            </span>
-                            事務局だよりの管理
-                        </h2>
-                        <form className="news-form" onSubmit={handleAddNewsDraft}>
-                            <div className="form-inputs">
-                                <input
-                                    type="text"
-                                    placeholder="タイトル"
-                                    value={newNews.title}
-                                    onChange={(e) => setNewNews({ ...newNews, title: e.target.value })}
-                                    required
-                                />
-                                <input
-                                    type="url"
-                                    placeholder="遷移先URL"
-                                    value={newNews.external_url}
-                                    onChange={(e) => setNewNews({ ...newNews, external_url: e.target.value })}
-                                    required
-                                />
                             </div>
+                            <h2 className="section-title">事務局だよりの管理</h2>
+                        </div>
 
-                            <div className="image-upload-wrapper">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageChange}
-                                    ref={fileInputRef}
-                                    style={{ display: 'none' }}
-                                />
-                                <div
-                                    className="image-dropzone"
-                                    onClick={() => fileInputRef.current.click()}
-                                >
-                                    {imagePreview ? (
-                                        <img src={imagePreview} alt="Preview" className="upload-preview" />
-                                    ) : (
-                                        <div className="upload-placeholder">
-                                            <ImageIcon size={32} />
-                                            <span>サムネイルを選択</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            <button type="submit" className="add-btn bg-[#84cc16] hover:bg-[#a3e635] text-white shadow-lg shadow-lime-200/50">
-                                <Plus size={20} /> 追加
-                            </button>
-                        </form>
-
-                        <div className="news-list">
-                            {officeNews.map((news) => (
-                                <div key={news.id} className={`news-card ${news.isDraft ? 'draft' : ''}`}>
-                                    {(news.thumbnail || news.thumbnail_preview) && (
-                                        <img src={news.thumbnail || news.thumbnail_preview} alt="" className="news-thumb" />
-                                    )}
-                                    {!news.thumbnail && !news.thumbnail_preview && (
-                                        <div className="news-thumb-placeholder"><ImageIcon size={20} /></div>
-                                    )}
-                                    <div className="news-info min-w-0">
-                                        <h3 className="truncate font-bold text-gray-800">{news.title} {news.isDraft && <span className="draft-badge bg-[#84cc16]">新規</span>}</h3>
-                                        <a href={news.external_url} target="_blank" rel="noopener noreferrer" className="text-[#84cc16] break-all block text-xs hover:underline mt-1">
-                                            <ExternalLink size={12} className="inline mr-1" /> {news.external_url}
-                                        </a>
+                        <div className="form-card-container">
+                            <form className="news-management-form" onSubmit={handleAddNewsDraft}>
+                                <div className="form-fields">
+                                    <div className="input-group">
+                                        <label>タイトル</label>
+                                        <input
+                                            type="text"
+                                            value={newNews.title}
+                                            onChange={(e) => setNewNews({ ...newNews, title: e.target.value })}
+                                            placeholder="タイトルを入力"
+                                            required
+                                        />
                                     </div>
-                                    <button className="delete-btn text-red-400 hover:text-red-500" onClick={() => handleDeleteNewsDraft(news.id)}>
-                                        <Trash2 size={20} />
-                                    </button>
+                                    <div className="input-group">
+                                        <label>遷移先URL</label>
+                                        <input
+                                            type="url"
+                                            value={newNews.external_url}
+                                            onChange={(e) => setNewNews({ ...newNews, external_url: e.target.value })}
+                                            placeholder="https://..."
+                                            required
+                                        />
+                                    </div>
                                 </div>
-                            ))}
+
+                                <div className="thumbnail-upload-section">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        ref={fileInputRef}
+                                        style={{ display: 'none' }}
+                                    />
+                                    <div
+                                        className="thumbnail-picker-card"
+                                        onClick={() => fileInputRef.current.click()}
+                                    >
+                                        {imagePreview ? (
+                                            <img src={imagePreview} alt="Preview" className="picker-preview" />
+                                        ) : (
+                                            <div className="picker-placeholder">
+                                                <ImageIcon size={24} />
+                                                <span>サムネイルを設定</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <button type="submit" className="add-draft-btn">
+                                    <Plus size={20} /> 追加
+                                </button>
+                            </form>
+
+                            <div className="current-news-list">
+                                {officeNews.map((news) => (
+                                    <div key={news.id} className={`news-item-row ${news.isDraft ? 'is-draft' : ''}`}>
+                                        <div className="item-icon-logo">
+                                            {news.thumbnail || news.thumbnail_preview ? (
+                                                <img src={news.thumbnail || news.thumbnail_preview} alt="" />
+                                            ) : (
+                                                <div className="fallback-logo"><ImageIcon size={20} /></div>
+                                            )}
+                                        </div>
+                                        <div className="item-details">
+                                            <h3 className="item-title">
+                                                {news.title}
+                                                {news.isDraft && <span className="new-badge">新規</span>}
+                                            </h3>
+                                            <a href={news.external_url} target="_blank" rel="noopener noreferrer" className="item-url">
+                                                <ExternalLink size={12} /> {news.external_url}
+                                            </a>
+                                        </div>
+                                        <button className="item-remove-btn" onClick={() => handleDeleteNewsDraft(news.id)}>
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </section>
 
-                    <section className="bg-white p-8 rounded-[32px] shadow-xl shadow-gray-200/50 mb-8">
-                        <h2 className="text-xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-                            <span className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                                <Play size={20} />
-                            </span>
-                            ショート動画の選択
-                        </h2>
-                        <p className="text-gray-500 text-sm mb-6 ml-12">ホームに表示するショート動画を選択してください。</p>
-                        <div className="video-scroll-list">
+                    <section className="admin-content-section">
+                        <div className="section-header">
+                            <div className="section-icon-bg video-accent">
+                                <Play size={20} fill="currentColor" />
+                            </div>
+                            <div className="section-header-text">
+                                <h2 className="section-title">ショート動画の選択</h2>
+                                <p className="section-subtitle">ホームに表示するショート動画を選択してください。</p>
+                            </div>
+                        </div>
+
+                        <div className="video-grid-layout">
                             {videos.map((video) => (
                                 <div
                                     key={video.id}
-                                    className={`video-card ${video.is_short ? 'selected ring-2 ring-[#84cc16]' : ''} ${video.isModified ? 'modified' : ''}`}
+                                    className={`video-selection-card ${video.is_short ? 'is-selected' : ''} ${video.isModified ? 'is-modified' : ''}`}
                                     onClick={() => toggleShortDraft(video.id)}
                                 >
-                                    <div className="video-thumb-wrapper">
+                                    <div className="video-preview-wrapper">
                                         <img src={video.thumb} alt={video.title} />
-                                        {video.is_short && <div className="video-overlay"><CheckCircle color="white" fill="#84cc16" /></div>}
-                                        {!video.is_short && <div className="video-overlay"><Circle color="white" /></div>}
+                                        <div className="selection-indicator">
+                                            {video.is_short ? (
+                                                <CheckCircle size={24} fill="#84cc16" color="white" />
+                                            ) : (
+                                                <Circle size={24} color="#CBD5E1" />
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="video-info p-3">
-                                        <p className="video-title text-sm font-bold text-gray-700 line-clamp-2">{video.title}</p>
-                                        <p className="video-author text-xs text-gray-400 mt-1">{video.user}</p>
+                                    <div className="video-card-footer">
+                                        <span className="v-author">事務局</span>
+                                        <p className="v-title">{video.title}</p>
                                     </div>
                                 </div>
                             ))}
@@ -275,6 +296,7 @@ const HomeAdminPage = () => {
             <Navigation activeTab="mypage" />
         </div>
     );
+
 };
 
 export default HomeAdminPage;

@@ -256,8 +256,7 @@ const Posts = () => {
           <Header />
           <div
             ref={scrollContainerRef}
-            className="posts-content p-4 overflow-y-auto"
-            style={{ height: 'calc(100vh - 120px)' }}
+            className="posts-content px-4 pt-[72px] pb-[100px]"
           >
             <h2 className="text-xl font-bold mb-4">
               {tag ? `#${tag} の詳細` : "投稿一覧"}

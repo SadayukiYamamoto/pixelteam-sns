@@ -55,7 +55,7 @@ const Home = () => {
         <div className="home-wrapper">
           <Header />
 
-          <div className="overflow-y-auto" style={{ height: 'calc(100vh - 120px)', backgroundColor: '#f9fafb', paddingBottom: '100px' }}>
+          <div className="pt-[72px]" style={{ backgroundColor: '#f9fafb', paddingBottom: '100px' }}>
             <MainContent setActiveTab={setActiveTab} />
           </div>
 

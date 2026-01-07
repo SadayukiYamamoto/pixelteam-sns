@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search } from 'lucide-react';
+import { FiSearch, FiPlay } from 'react-icons/fi';
 import Header from '../components/Header';
 import Navigation from '../components/Navigation';
+import "../admin/AdminCommon.css";
 
 const VideoWatchAnalysisPage = () => {
     const [logs, setLogs] = useState([]);
@@ -44,7 +45,6 @@ const VideoWatchAnalysisPage = () => {
         fetchLogs();
     };
 
-    // 秒数を "mm:ss" 形式などに変換
     const formatTime = (seconds) => {
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
@@ -53,7 +53,6 @@ const VideoWatchAnalysisPage = () => {
         return `${m}m ${s}s`;
     };
 
-    // ログを動画ごとにグループ化
     const groupedLogs = React.useMemo(() => {
         const groups = {};
         logs.forEach(log => {
@@ -76,7 +75,6 @@ const VideoWatchAnalysisPage = () => {
             if (logDate > group.maxDate) group.maxDate = logDate;
         });
 
-        // 視聴時間の長い順にソート
         return Object.values(groups).sort((a, b) => b.totalWatchTime - a.totalWatchTime);
     }, [logs]);
 
@@ -88,132 +86,130 @@ const VideoWatchAnalysisPage = () => {
     };
 
     const formatDateShort = (date) => {
-        return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleDateString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' });
     };
 
     return (
-        <div className="home-container">
+        <div className="admin-page-container">
+            <Header />
             <div className="admin-wrapper">
-                <Header title="視聴データ分析" />
-                <div className="max-w-7xl mx-auto p-4 md:p-10">
-
-                    <div className="mb-8">
-                        <h1 className="text-2xl font-bold text-gray-800">動画視聴ログ詳細</h1>
-                        <p className="text-gray-500 text-sm mt-1">
-                            誰がいつ、どの動画をどのくらい視聴したかを確認できます。
-                        </p>
-                    </div>
+                <div className="admin-page-content">
+                    <header className="admin-page-header">
+                        <h1>動画視聴ログ詳細</h1>
+                        <p>誰がいつ、どの動画をどのくらい視聴したかを確認できます。</p>
+                    </header>
 
                     {/* フィルター */}
-                    <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 mb-8">
-                        <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-6 items-end flex-wrap">
-
-                            <div className="w-full md:w-48">
-                                <label className="block text-xs font-black text-gray-400 mb-1.5 ml-1 uppercase tracking-widest">ユーザーID</label>
-                                <input
-                                    type="text"
-                                    placeholder="User ID"
-                                    className="w-full px-4 py-3 rounded-2xl outline-none transition-all bg-gray-50/50 focus:bg-white text-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] border-none"
-                                    value={filters.user_id}
-                                    onChange={e => setFilters({ ...filters, user_id: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="w-full md:w-64">
-                                <label className="block text-xs font-black text-gray-400 mb-1.5 ml-1 uppercase tracking-widest">動画タイトル</label>
-                                <input
-                                    type="text"
-                                    placeholder="動画タイトル"
-                                    className="w-full px-4 py-3 rounded-2xl outline-none transition-all bg-gray-50/50 focus:bg-white text-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] border-none"
-                                    value={filters.video_title}
-                                    onChange={e => setFilters({ ...filters, video_title: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="w-full md:w-auto flex items-center gap-2">
+                    <div className="premium-card mb-10 p-10" style={{ borderRadius: '40px' }}>
+                        <form onSubmit={handleSearch} className="space-y-6">
+                            <div className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-black text-gray-400 mb-1.5 ml-1 uppercase tracking-widest">開始日</label>
+                                    <label className="block text-[11px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">ユーザーID</label>
                                     <input
-                                        type="date"
-                                        className="w-[145px] px-3 py-3 rounded-2xl outline-none transition-all bg-gray-50/50 focus:bg-white text-[11px] shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] border-none"
-                                        value={filters.start_date}
-                                        onChange={e => setFilters({ ...filters, start_date: e.target.value })}
+                                        type="text"
+                                        placeholder="User ID"
+                                        className="w-full px-6 py-4 rounded-[20px] outline-none transition-all bg-gray-50/50 focus:bg-white text-sm shadow-inner border-none"
+                                        value={filters.user_id}
+                                        onChange={e => setFilters({ ...filters, user_id: e.target.value })}
                                     />
                                 </div>
-                                <span className="text-gray-300 mt-6 text-sm">~</span>
                                 <div>
-                                    <label className="block text-xs font-black text-gray-400 mb-1.5 ml-1 uppercase tracking-widest">終了日</label>
+                                    <label className="block text-[11px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">動画タイトル</label>
                                     <input
-                                        type="date"
-                                        className="w-[145px] px-3 py-3 rounded-2xl outline-none transition-all bg-gray-50/50 focus:bg-white text-[11px] shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] border-none"
-                                        value={filters.end_date}
-                                        onChange={e => setFilters({ ...filters, end_date: e.target.value })}
+                                        type="text"
+                                        placeholder="動画タイトル"
+                                        className="w-full px-6 py-4 rounded-[20px] outline-none transition-all bg-gray-50/50 focus:bg-white text-sm shadow-inner border-none"
+                                        value={filters.video_title}
+                                        onChange={e => setFilters({ ...filters, video_title: e.target.value })}
                                     />
                                 </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[11px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">開始日</label>
+                                        <input
+                                            type="date"
+                                            className="w-full px-6 py-4 rounded-[20px] outline-none transition-all bg-gray-50/50 focus:bg-white text-sm shadow-inner border-none"
+                                            value={filters.start_date}
+                                            onChange={e => setFilters({ ...filters, start_date: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-black text-gray-400 mb-2 uppercase tracking-widest ml-1">終了日</label>
+                                        <input
+                                            type="date"
+                                            className="w-full px-6 py-4 rounded-[20px] outline-none transition-all bg-gray-50/50 focus:bg-white text-sm shadow-inner border-none"
+                                            value={filters.end_date}
+                                            onChange={e => setFilters({ ...filters, end_date: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
                             </div>
-
                             <button
                                 type="submit"
-                                className="w-full md:w-auto px-10 py-3.5 bg-[#84cc16] hover:bg-[#a3e635] text-white font-black rounded-2xl shadow-lg shadow-lime-200/50 hover:shadow-xl hover:shadow-lime-300/50 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest text-xs border-none"
+                                className="w-full py-4 bg-accent hover:bg-lime-500 text-white font-black rounded-[24px] shadow-lg shadow-lime-200/50 hover:shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest text-sm border-none"
                             >
-                                <Search size={18} /> 検索
+                                <FiSearch size={20} /> 検索
                             </button>
                         </form>
                     </div>
+
                     {/* 集計済みテーブル */}
-                    <div className="bg-white rounded-[32px] shadow-xl shadow-gray-200/50 overflow-hidden border-none overflow-hidden mb-12">
-                        <div className="p-6 border-b border-gray-50 flex justify-between items-center bg-white/50 backdrop-blur-sm">
-                            <span className="text-sm font-black text-gray-600 uppercase tracking-widest">
-                                集計済データ: <span className="text-[#84cc16] text-lg">{groupedLogs.length}</span> 動画
+                    <div className="premium-card" style={{ borderRadius: '40px' }}>
+                        <div className="p-8 px-10 border-b border-gray-50 flex justify-between items-center bg-white/50 backdrop-blur-sm">
+                            <span className="text-[13px] font-black text-gray-400 uppercase tracking-widest">
+                                集計済データ: <span className="text-accent text-lg mx-1">{groupedLogs.length}</span> 動画
                             </span>
-                            <div className="text-sm text-gray-500 font-bold">
-                                合計視聴時間: <span className="font-mono text-gray-800 ml-1 bg-gray-50 px-3 py-1 rounded-full shadow-inner">
+                            <div className="text-[12px] text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                                合計視聴時間:
+                                <span className="font-black text-white ml-1 bg-[#475569] px-4 py-1.5 rounded-full shadow-lg">
                                     {formatTime(groupedLogs.reduce((acc, g) => acc + g.totalWatchTime, 0))}
                                 </span>
                             </div>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                        <div className="premium-table-container">
+                            <table className="premium-table">
                                 <thead>
-                                    <tr className="bg-gray-50/30 text-gray-400 text-[10px] font-black uppercase tracking-[0.2em] border-b border-gray-50">
-                                        <th className="p-5 pl-8 font-black w-5/12">動画タイトル</th>
-                                        <th className="p-5 font-black w-3/12">合計視聴時間</th>
-                                        <th className="p-5 font-black w-4/12">期間 (最初 ~ 最新)</th>
+                                    <tr>
+                                        <th className="p-6 pl-10 font-bold text-[11px] text-gray-400 uppercase tracking-widest border-none">動画タイトル</th>
+                                        <th className="p-6 font-bold text-[11px] text-gray-400 uppercase tracking-widest border-none">合計視聴時間</th>
+                                        <th className="p-6 font-bold text-[11px] text-gray-400 uppercase tracking-widest border-none">期間 (最初 - 最新)</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100 text-sm">
+                                <tbody>
                                     {groupedLogs.map(group => (
                                         <React.Fragment key={group.title}>
-                                            {/* 親行 */}
                                             <tr
-                                                className="hover:bg-lime-50/30 transition-all cursor-pointer bg-white"
+                                                className="hover:bg-gray-50/50 transition-all cursor-pointer border-b border-gray-50 last:border-none"
                                                 onClick={() => toggleGroup(group.title)}
                                             >
-                                                <td className="p-5 pl-8 font-bold text-gray-700 flex items-center gap-3">
-                                                    <span className={`transform transition-transform duration-300 text-[#84cc16] ${expandedGroups[group.title] ? 'rotate-90' : ''}`}>
-                                                        ▶
-                                                    </span>
-                                                    {group.title}
+                                                <td className="p-6 pl-10 font-bold text-gray-700 flex items-center gap-3">
+                                                    <FiPlay
+                                                        size={14}
+                                                        className={`text-accent fill-accent transition-transform duration-300 ${expandedGroups[group.title] ? 'rotate-90' : ''}`}
+                                                    />
+                                                    <span className="text-sm font-black">{group.title}</span>
                                                 </td>
-                                                <td className="p-5 text-gray-800 font-black font-mono">
+                                                <td className="p-6 text-gray-800 font-black text-sm">
                                                     {formatTime(group.totalWatchTime)}
                                                 </td>
-                                                <td className="p-5 text-gray-400 text-xs font-mono font-bold tracking-tighter">
-                                                    {formatDateShort(group.minDate).split(" ")[0]} - {formatDateShort(group.maxDate).split(" ")[0]}
+                                                <td className="p-6 text-gray-400 text-[11px] font-bold tracking-tight">
+                                                    {formatDateShort(group.minDate)} - {formatDateShort(group.maxDate)}
                                                 </td>
                                             </tr>
-                                            {/* 子行 (展開時) */}
                                             {expandedGroups[group.title] && group.logs.map((log, idx) => (
-                                                <tr key={idx} className="bg-gray-50/50 hover:bg-gray-100/50 transition-colors border-b border-gray-100/30 last:border-0">
-                                                    <td className="p-3 pl-14 text-xs text-gray-500 font-bold flex items-center gap-2">
+                                                <tr key={idx} className="bg-gray-50/50 hover:bg-white transition-colors border-b border-gray-100 last:border-none group">
+                                                    <td className="p-4 pl-16 text-[12px] text-gray-500 font-bold flex items-center gap-3">
                                                         <span className="text-gray-300">└</span>
-                                                        {new Date(log.last_watched_at).toLocaleString()}
+                                                        <div className="flex flex-col">
+                                                            <span className="text-gray-400 text-[10px] uppercase font-black">User ID</span>
+                                                            <span className="group-hover:text-accent transition-colors">{log.user}</span>
+                                                        </div>
                                                     </td>
-                                                    <td className="p-3 text-gray-600 font-black text-xs">
-                                                        {log.user}
-                                                    </td>
-                                                    <td className="p-3 text-gray-400 font-mono text-xs">
+                                                    <td className="p-4 text-gray-600 font-black text-[12px]">
                                                         {formatTime(log.watch_time)}
+                                                    </td>
+                                                    <td className="p-4 text-gray-400 font-bold text-[11px]">
+                                                        {new Date(log.last_watched_at).toLocaleString('ja-JP')}
                                                     </td>
                                                 </tr>
                                             ))}
@@ -221,8 +217,8 @@ const VideoWatchAnalysisPage = () => {
                                     ))}
                                     {groupedLogs.length === 0 && !loading && (
                                         <tr>
-                                            <td colSpan="3" className="p-16 text-center text-gray-400 font-bold">
-                                                データが見つかりませんでした
+                                            <td colSpan="3" className="p-32 text-center text-gray-300 font-black uppercase tracking-widest">
+                                                No logs found
                                             </td>
                                         </tr>
                                     )}

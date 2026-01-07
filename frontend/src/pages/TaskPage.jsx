@@ -18,31 +18,25 @@ const BusinessCard = ({ item }) => {
   // item.icon_name から Lucide アイコンを取得
   const Icon = LucideIcons[item.icon_name] || LucideIcons.HelpCircle;
 
-  // アイコン用の鮮やかなカラー配列
-  const themes = [
-    { color: '#3b82f6' }, // blue
-    { color: '#ec4899' }, // pink
-    { color: '#f59e0b' }, // amber
-    { color: '#10b981' }, // emerald
-    { color: '#8b5cf6' }, // purple
-    { color: '#06b6d4' }, // cyan
-    { color: '#f97316' }, // orange
-    { color: '#ef4444' }, // red
-    { color: '#6366f1' }, // indigo
-    { color: '#84cc16' }  // lime
-  ];
-
-  const getThemeIndex = () => {
-    try {
-      const idPart = typeof item.id === 'number' ? item.id : (item.id?.length || 0);
-      const titlePart = item.title?.length || 0;
-      return Math.abs(idPart + titlePart) % themes.length;
-    } catch (e) {
-      return 0;
-    }
+  // アイコン用のカラーマッピング（管理画面の COLOR_OPTIONS と同期）
+  const colorMap = {
+    "text-gray-800": "#1e293b",
+    "text-red-500": "#ef4444",
+    "text-blue-500": "#3b82f6",
+    "text-green-500": "#10b981",
+    "text-yellow-500": "#f59e0b",
+    "text-purple-500": "#a855f7",
+    "text-pink-500": "#ec4899",
+    "text-cyan-500": "#06b6d4",
+    // 予備の古いカラー値用
+    "text-emerald-500": "#10b981",
   };
 
-  const theme = themes[getThemeIndex()] || themes[0];
+  const getIconColor = () => {
+    return colorMap[item.color] || "#1e293b"; // デフォルトは黒
+  };
+
+  const iconColor = getIconColor();
 
   const triggerMission = async (actionType, actionDetail = null) => {
     try {
@@ -90,7 +84,7 @@ const BusinessCard = ({ item }) => {
         <Icon
           size={34}
           strokeWidth={2.4}
-          style={{ color: theme.color, stroke: theme.color }}
+          style={{ color: iconColor, stroke: iconColor }}
         />
       </div>
 
@@ -182,8 +176,7 @@ const TaskPage = () => {
         <Header />
 
         <div
-          className="overflow-y-auto p-5 pb-100 bg-[#f9fafb]"
-          style={{ height: "calc(100vh - 120px)" }}
+          className="pt-[72px] px-5 pb-[100px] bg-[#f9fafb]"
         >
           <div className="flex justify-center -mb-6 pt-6 relative z-10">
             <div className="pokepoke-label px-8 shadow-lg scale-110">

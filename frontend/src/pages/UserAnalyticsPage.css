@@ -1,0 +1,203 @@
+/* --- UserAnalyticsPage.css --- */
+
+.user-analytics-container {
+    background-color: #F8FAFC;
+    min-height: 100vh;
+}
+
+.user-analytics-wrapper {
+    max-width: 1400px;
+    /* Wider for analytics */
+    margin: 0 auto;
+    padding: 60px 24px 120px;
+}
+
+.user-analytics-header {
+    margin-bottom: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.user-analytics-header h1 {
+    font-size: 32px;
+    font-weight: 900;
+    color: #111827;
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
+}
+
+.user-analytics-header p {
+    font-size: 15px;
+    font-weight: 600;
+    color: #94A3B8;
+    margin: 0;
+}
+
+.analytics-summary-text {
+    font-size: 14px;
+    font-weight: 800;
+    color: #64748B;
+}
+
+.analytics-summary-text span {
+    font-size: 18px;
+}
+
+/* Premium Card */
+.analytics-card {
+    background: #FFFFFF;
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 20px 40px -10px rgba(0, 0, 0, 0.03);
+    border: 1px solid #F1F5F9;
+}
+
+.analytics-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.analytics-table th {
+    background: #FFFFFF;
+    padding: 24px 20px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 800;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1.5px solid #F8FAFC;
+    white-space: nowrap;
+}
+
+.analytics-table th.text-center {
+    text-align: center;
+}
+
+.analytics-table td {
+    padding: 24px 20px;
+    border-bottom: 1.5px solid #F8FAFC;
+    vertical-align: middle;
+}
+
+.analytics-table tr:last-child td {
+    border-bottom: none;
+}
+
+.analytics-table tr:hover td {
+    background: #FDFDFD;
+}
+
+/* Cell Specifics */
+.rank-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.rank-badge.top-3 {
+    background: #FEF9C3;
+    color: #A16207;
+}
+
+.rank-badge.others {
+    background: #F1F5F9;
+    color: #94A3B8;
+}
+
+.user-name-cell {
+    font-size: 15px;
+    font-weight: 900;
+    color: #1E293B;
+    margin-bottom: 2px;
+}
+
+.user-id-cell {
+    font-size: 12px;
+    font-weight: 700;
+    color: #CBD5E1;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.shop-badge {
+    padding: 8px 16px;
+    background: #F1F5F9;
+    color: #64748B;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.4;
+    display: inline-block;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 900;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.stat-value.zero {
+    color: #E2E8F0;
+}
+
+.stat-value.highlight-green {
+    color: #16A34A;
+}
+
+.stat-value.highlight-blue {
+    color: #2563EB;
+}
+
+.watch-time-cell {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-weight: 700;
+    color: #475569;
+}
+
+.watch-time-seconds {
+    font-size: 12px;
+    color: #CBD5E1;
+    margin-left: 4px;
+}
+
+/* Sort Button */
+.sort-trigger-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: #F1F5F9;
+    color: #94A3B8;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    margin-left: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.sort-trigger-btn.active {
+    background: #84CC16;
+    color: white;
+}
+
+.sort-trigger-btn:hover {
+    background: #E2E8F0;
+}
+
+.sort-trigger-btn.active:hover {
+    background: #65A30D;
+}

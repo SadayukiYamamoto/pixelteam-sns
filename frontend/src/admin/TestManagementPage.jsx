@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { FaGamepad, FaEdit, FaPlus, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FiPlus, FiEdit3 } from "react-icons/fi";
+import { HiCheckCircle, HiXCircle } from "react-icons/hi"; // Solid icons for better match
+import { FaGamepad } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 import Header from "../components/Header";
 import Navigation from "../components/Navigation";
+import "./AdminCommon.css";
 
 export default function TestManagementPage() {
     const [videos, setVideos] = useState([]);
@@ -29,87 +33,177 @@ export default function TestManagementPage() {
     };
 
     return (
-        <div className="bg-gray-50 min-h-screen pb-32">
+        <div className="admin-page-container min-h-screen bg-[#F8FAFC]">
             <Header />
-            <div className="max-w-7xl mx-auto p-6 pt-10">
-                <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <span className="p-2 bg-green-100 text-green-600 rounded-lg">
-                            <FaGamepad />
-                        </span>
-                        テスト管理
-                    </h2>
-                    <Link
-                        to="/tests/create"
-                        className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full shadow-md transition transform hover:-translate-y-0.5 flex items-center gap-2"
-                    >
-                        <FaPlus /> 新規作成
-                    </Link>
-                </div>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.99 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="admin-wrapper py-20 px-10"
+            >
+                <div className="max-w-[1180px] mx-auto">
 
-                <div className="bg-white rounded-[32px] shadow-lg border-none overflow-hidden">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
-                                <th className="p-4 w-1/4">サムネイル</th>
-                                <th className="p-4 w-1/3">動画タイトル</th>
-                                <th className="p-4 w-1/6 text-center">ステータス</th>
-                                <th className="p-4 w-1/6 text-right">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {videos.map((video) => (
-                                <tr key={video.id} className="hover:bg-green-50/10 transition-colors">
-                                    <td className="p-4">
-                                        {video.thumb ? (
-                                            <img
-                                                src={video.thumb}
-                                                alt={video.title}
-                                                className="w-32 h-20 object-cover rounded-lg shadow-sm"
-                                            />
-                                        ) : (
-                                            <div className="w-32 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-xs">
-                                                No Image
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="font-bold text-gray-800 text-lg mb-1">{video.title}</div>
-                                        <div className="text-xs text-gray-400 font-mono">ID: {video.id}</div>
-                                    </td>
-                                    <td className="p-4 text-center">
-                                        {video.has_test ? (
-                                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">
-                                                <FaCheckCircle /> 作成済み
-                                            </span>
-                                        ) : (
-                                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-sm font-bold">
-                                                <FaTimesCircle /> 未作成
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="p-4 text-right">
-                                        <button
-                                            onClick={() => navigate(`/tests/edit/${video.id}`)}
-                                            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl transition-colors font-bold shadow-sm"
-                                        >
-                                            <FaEdit className="text-green-500" />
-                                            {video.has_test ? "編集" : "作成"}
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {videos.length === 0 && !loading && (
-                                <tr>
-                                    <td colSpan="4" className="p-10 text-center text-gray-400">
-                                        動画が見つかりません
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                    {/* Header Area - Repositioned Higher & Clear of Table */}
+                    <div className="flex justify-between items-center mb-28">
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-5">
+                                <h1 className="text-4xl font-black text-[#111827] tracking-tight">テスト管理</h1>
+                                <div className="w-12 h-12 bg-[#DCFCE7] text-[#22C55E] rounded-2xl flex items-center justify-center border border-[#BBF7D0] shadow-sm">
+                                    <FaGamepad size={24} />
+                                </div>
+                            </div>
+                            <p className="text-[#94A3B8] text-[15px] font-bold mt-4 tracking-wide opacity-80">動画に紐づくテストデータの作成と編集が行えます。</p>
+                        </div>
+
+                        <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <Link
+                                to="/tests/create"
+                                className="bg-[#22C55E] hover:bg-[#16A34A] text-white font-black shadow-[0_20px_50px_-10px_rgba(34,197,94,0.4)] transition-all border-none whitespace-nowrap"
+                                style={{
+                                    borderRadius: '16px',
+                                    padding: '12px 40px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '16px',
+                                    fontSize: '17px',
+                                    minWidth: 'max-content'
+                                }}
+                            >
+                                <FiPlus size={28} className="stroke-[4]" />
+                                <span>新規作成</span>
+                            </Link>
+                        </motion.div>
+                    </div>
+
+                    {/* Table Container - Clean & Airy */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2, duration: 0.6 }}
+                        className="bg-white rounded-[48px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.06)] border border-[#F1F5F9] overflow-hidden"
+                    >
+                        <div className="overflow-x-auto">
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr className="border-b border-[#F1F5F9] bg-[#F9FAFB]">
+                                        <th className="py-12 px-6 text-center text-[12px] font-black text-[#94A3B8] uppercase tracking-[0.3em] w-[240px]">サムネイル</th>
+                                        <th className="py-12 px-6 text-center text-[12px] font-black text-[#94A3B8] uppercase tracking-[0.3em]">動画タイトル</th>
+                                        <th className="py-12 px-6 text-center text-[12px] font-black text-[#94A3B8] uppercase tracking-[0.3em] w-[220px]">ステータス</th>
+                                        <th className="py-12 px-6 text-center text-[12px] font-black text-[#94A3B8] uppercase tracking-[0.3em] w-[200px]">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-[#F1F5F9]">
+                                    <AnimatePresence>
+                                        {videos.map((video, index) => (
+                                            <motion.tr
+                                                key={video.id}
+                                                initial={{ opacity: 0, y: 15 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: 0.1 + (0.05 * index) }}
+                                                className="hover:bg-[#F9FAFB]/50 transition-colors group/row"
+                                            >
+                                                <td className="py-16 px-6">
+                                                    <div className="flex justify-center">
+                                                        <div className="w-[180px] h-[100px] rounded-[28px] overflow-hidden bg-gray-50 border border-[#F1F5F9] transition-transform duration-300 group-hover/row:scale-[1.02]">
+                                                            {video.thumb ? (
+                                                                <img
+                                                                    src={video.thumb}
+                                                                    alt={video.title}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-[#CBD5E1] text-[12px] font-bold uppercase tracking-widest">
+                                                                    Empty
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="py-16 px-6">
+                                                    <div className="flex flex-col items-center text-center">
+                                                        <div className="font-bold text-[#1F2937] text-2xl leading-tight mb-3 group-hover/row:text-[#22C55E] transition-colors duration-300">{video.title}</div>
+                                                        <div className="text-[12px] text-[#94A3B8] font-bold tracking-widest uppercase opacity-60 bg-[#F1F5F9] px-4 py-2 rounded-xl">ID: {video.id}</div>
+                                                    </div>
+                                                </td>
+                                                <td className="py-16 px-6 text-center">
+                                                    <div className="flex justify-center">
+                                                        {video.has_test ? (
+                                                            <div
+                                                                className="bg-[#DCFCE7] text-[#15803D] font-black border border-[#BBF7D0] shadow-sm justify-center"
+                                                                style={{
+                                                                    padding: '12px 32px',
+                                                                    borderRadius: '14px',
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '12px',
+                                                                    fontSize: '14px',
+                                                                    minWidth: '130px'
+                                                                }}
+                                                            >
+                                                                <HiCheckCircle size={20} className="text-[#22C55E]" />
+                                                                <span>作成済み</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div
+                                                                className="bg-[#F1F5F9] text-[#64748B] font-black border border-[#E2E8F0] shadow-sm justify-center"
+                                                                style={{
+                                                                    padding: '12px 32px',
+                                                                    borderRadius: '14px',
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '12px',
+                                                                    fontSize: '14px',
+                                                                    minWidth: '130px'
+                                                                }}
+                                                            >
+                                                                <HiXCircle size={20} className="text-[#94A3B8]" />
+                                                                <span>未作成</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="py-16 px-6 text-center">
+                                                    <div className="flex justify-center">
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => navigate(`/tests/edit/${video.id}`)}
+                                                            className="bg-white border border-[#E5E7EB] hover:border-[#22C55E] hover:text-[#22C55E] text-[#475569] font-black shadow-sm group/btn justify-center"
+                                                            style={{
+                                                                padding: '12px 32px',
+                                                                borderRadius: '14px',
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                gap: '12px',
+                                                                fontSize: '14px',
+                                                                minWidth: '110px'
+                                                            }}
+                                                        >
+                                                            <FiEdit3 size={18} className="text-[#22C55E] stroke-[2.5]" />
+                                                            <span>{video.has_test ? "編集" : "作成"}</span>
+                                                        </motion.button>
+                                                    </div>
+                                                </td>
+                                            </motion.tr>
+                                        ))}
+                                    </AnimatePresence>
+                                    {videos.length === 0 && !loading && (
+                                        <tr>
+                                            <td colSpan="4" className="py-80 text-center text-[#CBD5E1] font-black uppercase tracking-[0.4em] text-xl opacity-40">
+                                                No videos found
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </motion.div>
                 </div>
-            </div>
+            </motion.div>
             <Navigation activeTab="mypage" />
         </div>
     );

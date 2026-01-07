@@ -1,128 +1,131 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import Header from '../../components/Header';
-import Navigation from '../../components/Navigation';
-import { Plus, Trash2, ChevronLeft, Award } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || "";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Header from "../../components/Header";
+import Navigation from "../../components/Navigation";
+import "../../admin/AdminCommon.css";
+import { FiPlus, FiTrash2, FiAward, FiChevronLeft, FiPlusCircle } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import "./AdminLevelRewards.css";
 
 const AdminLevelRewards = () => {
+    const navigate = useNavigate();
     const [rewards, setRewards] = useState([]);
     const [badges, setBadges] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showAddForm, setShowAddForm] = useState(false);
-    const [newLevel, setNewLevel] = useState('');
-    const [newBadgeId, setNewBadgeId] = useState('');
+    const [isFormVisible, setIsFormVisible] = useState(false);
 
-    const navigate = useNavigate();
+    // Form state for adding new reward
+    const [newReward, setNewReward] = useState({
+        level: "",
+        badge_id: ""
+    });
 
     useEffect(() => {
         fetchData();
     }, []);
 
     const fetchData = async () => {
-        const token = localStorage.getItem("token");
         try {
+            setLoading(true);
+            const token = localStorage.getItem("token");
+            const headers = { Authorization: `Token ${token}` };
+
             const [rewardsRes, badgesRes] = await Promise.all([
-                axios.get(`${API_URL}/api/missions/admin/level-rewards/`, {
-                    headers: { Authorization: `Token ${token}` },
-                }),
-                axios.get(`${API_URL}/api/admin/badges/`, {
-                    headers: { Authorization: `Token ${token}` },
-                })
+                axios.get("/api/admin/level-rewards/", { headers }),
+                axios.get("/api/admin/badges/list/", { headers })
             ]);
-            setRewards(rewardsRes.data);
+
+            setRewards(rewardsRes.data.sort((a, b) => a.level - b.level));
             setBadges(badgesRes.data);
-            setLoading(false);
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error("Error fetching level reward data:", error);
+        } finally {
             setLoading(false);
         }
     };
 
-    const handleAddReward = async () => {
-        if (!newLevel || !newBadgeId) return;
-        const token = localStorage.getItem("token");
+    const handleAddReward = async (e) => {
+        e.preventDefault();
+        if (!newReward.level || !newReward.badge_id) return;
+
         try {
-            await axios.post(`${API_URL}/api/missions/admin/level-rewards/`,
-                { level: parseInt(newLevel), badge: parseInt(newBadgeId) },
-                { headers: { Authorization: `Token ${token}` } }
-            );
-            setNewLevel('');
-            setNewBadgeId('');
-            setShowAddForm(false);
+            const token = localStorage.getItem("token");
+            await axios.post("/api/admin/level-rewards/", newReward, {
+                headers: { Authorization: `Token ${token}` }
+            });
+            setNewReward({ level: "", badge_id: "" });
+            setIsFormVisible(false);
             fetchData();
-            alert("報酬を追加しました");
-        } catch (err) {
-            console.error(err);
-            alert("追加に失敗しました。このレベルの報酬は既に存在する可能性があります。");
+            alert("レベル報酬を追加しました");
+        } catch (error) {
+            console.error("Error adding reward:", error);
+            alert("追加に失敗しました。このレベルには既に報酬が設定されている可能性があります。");
         }
     };
 
-    const handleDeleteReward = async (id) => {
-        if (!window.confirm("この報酬を削除しますか？")) return;
-        const token = localStorage.getItem("token");
+    const handleDelete = async (id) => {
+        if (!window.confirm("この報酬設定を削除しますか？")) return;
         try {
-            await axios.delete(`${API_URL}/api/missions/admin/level-rewards/${id}/`, {
-                headers: { Authorization: `Token ${token}` },
+            const token = localStorage.getItem("token");
+            await axios.delete(`/api/admin/level-rewards/${id}/`, {
+                headers: { Authorization: `Token ${token}` }
             });
             fetchData();
-        } catch (err) {
-            console.error(err);
-            alert("削除に失敗しました");
+        } catch (error) {
+            console.error("Error deleting reward:", error);
         }
     };
 
     return (
-        <div className="home-container">
-            <div className="admin-wrapper">
-                <Header title="レベルバッジ報酬管理" />
-                <div className="max-w-2xl mx-auto px-4 pt-6 pb-24">
-                    <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => navigate('/admin')}
-                                className="p-2 hover:bg-white rounded-full transition-colors border-none bg-transparent"
-                            >
-                                <ChevronLeft size={24} />
+        <div className="admin-page-container">
+            <Header title="管理" />
+            <div className="admin-wrapper bg-[#f8fafc]">
+                <div className="level-rewards-container">
+
+                    {/* Header */}
+                    <div className="level-rewards-header">
+                        <div className="header-left-area">
+                            <button onClick={() => navigate(-1)} className="back-btn-minimal">
+                                <FiChevronLeft size={28} />
                             </button>
-                            <div>
-                                <h1 className="text-2xl font-black text-slate-800">レベルバッジ報酬</h1>
-                                <p className="text-slate-500 text-sm">特定のレベル到達時に付与されるバッジを管理</p>
+                            <div className="header-text">
+                                <h1>レベルバッジ報酬</h1>
+                                <p>特定のレベル到達時に付与されるバッジを管理</p>
                             </div>
                         </div>
                         <button
-                            onClick={() => setShowAddForm(!showAddForm)}
-                            className="bg-pink-500 text-white p-3 rounded-full border-none shadow-lg hover:bg-pink-600 transition-colors"
+                            className="add-main-btn"
+                            onClick={() => setIsFormVisible(!isFormVisible)}
                         >
-                            <Plus size={24} />
+                            <FiPlus size={24} strokeWidth={3} />
                         </button>
                     </div>
 
-                    {showAddForm && (
-                        <div className="bg-white rounded-2xl p-6 shadow-md border border-pink-100 mb-8 animate-in fade-in slide-in-from-top-4 duration-300">
-                            <h2 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                <Plus size={20} className="text-pink-500" />
-                                新しい報酬設定
+                    {/* New Reward Form (Toggled) */}
+                    {isFormVisible && (
+                        <div className="premium-form-card">
+                            <h2 className="form-title">
+                                <span><FiPlusCircle /></span> 新しい報酬設定
                             </h2>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">到達レベル</label>
+                            <form onSubmit={handleAddReward}>
+                                <div className="form-group-custom">
+                                    <label>到達レベル</label>
                                     <input
                                         type="number"
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                        className="input-minimal-box"
                                         placeholder="例: 10"
-                                        value={newLevel}
-                                        onChange={(e) => setNewLevel(e.target.value)}
+                                        value={newReward.level}
+                                        onChange={(e) => setNewReward({ ...newReward, level: e.target.value })}
+                                        required
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">付与するバッジ</label>
+                                <div className="form-group-custom">
+                                    <label>付与するバッジ</label>
                                     <select
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500"
-                                        value={newBadgeId}
-                                        onChange={(e) => setNewBadgeId(e.target.value)}
+                                        className="input-minimal-box"
+                                        value={newReward.badge_id}
+                                        onChange={(e) => setNewReward({ ...newReward, badge_id: e.target.value })}
+                                        required
                                     >
                                         <option value="">バッジを選択してください</option>
                                         {badges.map(badge => (
@@ -130,58 +133,44 @@ const AdminLevelRewards = () => {
                                         ))}
                                     </select>
                                 </div>
-                                <button
-                                    onClick={handleAddReward}
-                                    className="w-full bg-pink-500 text-white py-3 rounded-xl border-none font-black shadow-md hover:bg-pink-600 transition-colors mt-2"
-                                >
-                                    設定を保存
-                                </button>
-                            </div>
+                                <button type="submit" className="submit-btn-premium">設定を保存</button>
+                            </form>
                         </div>
                     )}
 
-                    {loading ? (
-                        <div className="flex justify-center py-20">
-                            <div className="animate-spin rounded-full h-8 w-8 border-2 border-pink-500 border-t-transparent"></div>
-                        </div>
-                    ) : (
-                        <div className="grid gap-4">
-                            {rewards.length === 0 ? (
-                                <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
-                                    <Award size={48} className="mx-auto text-slate-200 mb-4" />
-                                    <p className="text-slate-400 font-bold">まだ報酬設定がありません</p>
-                                </div>
-                            ) : (
-                                rewards.map((reward) => (
-                                    <div key={reward.id} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center justify-between transition-transform hover:scale-[1.01]">
-                                        <div className="flex items-center gap-5">
-                                            <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center font-black text-pink-500 text-xl border border-pink-100">
-                                                {reward.level}
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Level Reach Reward</p>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-50 border border-slate-100">
-                                                        <img src={reward.badge_data?.image_url} alt="" className="w-full h-full object-cover" />
-                                                    </div>
-                                                    <p className="font-black text-slate-800 text-lg">{reward.badge_data?.name}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => handleDeleteReward(reward.id)}
-                                            className="p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all border-none bg-transparent"
-                                        >
-                                            <Trash2 size={20} />
-                                        </button>
+                    {/* Reward Cards List */}
+                    <div className="rewards-list-area">
+                        {loading ? (
+                            <div className="p-20 text-center text-gray-400 font-bold">読み込み中...</div>
+                        ) : rewards.length === 0 ? (
+                            <div className="empty-state-dashed">
+                                <div className="empty-icon"><FiAward /></div>
+                                <p>まだ報酬設定がありません</p>
+                            </div>
+                        ) : (
+                            rewards.map(reward => (
+                                <div key={reward.id} className="reward-item-card">
+                                    <div className="level-info-pill">
+                                        LV.{reward.level}
                                     </div>
-                                ))
-                            )}
-                        </div>
-                    )}
+                                    <div className="badge-reward-info">
+                                        <h4>{reward.badge_name}</h4>
+                                        <p>Badge ID: {reward.badge_id.substring(0, 8)}</p>
+                                    </div>
+                                    <button
+                                        className="delete-btn-circle"
+                                        onClick={() => handleDelete(reward.id)}
+                                    >
+                                        <FiTrash2 size={18} />
+                                    </button>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
                 </div>
-                <Navigation activeTab="mypage" />
             </div>
+            <Navigation activeTab="mypage" />
         </div>
     );
 };

@@ -110,7 +110,7 @@ const UserAdminPage = () => {
 
     return (
         <div className="home-container">
-            <div className="home-wrapper">
+            <div className="admin-wrapper">
                 <Header />
                 <div className="admin-content">
                     <h2>ユーザー管理</h2>

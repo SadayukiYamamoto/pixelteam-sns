@@ -148,86 +148,119 @@ export default function NoticeAdminEditor() {
   };
 
   return (
-    <div className="home-container">
+    <div className="notice-editor-container">
+      <Header title={isEdit ? "お知らせ編集" : "お知らせ作成"} />
       <div className="admin-wrapper">
-        <Header title={isEdit ? "お知らせ編集" : "お知らせ作成"} />
-        <div className="max-w-4xl mx-auto pt-10 px-4">
+        <div className="notice-editor-content">
           {!authLoaded ? (
-            <div className="p-10 text-center">読み込み中...</div>
+            <div className="p-10 text-center font-bold text-gray-400">認証情報を読み込み中...</div>
           ) : (
             <>
-              <div className="flex justify-between items-center mb-8">
-                <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                  <span className="text-3xl">📢</span> お知らせ{isEdit ? "編集" : "作成"}
-                </h1>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowPreview(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border-none text-gray-700 font-bold rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-all"
-                  >
-                    <FiEye /> プレビュー
+              <div className="editor-header-bar">
+                <div className="editor-title-area">
+                  <h1>{isEdit ? "お知らせを編集" : "お知らせを作成"}</h1>
+                </div>
+                <div className="editor-actions">
+                  <button onClick={() => setShowPreview(true)} className="action-btn btn-preview">
+                    <FiEye size={18} /> プレビュー
                   </button>
-                  <button
-                    onClick={handleSubmit}
-                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-all hover:shadow-lg transform active:scale-95"
-                  >
-                    <FiSave /> {isEdit ? "更新する" : "公開する"}
+                  <button onClick={handleSubmit} className="action-btn btn-publish">
+                    <FiSave size={18} /> {isEdit ? "更新を保存" : "今すぐ公開"}
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
-                  <div className="bg-white p-6 rounded-2xl shadow-xl shadow-gray-200/40 border-none">
-                    <label className="block text-sm font-bold text-gray-700 mb-2">タイトル <span className="text-red-500">*</span></label>
+              <div className="editor-grid">
+                <main className="editor-main-panel">
+                  <div className="title-input-card">
                     <input
-                      className="w-full text-xl font-bold px-4 py-3 border-none rounded-xl focus:ring-2 focus:ring-blue-100 focus:bg-gray-50/30 outline-none transition-all shadow-inner"
+                      className="title-field"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      placeholder="お知らせのタイトルを入力"
+                      placeholder="お知らせのタイトルを入力してください"
                     />
                   </div>
 
-                  <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/40 border-none overflow-hidden">
-                    <div className="bg-gray-50/50 px-4 py-3 border-b border-gray-50 flex flex-wrap gap-2 items-center">
-                      {editor && (
-                        <>
-                          <button className={`p-2 rounded hover:bg-gray-200 transition-colors ${editor.isActive('bold') ? 'bg-gray-200 text-black' : 'text-gray-600'}`} onClick={() => editor.chain().focus().toggleBold().run()} title="太字">
-                            <FiBold size={18} />
-                          </button>
-                          <button className={`p-2 rounded hover:bg-gray-200 transition-colors ${editor.isActive('underline') ? 'bg-gray-200 text-black' : 'text-gray-600'}`} onClick={() => editor.chain().focus().toggleUnderline().run()} title="下線">
-                            <FiUnderline size={18} />
-                          </button>
-                          <div className="w-px h-6 bg-gray-300 mx-1"></div>
-                          <button className={`p-2 rounded hover:bg-gray-200 transition-colors ${editor.isActive('blockquote') ? 'bg-gray-200 text-black' : 'text-gray-600'}`} onClick={() => editor.chain().focus().toggleBlockquote().run()} title="引用">
-                            <FiMessageSquare size={18} />
-                          </button>
-                          <button className={`p-2 rounded hover:bg-gray-200 transition-colors ${editor.isActive('codeBlock') ? 'bg-gray-200 text-black' : 'text-gray-600'}`} onClick={() => editor.chain().focus().toggleCodeBlock().run()} title="コード">
-                            <FiCode size={18} />
-                          </button>
-                          <button className="p-2 rounded hover:bg-gray-200 transition-colors text-gray-600" onClick={() => {
+                  <div className="premium-tiptap-container">
+                    <div className="tiptap-toolbar">
+                      <div className="toolbar-group">
+                        <button
+                          type="button"
+                          className={`tiptap-btn ${editor && editor.isActive('bold') ? 'is-active' : ''}`}
+                          onClick={() => editor.chain().focus().toggleBold().run()}
+                          title="太字"
+                        >
+                          <FiBold />
+                        </button>
+                        <button
+                          type="button"
+                          className={`tiptap-btn ${editor && editor.isActive('underline') ? 'is-active' : ''}`}
+                          onClick={() => editor.chain().focus().toggleUnderline().run()}
+                          title="下線"
+                        >
+                          <FiUnderline />
+                        </button>
+                      </div>
+
+                      <div className="toolbar-sep"></div>
+
+                      <div className="toolbar-group">
+                        <button
+                          type="button"
+                          className={`tiptap-btn ${editor && editor.isActive('blockquote') ? 'is-active' : ''}`}
+                          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+                          title="引用"
+                        >
+                          <FiMessageSquare />
+                        </button>
+                        <button
+                          type="button"
+                          className={`tiptap-btn ${editor && editor.isActive('codeBlock') ? 'is-active' : ''}`}
+                          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+                          title="コード"
+                        >
+                          <FiCode />
+                        </button>
+                      </div>
+
+                      <div className="toolbar-sep"></div>
+
+                      <div className="toolbar-group">
+                        <button
+                          type="button"
+                          className="tiptap-btn"
+                          onClick={() => {
                             const url = prompt("リンクURLを入力");
                             if (url) editor.chain().focus().setLink({ href: url }).run();
-                          }} title="リンク">
-                            <FiLink size={18} />
-                          </button>
-                          <button className="p-2 rounded hover:bg-gray-200 transition-colors text-gray-600" onClick={triggerImageSelect} title="画像挿入">
-                            <FiImage size={18} />
-                          </button>
-                          <div className="w-px h-6 bg-gray-300 mx-1"></div>
-                          <div className="flex gap-1">
-                            {colors.map(c => (
-                              <button
-                                key={c}
-                                type="button"
-                                className={`w-5 h-5 rounded-full border border-gray-200 transition-transform hover:scale-110 ${editor.isActive('textStyle', { color: c }) ? 'ring-2 ring-offset-1 ring-gray-400' : ''}`}
-                                style={{ background: c }}
-                                onClick={() => editor.chain().focus().setColor(c).run()}
-                              />
-                            ))}
-                          </div>
-                        </>
-                      )}
+                          }}
+                          title="リンク"
+                        >
+                          <FiLink />
+                        </button>
+                        <button
+                          type="button"
+                          className="tiptap-btn"
+                          onClick={triggerImageSelect}
+                          title="画像挿入"
+                        >
+                          <FiImage />
+                        </button>
+                      </div>
+
+                      <div className="toolbar-sep"></div>
+
+                      <div className="toolbar-group flex gap-2 ml-1">
+                        {colors.map(c => (
+                          <button
+                            key={c}
+                            type="button"
+                            className={`tiptap-color-dot ${editor && editor.isActive('textStyle', { color: c }) ? 'is-active' : ''}`}
+                            style={{ background: c }}
+                            onClick={() => editor.chain().focus().setColor(c).run()}
+                          />
+                        ))}
+                      </div>
+
                       <input
                         ref={fileRef}
                         type="file"
@@ -236,17 +269,18 @@ export default function NoticeAdminEditor() {
                         onChange={handleInsertImage}
                       />
                     </div>
-                    <div className="p-6 min-h-[400px]">
-                      <EditorContent editor={editor} className="prose max-w-none focus:outline-none" />
+
+                    <div className="tiptap-editor-content">
+                      <EditorContent editor={editor} className="prose prose-slate max-w-none" />
                     </div>
                   </div>
-                </div>
+                </main>
 
-                <div className="space-y-6">
-                  <div className="bg-white p-5 rounded-2xl shadow-xl shadow-gray-200/40 border-none">
-                    <label className="block text-sm font-bold text-gray-700 mb-3">カテゴリー</label>
+                <aside className="editor-sidebar">
+                  <div className="sidebar-card">
+                    <h3>カテゴリー</h3>
                     <select
-                      className="w-full px-4 py-2.5 border-none rounded-xl focus:ring-2 focus:ring-blue-100 outline-none bg-gray-50 shadow-inner"
+                      className="premium-select"
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                     >
@@ -260,55 +294,49 @@ export default function NoticeAdminEditor() {
                     </select>
                   </div>
 
-                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <label className="block text-sm font-bold text-gray-700 mb-3">ヘッダー画像</label>
-                    <div className="mb-4">
+                  <div className="sidebar-card">
+                    <h3>ヘッダー画像</h3>
+                    <div
+                      className="sidebar-thumb-picker"
+                      onClick={() => document.getElementById('thumb-upload').click()}
+                    >
                       {imageUrl ? (
-                        <div className="relative group rounded-xl overflow-hidden border border-gray-200">
-                          <img src={imageUrl} alt="Thumbnail settings" className="w-full h-auto object-cover" />
-                          <button
-                            onClick={() => document.getElementById('thumb-upload').click()}
-                            className="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity font-bold"
-                          >
-                            変更する
-                          </button>
+                        <div className="sidebar-thumb-preview">
+                          <img src={imageUrl} alt="notice thumnail" />
+                          <div className="thumb-change-overlay">画像を更新する</div>
                         </div>
                       ) : (
-                        <div
-                          onClick={() => document.getElementById('thumb-upload').click()}
-                          className="w-full h-32 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:bg-gray-100 transition-colors"
-                        >
-                          <FiImage size={24} className="mb-2" />
-                          <span className="text-xs font-bold">画像を選択 / D&D</span>
-                        </div>
+                        <>
+                          <FiImage size={28} className="mb-2" />
+                          <span className="text-xs font-bold">サムネイルを設定</span>
+                        </>
                       )}
-                      <input id="thumb-upload" type="file" accept="image/*" onChange={handleThumbnailUpload} className="hidden" />
                     </div>
+                    <input id="thumb-upload" type="file" accept="image/*" onChange={handleThumbnailUpload} className="hidden" />
 
                     {imageUrl && (
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-2">表示位置</label>
-                        <div className="grid grid-cols-2 gap-2">
-                          {["header", "top", "bottom", "hidden"].map((pos) => (
+                      <div className="mt-6">
+                        <h3>表示位置</h3>
+                        <div className="pos-grid">
+                          {[
+                            { id: "header", label: "背景" },
+                            { id: "top", label: "記事上" },
+                            { id: "bottom", label: "記事下" },
+                            { id: "hidden", label: "隠す" }
+                          ].map((pos) => (
                             <button
-                              key={pos}
-                              onClick={() => setImagePosition(pos)}
-                              className={`px-2 py-1.5 text-xs font-bold rounded-lg border transition-all ${imagePosition === pos
-                                ? "bg-blue-600 text-white border-blue-600"
-                                : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
-                                }`}
+                              key={pos.id}
+                              onClick={() => setImagePosition(pos.id)}
+                              className={`pos-btn ${imagePosition === pos.id ? "active" : ""}`}
                             >
-                              {pos === "header" && "ヘッダー(背景)"}
-                              {pos === "top" && "記事上部"}
-                              {pos === "bottom" && "記事下部"}
-                              {pos === "hidden" && "表示しない"}
+                              {pos.label}
                             </button>
                           ))}
                         </div>
                       </div>
                     )}
                   </div>
-                </div>
+                </aside>
               </div>
             </>
           )}
@@ -327,4 +355,5 @@ export default function NoticeAdminEditor() {
       )}
     </div>
   );
+
 }

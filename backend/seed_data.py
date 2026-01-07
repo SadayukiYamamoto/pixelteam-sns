@@ -59,29 +59,8 @@ def seed():
         )
         print("Created sample news.")
 
-    # 3. Video
-    if Video.objects.count() == 0:
-        Video.objects.create(
-            id='v1',
-            title='【解説】基本的な操作方法',
-            user='事務局',
-            video_url='https://www.w3schools.com/html/mov_bbb.mp4',
-            thumb='https://picsum.photos/400/225?random=3',
-            is_featured=True,
-            is_short=False,
-            views=100
-        )
-        Video.objects.create(
-            id='v2',
-            title='ショート動画テスト',
-            user='事務局',
-            video_url='https://www.w3schools.com/html/mov_bbb.mp4',
-            thumb='https://picsum.photos/400/225?random=4',
-            is_featured=False,
-            is_short=True,
-            views=50
-        )
-        print("Created sample videos.")
+    # 3. Video (Sample videos removed as requested)
+    pass
 
     # 4. TreasurePost
     if TreasurePost.objects.count() == 0:

@@ -1,309 +1,295 @@
-/* TestCreatePage.css */
+/* --- TestCreatePage.css --- */
 
-/* 全体のラッパー（スクロールエリア） */
+.test-create-container {
+    background-color: #F8FAFC;
+    min-height: 100vh;
+}
+
 .test-create-wrapper {
-    background-color: #f0ebf8;
-    /* 薄い紫がかったグレー */
-    min-height: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 20px 120px;
 }
 
-/* ヘッダー部分 */
+/* Header Section */
 .test-create-header {
-    background: linear-gradient(135deg, #673ab7, #512da8);
-    /* Google Formsっぽい紫 */
-    color: white;
-    padding: 40px 20px 80px 20px;
-    /* カードが重なるように下余白を多めに */
-    text-align: center;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 48px;
 }
 
-.test-create-header h1 {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 8px;
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #94A3B8;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: fit-content;
+    padding: 0;
+}
+
+.back-btn:hover {
+    color: #475569;
+    transform: translateX(-4px);
+}
+
+.page-main-title {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.title-icon-box {
+    width: 64px;
+    height: 64px;
+    background: #DCFCE7;
+    color: #22C55E;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    border: 1px solid #BBF7D0;
+    box-shadow: 0 10px 20px -5px rgba(34, 197, 94, 0.2);
 }
 
-.test-create-header p {
-    opacity: 0.9;
-    font-size: 14px;
+.test-create-header h1 {
+    font-size: 32px;
+    font-weight: 900;
+    color: #111827;
+    margin: 0;
+    letter-spacing: -0.02em;
 }
 
-/* コンテンツコンテナ */
-.test-create-container {
-    max-width: 720px;
-    margin: -50px auto 40px auto;
-    /* ヘッダーに重ねる */
-    padding: 0 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+/* Form Sections */
+.test-section-card {
+    background: #FFFFFF;
+    border-radius: 32px;
+    padding: 40px;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 20px 40px -10px rgba(0, 0, 0, 0.04);
+    border: 1px solid #F1F5F9;
 }
 
-/* 共通カードスタイル */
-.form-section,
-.question-card,
-.survey-edit-card {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-top: 8px solid transparent;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-section {
-    border-top-color: #673ab7;
-    /* 紫のアクセント */
-}
-
-.question-card {
-    border-left: 6px solid #4f46e5;
-    /* 青のアクセント */
-}
-
-.survey-edit-card {
-    border-left: 6px solid #10b981;
-    /* 緑のアクセント（アンケート） */
-}
-
-.form-section:hover,
-.question-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-}
-
-/* セクションタイトル */
-.section-title,
-.section-header {
-    font-size: 20px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 20px;
+.section-label {
     display: flex;
     align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.label-number {
+    font-size: 32px;
+    font-weight: 900;
+    color: #22C55E;
+    opacity: 0.4;
+    font-family: 'Inter', sans-serif;
+}
+
+.label-text {
+    font-size: 18px;
+    font-weight: 900;
+    color: #111827;
+}
+
+/* Input Styles */
+.premium-input-group {
+    display: flex;
+    flex-direction: column;
     gap: 10px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 12px;
+    margin-bottom: 24px;
 }
 
-/* フォームグループ */
-.form-group {
-    margin-bottom: 20px;
+.premium-input-group label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding-left: 4px;
 }
 
-.form-group label {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    color: #555;
-    margin-bottom: 8px;
-}
-
-.form-group select,
-.form-group input {
+.premium-select,
+.premium-input {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
-    background: #fafafa;
-    transition: 0.2s;
-}
-
-.form-group select:focus,
-.form-group input:focus {
-    border-color: #673ab7;
-    background: #fff;
+    background: #F8FAFC;
+    border: 1.5px solid #F1F5F9;
+    border-radius: 18px;
+    padding: 18px 40px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #334155;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(103, 58, 183, 0.1);
+    transition: all 0.2s;
 }
 
-/* カードヘッダー（削除ボタンなど） */
-.card-header {
+.premium-select:focus,
+.premium-input:focus {
+    background: #FFFFFF;
+    border-color: #22C55E;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+}
+
+/* Question Item */
+.question-item {
+    position: relative;
+    padding-bottom: 48px;
+    margin-bottom: 48px;
+    border-bottom: 1.5px dashed #F1F5F9;
+}
+
+.question-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.question-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
-}
-
-.card-header h3 {
-    font-size: 18px;
-    font-weight: bold;
-    color: #444;
-}
-
-.badge {
-    background: #e0f2f1;
-    color: #00695c;
-    font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 12px;
-    margin-left: 8px;
-    vertical-align: middle;
-}
-
-.delete-btn {
-    background: transparent;
-    border: none;
-    color: #999;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    transition: 0.2s;
-}
-
-.delete-btn:hover {
-    background: #fee2e2;
-    color: #ef4444;
-}
-
-/* 質問入力 */
-.question-input {
-    width: 100%;
-    font-size: 16px;
-    padding: 12px;
-    border: none;
-    border-bottom: 2px solid #eee;
-    /* 下線スタイル */
-    background: transparent;
     margin-bottom: 20px;
-    transition: 0.3s;
 }
 
-.question-input:focus {
-    outline: none;
-    border-bottom-color: #673ab7;
-    background: #fdfdfd;
-}
-
-/* 選択肢リスト */
-.choices-list,
-.survey-choices-edit {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.choice-row {
+.q-badge {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.q-number {
+    width: 36px;
+    height: 36px;
+    background: #111827;
+    color: #FFFFFF;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 14px;
+}
+
+.q-meta {
+    font-size: 11px;
+    font-weight: 800;
+    color: #CBD5E1;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+}
+
+.choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.choice-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #F8FAFC;
+    padding: 12px;
+    border-radius: 20px;
+    border: 1.5px solid transparent;
+    transition: all 0.2s;
+}
+
+.choice-item.correct {
+    background: #F0FDF4;
+    border-color: #22C55E;
+}
+
+.choice-radio {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    color: transparent;
+}
+
+.choice-radio.active {
+    background: #22C55E;
+    border-color: #22C55E;
+    color: #FFFFFF;
 }
 
 .choice-input {
     flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #eee;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: 0.2s;
-}
-
-.choice-input:focus {
-    border-color: #4f46e5;
+    background: transparent;
+    border: none;
     outline: none;
+    font-size: 14px;
+    font-weight: 700;
+    color: #475569;
 }
 
-.correct-badge {
-    font-size: 12px;
-    color: #10b981;
-    font-weight: bold;
-    background: #d1fae5;
-    padding: 4px 8px;
-    border-radius: 4px;
-    white-space: nowrap;
+.choice-input::placeholder {
+    color: #CBD5E1;
 }
 
-.sub-label {
-    font-size: 13px;
-    color: #888;
-    margin-bottom: 8px;
-}
-
-/* 追加ボタン類 */
-.add-question-btn {
+/* Action Buttons */
+.add-btn-v2 {
+    width: 100%;
+    padding: 24px;
+    background: #F8FAFC;
+    border: 2px dashed #E2E8F0;
+    border-radius: 20px;
+    color: #94A3B8;
+    font-weight: 800;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 16px;
-    background: white;
-    border: 2px dashed #ccc;
-    border-radius: 12px;
-    color: #666;
-    font-weight: bold;
-    font-size: 16px;
+    gap: 10px;
     cursor: pointer;
-    transition: 0.2s;
-    margin-top: 10px;
+    transition: all 0.2s;
+    margin-top: 24px;
 }
 
-.add-question-btn:hover {
-    border-color: #673ab7;
-    color: #673ab7;
-    background: #f3e5f5;
+.add-btn-v2:hover {
+    background: #F0FDF4;
+    border-color: #22C55E;
+    color: #22C55E;
 }
 
-.add-question-btn.secondary {
-    border-color: #10b981;
-    color: #059669;
-    font-size: 14px;
-    padding: 12px;
-    margin-bottom: 12px;
-}
-
-.add-question-btn.secondary:hover {
-    background: #ecfdf5;
-}
-
-.add-choice-sm-btn {
-    background: none;
+.trash-btn {
+    background: transparent;
     border: none;
-    color: #2563eb;
-    font-size: 13px;
+    color: #FCA5A5;
+    padding: 8px;
     cursor: pointer;
-    padding: 4px 0;
-    text-align: left;
-    margin-top: 4px;
+    transition: all 0.2s;
+    border-radius: 10px;
 }
 
-.add-choice-sm-btn:hover {
-    text-decoration: underline;
+.trash-btn:hover {
+    background: #FEF2F2;
+    color: #EF4444;
 }
 
-.add-survey-buttons {
-    display: flex;
-    gap: 16px;
-}
-
-/* 保存エリア */
-.actions {
-    text-align: right;
-    margin-top: 20px;
-    padding-bottom: 40px;
-}
-
-.save-test-btn {
-    background: linear-gradient(135deg, #673ab7, #512da8);
-    color: white;
-    border: none;
-    padding: 14px 40px;
-    border-radius: 50px;
-    font-size: 18px;
-    font-weight: bold;
-    box-shadow: 0 4px 14px rgba(81, 45, 168, 0.4);
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.save-test-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(81, 45, 168, 0.5);
+@media (max-width: 768px) {
+    .choice-grid {
+        grid-template-columns: 1fr;
+    }
 }

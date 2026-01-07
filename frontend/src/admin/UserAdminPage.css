@@ -1,211 +1,256 @@
+/* --- UserAdminPage.css - Premium Overhaul --- */
+
+.home-container {
+    background-color: #F8FAFC;
+    min-height: 100vh;
+}
+
 .admin-content {
-    padding: 20px;
-    padding-bottom: 80px;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 120px;
+}
+
+.admin-content h2 {
+    font-size: 28px;
+    font-weight: 900;
+    color: #111827;
+    margin-bottom: 32px;
+    letter-spacing: -0.025em;
 }
 
 .user-list {
-    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .user-list-item {
     display: flex;
     align-items: center;
-    background: #fff;
-    padding: 10px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    justify-content: space-between;
+    background: #FFFFFF;
+    padding: 20px 24px;
+    border-radius: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    border: 1px solid #F1F5F9;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.user-icon-sm {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 12px;
-    object-fit: cover;
+.user-list-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05);
+    border-color: #E2E8F0;
 }
 
 .user-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
     flex: 1;
+    min-width: 0;
+}
+
+.user-icon-sm {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    object-fit: cover;
+    background: #F1F5F9;
 }
 
 .user-name {
-    font-weight: bold;
-    font-size: 14px;
-    margin: 0;
+    font-weight: 800;
+    font-size: 16px;
+    color: #111827;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .user-meta {
-    font-size: 12px;
-    color: #666;
+    font-size: 13px;
+    color: #64748B;
     margin: 0;
 }
 
 .edit-btn {
-    background: #007bff;
-    color: white;
+    background: #F1F5F9;
+    color: #475569;
     border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
+    padding: 10px 20px;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.2s;
 }
 
+.edit-btn:hover {
+    background: #E2E8F0;
+    color: #1E293B;
+}
+
+/* Edit Form */
 .edit-form {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
+    background: #FFFFFF;
+    padding: 40px;
+    border-radius: 32px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.edit-form h3 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 32px 0;
+}
+
+.back-btn {
+    background: #F8FAFC;
+    border: none;
+    color: #64748B;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 24px;
+    transition: all 0.2s;
+}
+
+.back-btn:hover {
+    background: #F1F5F9;
+    color: #1E293B;
 }
 
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 24px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 6px;
-    font-weight: bold;
-    font-size: 14px;
+    margin-bottom: 8px;
+    font-weight: 800;
+    font-size: 13px;
+    color: #374151;
 }
 
 .form-group input,
 .form-group select {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
+    padding: 12px 16px;
+    border: 2px solid #F1F5F9;
+    border-radius: 14px;
+    font-size: 15px;
+    transition: all 0.2s;
+    outline: none;
+    background: #F8FAFC;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #3B82F6;
+    background: #FFFFFF;
 }
 
 .preview-img {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     object-fit: cover;
-    border-radius: 8px;
-    margin-top: 10px;
+    border-radius: 24px;
+    margin-top: 12px;
+    border: 4px solid #F1F5F9;
 }
 
 .badge-select-list {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
 }
 
 .badge-select-item {
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    padding: 10px;
+    background: #F8FAFC;
+    border: 2px solid #F1F5F9;
+    border-radius: 18px;
+    padding: 16px;
     text-align: center;
     cursor: pointer;
-    opacity: 0.6;
-}
-
-.badge-select-item.selected {
-    border-color: #007bff;
-    opacity: 1;
-    background: #f0f8ff;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
 
 .badge-select-item img {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     object-fit: contain;
-    margin-bottom: 4px;
+}
+
+.badge-select-item span {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748B;
+}
+
+.badge-select-item.selected {
+    border-color: #3B82F6;
+    background: #EFF6FF;
+}
+
+.badge-select-item.selected span {
+    color: #2563EB;
 }
 
 .save-btn-primary {
     width: 100%;
-    background: #28a745;
-    color: white;
+    background: #111827;
+    color: #FFFFFF;
     border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-.back-btn {
-    border: none;
-    background: none;
-    color: #007bff;
-    cursor: pointer;
-    margin-bottom: 10px;
-}
-
-.admin-card {
-    background: #fff;
     padding: 16px;
-    border-radius: 12px;
-    margin-bottom: 24px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.assign-btn {
-    width: 100%;
-    background: #ff9800;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: bold;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 16px;
     cursor: pointer;
+    margin-top: 32px;
+    transition: all 0.2s;
 }
 
-.badge-list-admin {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.badge-admin-item {
-    background: #fff;
-    padding: 10px;
-    border-radius: 8px;
-    text-align: center;
-    width: 80px;
-}
-
-.badge-admin-item img {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-}
-
-.badge-admin-item p {
-    font-size: 10px;
-    margin: 4px 0 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.save-btn-primary:hover {
+    background: #1F2937;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .secretary-badge {
-    display: inline-block;
-    background-color: #e3f2fd;
-    color: #1976d2;
+    background-color: #F0FDF4;
+    color: #10B981;
     font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 8px;
-    vertical-align: middle;
-    font-weight: bold;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 6px;
 }
 
 .form-group-checkbox {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .form-group-checkbox label {
     display: flex;
     align-items: center;
+    gap: 12px;
     cursor: pointer;
     font-size: 14px;
-    color: #333;
+    font-weight: 700;
+    color: #4B5563;
 }
 
 .form-group-checkbox input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
     cursor: pointer;
 }

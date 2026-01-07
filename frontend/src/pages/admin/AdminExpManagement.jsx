@@ -1,129 +1,166 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import Header from '../../components/Header';
-import Navigation from '../../components/Navigation';
-import { Save, User as UserIcon, TrendingUp, ChevronLeft } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || "";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Header from "../../components/Header";
+import Navigation from "../../components/Navigation";
+import "../../admin/AdminCommon.css";
+import { FiSearch, FiSave, FiChevronLeft, FiEdit3, FiCheck } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import "./AdminExpManagement.css";
 
 const AdminExpManagement = () => {
+    const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [editingUser, setEditingUser] = useState(null);
-    const [editedExp, setEditedExp] = useState(0);
-    const navigate = useNavigate();
+    const [search, setSearch] = useState("");
+    const [editingExp, setEditingExp] = useState({}); // { user_id: exp_value }
+    const [editingUserId, setEditingUserId] = useState(null); // Which user is currently showing input
 
     useEffect(() => {
         fetchUsers();
     }, []);
 
     const fetchUsers = async () => {
-        const token = localStorage.getItem("token");
         try {
-            const res = await axios.get(`${API_URL}/api/admin/users/`, {
-                headers: { Authorization: `Token ${token}` },
+            setLoading(true);
+            const token = localStorage.getItem("token");
+            const res = await axios.get("/api/admin/analytics/users/", {
+                headers: { Authorization: `Token ${token}` }
             });
             setUsers(res.data);
-            setLoading(false);
-        } catch (err) {
-            console.error(err);
+
+            // Initialize local exp state
+            const expMap = {};
+            res.data.forEach(u => {
+                expMap[u.user_id] = u.exp || 0;
+            });
+            setEditingExp(expMap);
+        } catch (error) {
+            console.error("Error fetching users for EXP management:", error);
+        } finally {
             setLoading(false);
         }
     };
 
-    const handleEdit = (user) => {
-        setEditingUser(user.user_id);
-        setEditedExp(user.exp);
+    const handleExpChange = (userId, value) => {
+        setEditingExp(prev => ({
+            ...prev,
+            [userId]: parseInt(value) || 0
+        }));
     };
 
-    const handleSave = async (userId) => {
-        const token = localStorage.getItem("token");
+    const handleSave = async (user) => {
+        const newExp = editingExp[user.user_id];
         try {
-            await axios.patch(`${API_URL}/api/admin/users/${userId}/`,
-                { exp: parseInt(editedExp) },
-                { headers: { Authorization: `Token ${token}` } }
-            );
-            setEditingUser(null);
-            fetchUsers();
-            alert("EXPを更新しました");
-        } catch (err) {
-            console.error(err);
+            const token = localStorage.getItem("token");
+            await axios.post("/api/admin/users/update_exp/", {
+                user_id: user.user_id,
+                exp: newExp
+            }, {
+                headers: { Authorization: `Token ${token}` }
+            });
+            alert(`${user.display_name} のEXPを更新しました`);
+            setEditingUserId(null); // Close edit mode
+            fetchUsers(); // Refresh
+        } catch (error) {
+            console.error("Error updating EXP:", error);
             alert("更新に失敗しました");
         }
     };
 
+    const filteredUsers = users.filter(u =>
+        u.display_name?.toLowerCase().includes(search.toLowerCase()) ||
+        u.user_id?.toLowerCase().includes(search.toLowerCase())
+    );
+
     return (
-        <div className="home-container">
-            <div className="admin-wrapper">
-                <Header title="EXP・レベル管理" />
-                <div className="max-w-2xl mx-auto px-4 pt-6 pb-24">
-                    <div className="flex items-center gap-4 mb-8">
-                        <button
-                            onClick={() => navigate('/admin')}
-                            className="p-2 hover:bg-white rounded-full transition-colors border-none bg-transparent"
-                        >
-                            <ChevronLeft size={24} />
+        <div className="admin-page-container">
+            <Header title="管理" />
+            <div className="admin-wrapper bg-[#f8fafc]">
+                <div className="exp-admin-container">
+
+                    {/* Header with Back Button */}
+                    <div className="exp-admin-header">
+                        <button onClick={() => navigate(-1)} className="back-btn-minimal">
+                            <FiChevronLeft size={28} />
                         </button>
-                        <div>
-                            <h1 className="text-2xl font-black text-slate-800">EXP・レベル管理</h1>
-                            <p className="text-slate-500 text-sm">ユーザーの経験値を直接編集できます</p>
+                        <div className="exp-admin-header-text">
+                            <h1>EXP・レベル管理</h1>
+                            <p>ユーザーの経験値を直接編集できます</p>
                         </div>
                     </div>
 
-                    {loading ? (
-                        <div className="flex justify-center py-20">
-                            <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent"></div>
+                    {/* Search Bar */}
+                    <div className="exp-search-section mb-8">
+                        <div className="relative flex items-center">
+                            <FiSearch className="absolute left-6 text-gray-400" size={20} />
+                            <input
+                                className="w-full pl-16 pr-5 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-accent/10 transition-all outline-none font-bold text-gray-700 shadow-sm placeholder-gray-400 text-base"
+                                placeholder="ユーザーを検索..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
                         </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {users.map((user) => (
-                                <div key={user.user_id} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100">
-                                            <img src={user.profile_image || "/default-avatar.png"} alt="" className="w-full h-full object-cover" />
+                    </div>
+
+                    {/* User Cards List */}
+                    <div className="user-exp-list">
+                        {loading ? (
+                            <div className="p-20 text-center text-gray-400 font-bold">読み込み中...</div>
+                        ) : filteredUsers.length === 0 ? (
+                            <div className="p-20 text-center text-gray-300 font-black tracking-widest uppercase">検索結果なし</div>
+                        ) : (
+                            filteredUsers.map(user => (
+                                <div key={user.user_id} className="user-exp-card">
+                                    <div className="user-info-area">
+                                        <div className="user-avatar-wrapper">
+                                            <img
+                                                src={user.profile_image || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.display_name || "User") + "&background=random"}
+                                                alt={user.display_name}
+                                                onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=User&background=ddd" }}
+                                            />
                                         </div>
-                                        <div>
-                                            <p className="font-bold text-slate-800">{user.display_name}</p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className="bg-emerald-50 text-emerald-600 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Lv.{user.level}</span>
-                                                <span className="text-slate-400 text-xs">Total: {user.exp} EXP</span>
+                                        <div className="user-details">
+                                            <h3>{user.display_name}</h3>
+                                            <div className="user-stats-minimal">
+                                                <span className="level-badge-mini">LV.{user.level || 0}</span>
+                                                <span className="total-exp-label">Total: {user.exp?.toLocaleString() || 0} EXP</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-2">
-                                        {editingUser === user.user_id ? (
-                                            <div className="flex items-center gap-2">
+                                    <div className="action-area-right">
+                                        {editingUserId === user.user_id ? (
+                                            <div className="exp-input-wrapper">
                                                 <input
                                                     type="number"
-                                                    className="w-24 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                                    value={editedExp}
-                                                    onChange={(e) => setEditedExp(e.target.value)}
+                                                    className="minimal-exp-input"
+                                                    value={editingExp[user.user_id]}
+                                                    onChange={(e) => handleExpChange(user.user_id, e.target.value)}
+                                                    autoFocus
                                                 />
                                                 <button
-                                                    onClick={() => handleSave(user.user_id)}
-                                                    className="bg-emerald-500 text-white p-2 rounded-xl border-none shadow-sm hover:bg-emerald-600 transition-colors"
+                                                    className="save-action-btn"
+                                                    onClick={() => handleSave(user)}
                                                 >
-                                                    <Save size={18} />
+                                                    <FiSave size={18} />
                                                 </button>
                                             </div>
                                         ) : (
                                             <button
-                                                onClick={() => handleEdit(user)}
-                                                className="bg-slate-50 text-slate-600 px-4 py-2 rounded-xl border-none text-sm font-bold hover:bg-slate-100 transition-colors"
+                                                className="edit-btn-minimal"
+                                                onClick={() => setEditingUserId(user.user_id)}
                                             >
                                                 編集
                                             </button>
                                         )}
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            ))
+                        )}
+                    </div>
                 </div>
-                <Navigation activeTab="mypage" />
             </div>
+            <Navigation activeTab="mypage" />
         </div>
     );
 };

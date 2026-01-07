@@ -1,0 +1,159 @@
+/* --- NoticeAdminPage.css - Premium Overhaul --- */
+
+.admin-page-container {
+    background-color: #F8FAFC;
+    min-height: 100vh;
+}
+
+.admin-main-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px 120px;
+}
+
+.admin-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.admin-page-title {
+    font-size: 28px;
+    font-weight: 900;
+    color: #111827;
+    letter-spacing: -0.025em;
+    margin: 0 !important;
+}
+
+.create-btn {
+    background: #4F46E5;
+    color: #FFFFFF;
+    padding: 12px 24px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.create-btn:hover {
+    background: #4338CA;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+}
+
+.create-btn:active {
+    transform: scale(0.98);
+}
+
+/* Notice List */
+.notice-items-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.notice-admin-card {
+    background: #FFFFFF;
+    border-radius: 24px;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid #F1F5F9;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.notice-admin-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    border-color: #E2E8F0;
+}
+
+.notice-card-left {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.notice-thumb-box {
+    width: 100px;
+    height: 64px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #F1F5F9;
+    flex-shrink: 0;
+}
+
+.notice-thumb-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.notice-meta-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.notice-category-tag {
+    font-size: 10px;
+    font-weight: 900;
+    padding: 3px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.tag-office {
+    background: #EEF2FF;
+    color: #4F46E5;
+}
+
+.tag-other {
+    background: #F0FDF4;
+    color: #22C55E;
+}
+
+.notice-item-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 6px 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notice-item-date {
+    font-size: 12px;
+    color: #94A3B8;
+    margin: 0 !important;
+}
+
+.delete-action-btn {
+    background: transparent;
+    border: none;
+    color: #F87171;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.delete-action-btn:hover {
+    background: #FEF2F2;
+    color: #EF4444;
+}

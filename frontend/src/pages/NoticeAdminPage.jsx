@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Navigation from "../components/Navigation";
-import { Link, useNavigate } from "react-router-dom"; // Link, useNavigate 追加
+import "./NoticeAdminPage.css";
+import { Plus, Trash2 } from "lucide-react";
 
 const NoticeAdminPage = () => {
     const [notices, setNotices] = useState([]);
@@ -43,67 +45,54 @@ const NoticeAdminPage = () => {
     };
 
     return (
-        <div className="home-container">
-            <div className="home-wrapper">
+        <div className="home-container admin-page-container">
+            <div className="admin-wrapper">
                 <Header />
-                <div style={{ padding: "20px", paddingBottom: "100px", flex: 1, overflowY: "auto" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                        <h2 style={{ fontSize: "20px", fontWeight: "bold" }}>お知らせ管理</h2>
-                        <Link
-                            to="/admin/notice/new"
-                            style={{
-                                background: "#4f46e5", color: "white", padding: "8px 16px",
-                                borderRadius: "6px", textDecoration: "none", fontWeight: "bold", fontSize: "14px"
-                            }}
-                        >
-                            + 新規投稿
+                <div className="admin-main-content">
+                    <div className="admin-page-header">
+                        <h1 className="admin-page-title">お知らせ管理</h1>
+                        <Link to="/admin/notice/new" className="create-btn">
+                            <Plus size={18} strokeWidth={3} />
+                            新規投稿
                         </Link>
                     </div>
 
-                    {/* お知らせ一覧 */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div className="notice-items-grid">
                         {notices.map((notice) => (
                             <div
                                 key={notice.id}
+                                className="notice-admin-card"
                                 onClick={() => navigate(`/admin/notice/${notice.id}`)}
-                                style={{
-                                    background: "white", padding: "12px", borderRadius: "8px",
-                                    borderLeft: `4px solid ${notice.category === '事務局' ? '#4f46e5' : '#22c55e'}`,
-                                    cursor: "pointer", transition: "0.2s",
-                                    boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
-                                }}
                             >
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                                    <div style={{ display: "flex", gap: "12px" }}>
-                                        {notice.image_url && (
-                                            <img src={notice.image_url} alt="" style={{ width: "80px", height: "50px", objectFit: "cover", borderRadius: "4px" }} />
-                                        )}
-                                        <div>
-                                            <span style={{ fontSize: "10px", background: "#eee", padding: "2px 6px", borderRadius: "4px", marginRight: "8px" }}>
-                                                {notice.category}
-                                            </span>
-                                            <span style={{ fontSize: "14px", fontWeight: "bold" }}>{notice.title}</span>
-                                            <p style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
-                                                {notice.created_at?.slice(0, 10)}
-                                            </p>
+                                <div className="notice-card-left">
+                                    {notice.image_url && (
+                                        <div className="notice-thumb-box">
+                                            <img src={notice.image_url} alt="" />
                                         </div>
+                                    )}
+                                    <div className="notice-meta-info">
+                                        <span className={`notice-category-tag ${notice.category === '事務局' ? 'tag-office' : 'tag-other'}`}>
+                                            {notice.category}
+                                        </span>
+                                        <h3 className="notice-item-title">{notice.title}</h3>
+                                        <p className="notice-item-date">{notice.created_at?.slice(0, 10)}</p>
                                     </div>
-                                    <button
-                                        onClick={(e) => handleDelete(notice.id, e)}
-                                        style={{ fontSize: "12px", color: "red", border: "none", background: "none", cursor: "pointer", padding: "4px" }}
-                                    >
-                                        削除
-                                    </button>
                                 </div>
+                                <button
+                                    className="delete-action-btn"
+                                    onClick={(e) => handleDelete(notice.id, e)}
+                                >
+                                    <Trash2 size={20} />
+                                </button>
                             </div>
                         ))}
                     </div>
-
                 </div>
-                <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
             </div>
+            <Navigation activeTab="mypage" />
         </div>
     );
 };
+
 
 export default NoticeAdminPage;
