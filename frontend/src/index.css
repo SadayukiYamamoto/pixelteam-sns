@@ -839,11 +839,6 @@ code {
 svg {
   width: 24px;
   height: 24px;
-  fill: none;
-  stroke: currentcolor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
   overflow: hidden;
 }
 
