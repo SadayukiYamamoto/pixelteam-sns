@@ -53,7 +53,15 @@ axiosClient.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       console.error("🚨 401 Unauthorized: トークンが無効か、ログインが必要です。");
-      // ログインページへリダイレクトする場合はここで navigate("/login") などを行う
+
+      // トークンを削除
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      // ログインページへリダイレクト（リロードを伴うが確実）
+      if (!window.location.pathname.includes("/login")) {
+        window.location.href = "/login?expired=true";
+      }
     }
     return Promise.reject(error);
   }

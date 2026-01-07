@@ -42,6 +42,8 @@ export default function TreasurePostForm() {
   const [appealPoints, setAppealPoints] = useState("");
   const storage = getStorage(app);
   const user = JSON.parse(localStorage.getItem("user"));
+  // 🔹 一度キャンセル（拒否）したURLを記録するリスト
+  const dismissedUrls = useRef(new Set());
 
   const editor = useEditor({
     extensions: [
@@ -78,8 +80,17 @@ export default function TreasurePostForm() {
           const url = m[0];
           const html = editor.getHTML();
 
-          // Check if card for this URL already exists in editor
-          if (html.includes(`data-url="${url}"`)) return;
+          // Check if card for this URL already exists in editor or was dismissed
+          if (html.includes(`data-url="${url}"`) || dismissedUrls.current.has(url)) return;
+
+          // ユーザーに確認
+          const shouldConvert = window.confirm(`リンクカードを作成しますか？\n${url}`);
+
+          if (!shouldConvert) {
+            // ❌ キャンセルされた場合、記録して二度と聞かない
+            dismissedUrls.current.add(url);
+            return;
+          }
 
           // Find the exact position of the URL text
           const { from, to } = findUrlPosition(editor, url);

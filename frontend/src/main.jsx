@@ -50,6 +50,8 @@ import AdminInteractionAnalysisPage from "./admin/AdminInteractionAnalysisPage";
 import LoginPopupAdminPage from "./admin/LoginPopupAdminPage"; // ← 追加
 import AdminExpManagement from "./pages/admin/AdminExpManagement";
 import AdminLevelRewards from "./pages/admin/AdminLevelRewards";
+import VideoFeedbackAdminPage from "./admin/VideoFeedbackAdminPage"; // ← 追加
+import ProtectedRoute from "./components/ProtectedRoute";
 
 
 
@@ -60,77 +62,76 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <Routes>
 
       {/* 全ページ共通レイアウト */}
-      <Route path="/" element={<Home />} />
-      <Route path="/home" element={<Home />} />
-      <Route path="/posts" element={<Posts />} />
-      <Route path="/search" element={<Posts />} />
-      <Route path="/mypage" element={<MyPage />} />
-      <Route path="/mypage/:userId" element={<MyPage />} />
-      <Route path="/profile-edit/:userId" element={<ProfileEdit />} />
-      <Route path="/post" element={<PostPage />} />
-      <Route path="/post/:id" element={<PostPage />} />
-      <Route path="/posts/:id" element={<PostDetail />} /> {/* ← 詳細ページ追加 */}
-      <Route path="/missions" element={<MissionsPage />} />
-      <Route path="/notifications" element={<NotificationsPage />} />
+      <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
+      <Route path="/search" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
+      <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
+      <Route path="/mypage/:userId" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
+      <Route path="/profile-edit/:userId" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
+      <Route path="/post" element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
+      <Route path="/post/:id" element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
+      <Route path="/posts/:id" element={<ProtectedRoute><PostDetail /></ProtectedRoute>} /> {/* ← 詳細ページ追加 */}
+      <Route path="/missions" element={<ProtectedRoute><MissionsPage /></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
 
 
       {/* treasure */}
 
 
-      <Route path="/videos" element={<PixTubeHome />} />
-      <Route path="/video/upload" element={<VideoUploadPage />} />
-      <Route path="/admin/videos" element={<VideoAdminPage />} />
-      <Route path="/admin/videos" element={<VideoAdminPage />} />
-      <Route path="/admin/posts/manage" element={<PostManagementPage />} /> {/* ← 追加 */}
-      <Route path="/admin/analytics/users" element={<UserAnalyticsPage />} /> {/* ← 追加 */}
-      <Route path="/admin/analytics/shops" element={<ShopManagementPage />} /> {/* ← 追加 */}
-      <Route path="/admin/analytics/videos/watch-logs" element={<VideoWatchAnalysisPage />} /> {/* ← 追加 */}
-      <Route path="/admin/analytics/interactions" element={<AdminInteractionAnalysisPage />} /> {/* ← 追加 */}
-      <Route path="/admin/points" element={<PointManagementPage />} /> {/* ← Added */}
-      <Route path="/admin/notices" element={<NoticeAdminPage />} />
-      <Route path="/admin/users" element={<UserAdminPage />} />
-      <Route path="/admin/badges" element={<BadgeAdminPage />} />
-      <Route path="/admin/notice/new" element={<NoticeAdminEditor />} /> {/* ← 追加 */}
-      <Route path="/admin/notice/:id" element={<NoticeAdminEditor />} /> {/* ← 追加 */}
-      <Route path="/notice/:id" element={<NoticeDetailPage />} /> {/* ← 追加 */}
-      <Route path="/video/:id" element={<VideoPlayer />} />
-      <Route path="/videos/:videoId/test" element={<VideoTestPage />} />
+      <Route path="/videos" element={<ProtectedRoute><PixTubeHome /></ProtectedRoute>} />
+      <Route path="/video/upload" element={<ProtectedRoute><VideoUploadPage /></ProtectedRoute>} />
+      <Route path="/admin/videos" element={<ProtectedRoute><VideoAdminPage /></ProtectedRoute>} />
+      <Route path="/admin/posts/manage" element={<ProtectedRoute><PostManagementPage /></ProtectedRoute>} /> {/* ← 追加 */}
+      <Route path="/admin/analytics/users" element={<ProtectedRoute><UserAnalyticsPage /></ProtectedRoute>} /> {/* ← 追加 */}
+      <Route path="/admin/analytics/shops" element={<ProtectedRoute><ShopManagementPage /></ProtectedRoute>} /> {/* ← 追加 */}
+      <Route path="/admin/analytics/videos/watch-logs" element={<ProtectedRoute><VideoWatchAnalysisPage /></ProtectedRoute>} /> {/* ← 追加 */}
+      <Route path="/admin/analytics/interactions" element={<ProtectedRoute><AdminInteractionAnalysisPage /></ProtectedRoute>} /> {/* ← 追加 */}
+      <Route path="/admin/points" element={<ProtectedRoute><PointManagementPage /></ProtectedRoute>} /> {/* ← Added */}
+      <Route path="/admin/notices" element={<ProtectedRoute><NoticeAdminPage /></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute><UserAdminPage /></ProtectedRoute>} />
+      <Route path="/admin/badges" element={<ProtectedRoute><BadgeAdminPage /></ProtectedRoute>} />
+      <Route path="/admin/notice/new" element={<ProtectedRoute><NoticeAdminEditor /></ProtectedRoute>} /> {/* ← 追加 */}
+      <Route path="/admin/notice/:id" element={<ProtectedRoute><NoticeAdminEditor /></ProtectedRoute>} /> {/* ← 追加 */}
+      <Route path="/notice/:id" element={<ProtectedRoute><NoticeDetailPage /></ProtectedRoute>} /> {/* ← 追加 */}
+      <Route path="/video/:id" element={<ProtectedRoute><VideoPlayer /></ProtectedRoute>} />
+      <Route path="/videos/:videoId/test" element={<ProtectedRoute><VideoTestPage /></ProtectedRoute>} />
 
-      <Route path="/treasure" element={<TreasurePixelPage />} />
-      <Route path="/treasure-pixel" element={<TreasurePixelPage />} />
-      <Route path="/treasure-categories" element={<TreasurePixelCategoryPage />} />
-      <Route path="/treasure/:category" element={<TreasureCategoryList />} />
-      <Route path="/treasure/:category/:postId" element={<TreasurePostDetail />} />
-      <Route path="/treasure/new" element={<TreasurePostForm />} />
-      <Route path="/treasure/edit/:id" element={<TreasurePostForm />} />
+      <Route path="/treasure" element={<ProtectedRoute><TreasurePixelPage /></ProtectedRoute>} />
+      <Route path="/treasure-pixel" element={<ProtectedRoute><TreasurePixelPage /></ProtectedRoute>} />
+      <Route path="/treasure-categories" element={<ProtectedRoute><TreasurePixelCategoryPage /></ProtectedRoute>} />
+      <Route path="/treasure/:category" element={<ProtectedRoute><TreasureCategoryList /></ProtectedRoute>} />
+      <Route path="/treasure/:category/:postId" element={<ProtectedRoute><TreasurePostDetail /></ProtectedRoute>} />
+      <Route path="/treasure/new" element={<ProtectedRoute><TreasurePostForm /></ProtectedRoute>} />
+      <Route path="/treasure/edit/:id" element={<ProtectedRoute><TreasurePostForm /></ProtectedRoute>} />
 
       {/* tasks */}
-      <Route path="/tasks" element={<TaskPage />} />
-      <Route path="/tests/create" element={<TestCreatePage />} />
-      <Route path="/components/tasks/Individual-achievements" element={<IndividualAchievements />} />
-      <Route path="/components/tasks/Individual-shops" element={<IndividualShops />} />
-      <Route path="/components/tasks/number-visitors" element={<NumberVisitors />} />
-      <Route path="/components/tasks/sift-management" element={<SiftManagement />} />
-      <Route path="/components/tasks/swing-management" element={<SwingManagement />} />
+      <Route path="/tasks" element={<ProtectedRoute><TaskPage /></ProtectedRoute>} />
+      <Route path="/tests/create" element={<ProtectedRoute><TestCreatePage /></ProtectedRoute>} />
+      <Route path="/components/tasks/Individual-achievements" element={<ProtectedRoute><IndividualAchievements /></ProtectedRoute>} />
+      <Route path="/components/tasks/Individual-shops" element={<ProtectedRoute><IndividualShops /></ProtectedRoute>} />
+      <Route path="/components/tasks/number-visitors" element={<ProtectedRoute><NumberVisitors /></ProtectedRoute>} />
+      <Route path="/components/tasks/sift-management" element={<ProtectedRoute><SiftManagement /></ProtectedRoute>} />
+      <Route path="/components/tasks/swing-management" element={<ProtectedRoute><SwingManagement /></ProtectedRoute>} />
 
       {/* おしらせ */}
-      <Route path="/notice" element={<NoticePage />} />
-      <Route path="/notice/:id" element={<NoticeDetailPage />} />
-      <Route path="/admin/notices/new" element={<NoticeAdminEditor />} />
-      <Route path="/admin/notices/edit/:id" element={<NoticeAdminEditor />} />
+      <Route path="/notice" element={<ProtectedRoute><NoticePage /></ProtectedRoute>} />
+      <Route path="/notice/:id" element={<ProtectedRoute><NoticeDetailPage /></ProtectedRoute>} />
+      <Route path="/admin/notices/new" element={<ProtectedRoute><NoticeAdminEditor /></ProtectedRoute>} />
+      <Route path="/admin/notices/edit/:id" element={<ProtectedRoute><NoticeAdminEditor /></ProtectedRoute>} />
 
       {/* 管理画面 */}
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/login-popup" element={<LoginPopupAdminPage />} />
-      <Route path="/admin/home" element={<HomeAdminPage />} />
-      <Route path="/admin/home" element={<HomeAdminPage />} />
-      <Route path="/admin/posts" element={<PostAdminPage />} />
-      <Route path="/admin/tasks" element={<TaskManagementPage />} />
-      <Route path="/admin/tests" element={<TestManagementPage />} /> {/* ← 追加 */}
-      <Route path="/tests/edit/:videoId" element={<TestCreatePage />} /> {/* ← 編集用パラメータ付き */}
-      <Route path="/admin/exp" element={<AdminExpManagement />} />
-      <Route path="/admin/level-rewards" element={<AdminLevelRewards />} />
-      <Route path="/analytics/matrix" element={<WatchMatrix />} />
+      <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/admin/login-popup" element={<ProtectedRoute><LoginPopupAdminPage /></ProtectedRoute>} />
+      <Route path="/admin/home" element={<ProtectedRoute><HomeAdminPage /></ProtectedRoute>} />
+      <Route path="/admin/posts" element={<ProtectedRoute><PostAdminPage /></ProtectedRoute>} />
+      <Route path="/admin/tasks" element={<ProtectedRoute><TaskManagementPage /></ProtectedRoute>} />
+      <Route path="/admin/tests" element={<ProtectedRoute><TestManagementPage /></ProtectedRoute>} /> {/* ← 追加 */}
+      <Route path="/admin/videos/feedback" element={<ProtectedRoute><VideoFeedbackAdminPage /></ProtectedRoute>} /> {/* ← 追加 */}
+      <Route path="/tests/edit/:videoId" element={<ProtectedRoute><TestCreatePage /></ProtectedRoute>} /> {/* ← 編集用パラメータ付き */}
+      <Route path="/admin/exp" element={<ProtectedRoute><AdminExpManagement /></ProtectedRoute>} />
+      <Route path="/admin/level-rewards" element={<ProtectedRoute><AdminLevelRewards /></ProtectedRoute>} />
+      <Route path="/analytics/matrix" element={<ProtectedRoute><WatchMatrix /></ProtectedRoute>} />
 
 
 

@@ -158,56 +158,6 @@ const MyPage = () => {
             )}
           </div>
 
-          {/* Admin Menu (Only for Admin/Secretary) */}
-          {isOwnProfile && (profile.user_id === ADMIN_UID || profile.is_secretary || profile.is_staff) && (
-            <div style={{ padding: "0 16px 16px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <button
-                onClick={() => navigate("/admin/videos")}
-                style={{ flex: "1 1 calc(33.33% - 10px)", padding: "10px", background: "#333", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", fontSize: "12px" }}
-              >
-                動画管理
-              </button>
-              <button
-                onClick={() => navigate("/admin/notices")}
-                style={{ flex: "1 1 calc(33.33% - 10px)", padding: "10px", background: "#333", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", fontSize: "12px" }}
-              >
-                お知らせ管理
-              </button>
-              <button
-                onClick={() => navigate("/admin/users")}
-                style={{ flex: "1 1 calc(33.33% - 10px)", padding: "10px", background: "#007bff", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", fontSize: "12px" }}
-              >
-                ユーザー管理
-              </button>
-              <button
-                onClick={() => navigate("/admin/badges")}
-                style={{ flex: "1 1 calc(33.33% - 10px)", padding: "10px", background: "#ff9800", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", fontSize: "12px" }}
-              >
-                バッジ管理
-              </button>
-              <button
-                onClick={() => navigate("/admin/posts")}
-                style={{ flex: "1 1 calc(33.33% - 10px)", padding: "10px", background: "#3b82f6", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", fontSize: "12px" }}
-              >
-                投稿管理
-              </button>
-              <button
-                onClick={() => navigate("/admin/login-popup")}
-                style={{ flex: "1 1 calc(33.33% - 10px)", padding: "10px", background: "#f97316", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", fontSize: "12px" }}
-              >
-                ログインPOPUP
-              </button>
-              <button onClick={() => navigate("/admin/points")} style={{ flex: "1 1 calc(50% - 10px)", padding: "10px", background: "#ffc107", color: "black", borderRadius: "8px", border: "none", fontWeight: "bold", fontSize: "12px" }}>
-                ポイント管理
-              </button>
-              <button onClick={() => navigate("/admin/exp")} style={{ flex: "1 1 calc(50% - 10px)", padding: "10px", background: "#10b981", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", fontSize: "12px" }}>
-                EXP管理
-              </button>
-              <button onClick={() => navigate("/admin/level-rewards")} style={{ flex: "1 1 100%", padding: "10px", background: "#ec4899", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", fontSize: "12px" }}>
-                レベルバッジ報酬
-              </button>
-            </div>
-          )}
 
           {/* Tabs */}
           <div className="flex bg-white rounded-xl shadow-sm mb-6 overflow-hidden divide-x divide-gray-100">

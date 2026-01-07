@@ -51,6 +51,8 @@ export default function PostPage() {
   const [imageFile, setImageFile] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const currentUserId = localStorage.getItem("userId");
+  // 🔹 一度キャンセル（拒否）したURLを記録するリスト
+  const dismissedUrls = useRef(new Set());
 
 
   // 🟦 Editor 設定
@@ -108,15 +110,26 @@ export default function PostPage() {
       if (matches.length > 0) {
         matches.forEach(async (m) => {
           const url = m[0];
-          if (editor.getHTML().includes(`ogp-card`)) return;
-          const pos = editor.state.doc.textBetween(0, editor.state.doc.content.size).indexOf(url);
-          if (pos === -1) return;
-          editor
-            .chain()
-            .focus()
-            .deleteRange({ from: pos + 1, to: pos + url.length + 1 })
-            .run();
-          await editor.commands.insertOGP(url);
+
+          // 既にカード化されている、または「このセッションで拒否した」URLは無視する
+          if (editor.getHTML().includes(`data-url="${url}"`) || dismissedUrls.current.has(url)) return;
+
+          // ユーザーに確認
+          const shouldConvert = window.confirm(`リンクカードを作成しますか？\n${url}`);
+
+          if (shouldConvert) {
+            const pos = editor.state.doc.textBetween(0, editor.state.doc.content.size).indexOf(url);
+            if (pos === -1) return;
+            editor
+              .chain()
+              .focus()
+              .deleteRange({ from: pos + 1, to: pos + url.length + 1 })
+              .run();
+            await editor.commands.insertOGP(url);
+          } else {
+            // ❌ キャンセルされた場合、無視リストに追加して二度と聞かないようにする
+            dismissedUrls.current.add(url);
+          }
         });
       }
     },

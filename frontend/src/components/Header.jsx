@@ -8,7 +8,7 @@ import NoticePopup from "./NoticePopup";
 import NotificationPopup from "./NotificationPopup";
 // AccountSwitcher removed
 
-const Header = ({ onProfileClick }) => {
+const Header = ({ onProfileClick, className = "" }) => {
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
   const [noticeUnreadCount, setNoticeUnreadCount] = useState(0);
@@ -89,7 +89,7 @@ const Header = ({ onProfileClick }) => {
 
   return (
     <>
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] h-[72px] flex justify-between items-center bg-white shadow-sm z-[1001] px-8 border-b border-gray-100">
+      <div className={`fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] h-[72px] flex justify-between items-center bg-white shadow-sm z-[9999] px-8 border-b border-gray-100 ${className}`}>
 
         <div className="flex items-center flex-shrink-0 ml-6">
           <h1

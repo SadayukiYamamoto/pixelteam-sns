@@ -46,6 +46,7 @@ urlpatterns = [
     path("task_buttons/", views.task_button_list_create),
     path("task_buttons/<uuid:pk>/", views.task_button_detail),
     path("admin/videos/list/", views.admin_video_list),
+    path("admin/videos/feedback/", views.admin_video_feedback),
     path("log/interaction/", views.log_interaction),
     path("admin/interaction-logs/", views.admin_interaction_logs),
 ]

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
 import Navigation from '../components/Navigation';
@@ -10,10 +10,16 @@ import { ArrowLeft } from 'lucide-react';
 const PostDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showCommentSheet, setShowCommentSheet] = useState(false);
     const [activeTab, setActiveTab] = useState('home');
+
+    // 最初に画面トップにスクロール
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -22,7 +28,6 @@ const PostDetail = () => {
                 const config = token ? { headers: { Authorization: `Token ${token}` } } : {};
                 const res = await axios.get(`/api/posts/${id}/`, config);
 
-                // PostItemが期待する形式にデータを整形
                 const formattedPost = {
                     id: res.data.id,
                     content: res.data.content,
@@ -36,6 +41,12 @@ const PostDetail = () => {
                 };
 
                 setPost(formattedPost);
+
+                // URLパラメータに showComments があればシートを開く
+                const params = new URLSearchParams(location.search);
+                if (params.get('openComments') === 'true') {
+                    setShowCommentSheet(true);
+                }
             } catch (error) {
                 console.error('Error fetching post:', error);
             } finally {
@@ -44,7 +55,7 @@ const PostDetail = () => {
         };
 
         fetchPost();
-    }, [id]);
+    }, [id, location.search]);
 
     const handleLike = async (postId) => {
         try {
@@ -89,23 +100,25 @@ const PostDetail = () => {
 
     return (
         <div className="bg-[#f6f7f9] min-h-screen pb-24">
-            {/* ヘッダーの代わりに戻るボタン付きのヘッダー風エリア */}
+            {/* ヘッダー */}
             <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-50 flex items-center px-4 max-w-[480px] mx-auto">
                 <button
                     onClick={() => navigate(-1)}
-                    className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                    className="w-10 h-10 flex items-center justify-center bg-white shadow-md rounded-full text-slate-700 border-none transition-all active:scale-95 mr-3"
                 >
-                    <ArrowLeft size={24} />
+                    <ArrowLeft size={22} />
                 </button>
-                <span className="ml-2 font-bold text-lg text-gray-800">投稿詳細</span>
+                <span className="font-black text-lg text-gray-800">投稿詳細</span>
             </div>
 
             <div className="pt-20 px-4 max-w-[480px] mx-auto">
-                <PostItem
-                    post={post}
-                    onLike={handleLike}
-                    onComment={handleComment}
-                />
+                <div style={{ marginTop: '40px' }}>
+                    <PostItem
+                        post={post}
+                        onLike={handleLike}
+                        onComment={handleComment}
+                    />
+                </div>
             </div>
 
             <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />

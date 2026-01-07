@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TextField, Button, Typography, Container, Box, Divider } from "@mui/material";
 import axiosClient from "../api/axiosClient";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { auth, GoogleAuthProvider, signInWithPopup } from "../firebase"; // Import Firebase
 import { FcGoogle } from "react-icons/fc"; // Optional: Google Icon
 import { initializePushNotifications } from "../utils/push-notifications"; // ✅ 追加
@@ -12,6 +12,17 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // ProtectedRoute から渡されたメッセージ、またはURLパラメータの expired を取得
+  const queryParams = new URLSearchParams(location.search);
+  const isExpired = queryParams.get("expired") === "true";
+
+  const message = isExpired
+    ? "セッションの期限が切れました。再度ログインしてください。"
+    : location.state?.message;
+
+  const from = location.state?.from?.pathname || "/mypage";
 
   const handleLoginSuccess = (data) => {
     console.log("✅ ログイン成功:", data.display_name);
@@ -47,7 +58,8 @@ const Login = () => {
       console.log("➡️ チーム未設定のためプロフィール編集へ遷移");
       navigate(`/profile-edit/${data.user_id}`);
     } else {
-      navigate("/mypage");
+      // 元々行こうとしていたページ、またはマイページへ
+      navigate(from, { replace: true });
     }
 
     // ✅ ログイン直後に通知初期化（トークンのバックエンド同期）を実行
@@ -128,6 +140,14 @@ const Login = () => {
         sx={{ display: "flex", flexDirection: "column", gap: 2 }}
       >
         <Typography variant="h5" align="center" fontWeight="bold">GarageGateway</Typography>
+
+        {message && (
+          <Box sx={{ bgcolor: 'rgba(255, 152, 0, 0.1)', p: 2, borderRadius: 2, border: '1px solid #ff9800' }}>
+            <Typography color="#e65100" variant="body2" align="center" fontWeight="bold">
+              {message}
+            </Typography>
+          </Box>
+        )}
 
         <Button
           variant="outlined"

@@ -20,8 +20,8 @@
   align-items: center;
   background-color: var(--bg-light);
   min-height: 100vh;
-  padding: 24px 16px 100px;
-  font-family: 'Inter', 'Noto Sans JP', sans-serif;
+  padding: 24px 0 100px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* Header */
@@ -69,7 +69,8 @@
   background: var(--card-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  padding: 24px;
+  padding: 24px 10px;
+  /* Reduced horizontal padding */
   box-sizing: border-box;
 }
 
@@ -180,7 +181,8 @@
   margin-bottom: 24px;
   border: 2px solid #eef2f7;
   border-radius: 16px;
-  padding: 16px 20px;
+  padding: 16px 6px;
+  /* Total horizontal padding (Card 10 + Editor 6 = 16) matches PostItem */
   background: #fcfdfe;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: text;
@@ -198,8 +200,9 @@
 }
 
 .premium-editor-content {
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 14px;
+  /* Match PostItem */
+  line-height: 1.625;
   color: var(--text-main);
   outline: none;
   min-height: 220px;

@@ -144,6 +144,13 @@ const AdminDashboard = () => {
             icon: <FaMedal size={40} color="#ec4899" />,
             color: "border-pink-500",
         },
+        {
+            title: "テスト・アンケート分析",
+            description: "テスト成績やアンケート満足度の詳細を動画ごとに分析します。",
+            path: "/admin/videos/feedback",
+            icon: <FaFileSignature size={40} color="#10b981" />,
+            color: "border-green-500",
+        },
     ];
 
     return (

@@ -1,0 +1,339 @@
+/* --- VideoFeedbackAdminPage.css --- */
+
+.video-feedback-container {
+    background-color: #F8FAFC;
+    min-height: 100vh;
+}
+
+.video-feedback-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 20px 120px;
+}
+
+/* Header */
+.video-feedback-header {
+    margin-bottom: 40px;
+}
+
+.video-feedback-title-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.video-feedback-title-group h1 {
+    font-size: 28px;
+    font-weight: 900;
+    color: #111827;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.video-feedback-header p {
+    font-size: 14px;
+    color: #64748B;
+    font-weight: 500;
+    padding-left: 48px;
+}
+
+/* Filter/Search Section */
+.video-feedback-search-card {
+    background: #FFFFFF;
+    border-radius: 24px;
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+    border: 1.5px solid #F1F5F9;
+}
+
+.search-input-wrapper {
+    position: relative;
+    max-width: 400px;
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    background: #F8FAFC;
+    border: 1.5px solid #F1F5F9;
+    border-radius: 12px;
+    padding: 14px 16px 14px 44px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1E293B;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.search-input-wrapper input:focus {
+    background: #FFFFFF;
+    border-color: #10B981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94A3B8;
+}
+
+/* Table Area */
+.feedback-results-card {
+    background: #FFFFFF;
+    border-radius: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+    border: 1.5px solid #F1F5F9;
+    overflow: hidden;
+}
+
+.feedback-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.feedback-table th {
+    text-align: left;
+    padding: 20px 24px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: #F8FAFC;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.feedback-table td {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: #1E293B;
+    border-bottom: 1px solid #F8FAFC;
+    vertical-align: middle;
+}
+
+/* Video Row */
+.row-video {
+    background-color: #FFFFFF;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.row-video:hover {
+    background-color: #F1F5F9;
+}
+
+.row-video.expanded {
+    background-color: #F8FAFC;
+}
+
+.thumb-cell {
+    width: 120px;
+}
+
+.thumb-mini {
+    width: 100px;
+    height: 56px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+}
+
+.thumb-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.title-cell {
+    font-weight: 800;
+    font-size: 15px;
+}
+
+.score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FFF7ED;
+    color: #C2410C;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-weight: 900;
+    font-size: 13px;
+    border: 1px solid #FFEDD5;
+}
+
+.sat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #F0FDF4;
+    color: #15803D;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-weight: 900;
+    font-size: 13px;
+    border: 1px solid #DCFCE7;
+}
+
+.resp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #EFF6FF;
+    color: #1D4ED8;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-weight: 900;
+    font-size: 13px;
+    border: 1px solid #DBEAFE;
+}
+
+/* User Sub-Row */
+.row-user-feedback {
+    background-color: #FFFFFF;
+}
+
+.user-cell-content {
+    padding-left: 48px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar-mini {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #10B981;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.user-name-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name-text {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.user-id-text {
+    font-size: 10px;
+    color: #94A3B8;
+    font-weight: 600;
+}
+
+.feedback-details-box {
+    margin: 4px 0;
+    padding: 10px;
+    background: #F1F5F9;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 300px;
+}
+
+.feedback-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    padding-bottom: 4px;
+}
+
+.feedback-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.feedback-q {
+    font-size: 10px;
+    font-weight: 800;
+    color: #94A3B8;
+    text-transform: uppercase;
+}
+
+.feedback-a {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    line-height: 1.4;
+}
+
+.test-detail-box {
+    margin: 4px 0;
+    padding: 10px;
+    background: #FFFFFF;
+    border-radius: 12px;
+    border: 1px solid #F1F5F9;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 400px;
+}
+
+.test-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.test-q-text {
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748B;
+}
+
+.test-a-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.test-a-text {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.indicator-correct {
+    color: #10B981;
+    background: #DCFCE7;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.indicator-wrong {
+    color: #EF4444;
+    background: #FEE2E2;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 900;
+}
+
+/* Empty State */
+.feedback-empty {
+    padding: 80px 0;
+    text-align: center;
+    color: #CBD5E1;
+}
+
+.feedback-empty p {
+    font-style: italic;
+    font-weight: 300;
+}

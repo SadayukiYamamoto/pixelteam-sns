@@ -436,6 +436,8 @@ def video_list(request):
                 "video_url": dv.video_url or fv["video_url"],
                 "is_featured": dv.is_featured,
                 "is_short": dv.is_short,
+                "category": dv.category,
+                "order": dv.order,
                 "created_at": dv.created_at.isoformat() if dv.created_at else fv["created_at"]
             })
         final_videos_map[vid] = fv
@@ -453,7 +455,9 @@ def video_list(request):
                 "userAvatar": dv.userAvatar,
                 "created_at": dv.created_at.isoformat() if dv.created_at else None,
                 "is_featured": dv.is_featured,
-                "is_short": dv.is_short
+                "is_short": dv.is_short,
+                "category": dv.category,
+                "order": dv.order
             }
 
     # 4. ユーザー進捗の取得
@@ -1820,6 +1824,126 @@ def admin_video_list(request):
         })
 
     return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def admin_video_feedback(request):
+    """
+    動画ごとのテスト結果とアンケート結果をまとめて返す。
+    管理権限が必要。
+    """
+    if not request.user.is_admin_or_secretary:
+        return Response({"error": "権限がありません"}, status=403)
+
+    from django.db.models import Avg
+
+    videos = Video.objects.all()
+    result_data = []
+
+    for video in videos:
+        # --- テスト統計 ---
+        test_results = UserTestResult.objects.filter(video_id=video.id)
+        avg_score = test_results.aggregate(Avg('score'))['score__avg'] or 0
+
+        # --- アンケート統計 ---
+        try:
+            video_test = video.videotest
+            survey = video_test.survey
+            responses = SurveyResponse.objects.filter(test=video_test)
+        except (VideoTest.DoesNotExist, AttributeError, Survey.DoesNotExist):
+            responses = SurveyResponse.objects.none()
+
+        satisfaction_scores = []
+        user_map = {} # user_id -> {test: ..., survey: ...}
+
+        # 1. テスト結果をマッピング（1回目に回答した内容を保持）
+        for tr in test_results.order_by('created_at'):
+            uid = tr.user.user_id
+            if uid not in user_map:
+                user_map[uid] = {"user": tr.user, "test": None, "survey": None, "test_obj": None}
+            
+            # すでにデータがある場合はスキップし、最初（最古）のデータを優先する
+            if user_map[uid]["test"] is None:
+                user_map[uid]["test"] = {
+                    "score": tr.score,
+                    "max_score": tr.max_score,
+                    "is_passed": tr.is_passed,
+                    "created_at": tr.created_at
+                }
+                user_map[uid]["test_obj"] = tr
+
+        # 2. アンケート結果をマッピング
+        for resp in responses:
+            uid = resp.user_id
+            if uid not in user_map:
+                user_obj = User.objects.filter(user_id=uid).first()
+                user_map[uid] = {"user": user_obj, "test": None, "survey": None}
+            
+            answers = []
+            satisfaction = None
+            for ans in SurveyAnswer.objects.filter(response=resp):
+                ans_text = ans.choice.text if ans.choice else ans.answer_text
+                answers.append({
+                    "question": ans.question.text,
+                    "answer": ans_text
+                })
+                # 満足度の計算 (簡易的)
+                if "満足度" in ans.question.text:
+                    val = 0
+                    if "とても満足" in ans_text: val = 4
+                    elif "満足" in ans_text: val = 3
+                    elif "普通" in ans_text: val = 2
+                    elif "不満" in ans_text: val = 1
+                    if val > 0:
+                        satisfaction_scores.append(val)
+                        satisfaction = val
+
+            user_map[uid]["survey"] = {
+                "satisfaction": satisfaction,
+                "answers": answers,
+                "created_at": resp.created_at
+            }
+
+        avg_sat = sum(satisfaction_scores) / len(satisfaction_scores) if satisfaction_scores else 0
+
+        # データがある場合のみ追加
+        if test_results.exists() or responses.exists():
+            logs = []
+            for uid, data in user_map.items():
+                # テストの正誤詳細を取得
+                test_details = []
+                if data["test_obj"]:
+                    for ta in data["test_obj"].answers.all():
+                        test_details.append({
+                            "question": ta.question.text,
+                            "user_choice": ta.choice.text,
+                            "is_correct": ta.choice.is_correct
+                        })
+
+                logs.append({
+                    "user_id": uid,
+                    "display_name": data["user"].display_name if data["user"] else "匿名",
+                    "test": data["test"],
+                    "test_details": test_details,
+                    "survey": data["survey"]
+                })
+            
+            # 日付順（新しい順）に並べ替え
+            logs.sort(key=lambda x: (x["test"]["created_at"] if x["test"] else x["survey"]["created_at"]), reverse=True)
+
+            result_data.append({
+                "video_id": video.id,
+                "video_title": video.title,
+                "thumb": video.thumb,
+                "avg_score": round(avg_score, 1),
+                "avg_satisfaction": round(avg_sat, 1),
+                "total_tests": test_results.count(),
+                "total_surveys": responses.count(),
+                "logs": logs
+            })
+
+    return Response(result_data)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

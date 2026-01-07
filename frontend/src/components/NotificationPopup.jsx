@@ -47,8 +47,9 @@ const NotificationPopup = ({ onClose }) => {
 
     const handleNotifClick = (notif) => {
         if (notif.post_id) {
-            navigate(`/post/${notif.post_id}`);
-            onClose(); // Close popup after navigation
+            const query = notif.notification_type === 'COMMENT' ? '?openComments=true' : '';
+            navigate(`/posts/${notif.post_id}${query}`);
+            onClose();
         }
     };
 

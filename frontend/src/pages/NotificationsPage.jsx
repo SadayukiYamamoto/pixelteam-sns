@@ -52,7 +52,8 @@ const NotificationsPage = () => {
 
     const handleNotifClick = (notif) => {
         if (notif.post_id) {
-            navigate(`/post/${notif.post_id}`);
+            const query = notif.notification_type === 'COMMENT' ? '?openComments=true' : '';
+            navigate(`/posts/${notif.post_id}${query}`);
         }
     };
 

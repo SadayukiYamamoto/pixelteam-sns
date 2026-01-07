@@ -411,34 +411,62 @@ const Posts = () => {
       )}
 
       {showLikeModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-4 rounded-xl w-80 max-h-[60vh] overflow-y-auto shadow-lg">
-            <h3 className="text-lg font-bold mb-3">いいねしたユーザー</h3>
-            {likeListLoading ? (
-              <div className="flex flex-col items-center justify-center py-10">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
-                <span className="text-gray-500 text-sm">読み込み中...</span>
-              </div>
-            ) : likeList.length > 0 ? (
-              likeList.map((user, i) => (
-                <div key={i} className="flex items-center space-x-3 py-2 border-b border-gray-100">
-                  <img
-                    src={user.profile_image || "/default-avatar.png"}
-                    alt="avatar"
-                    className="w-8 h-8 rounded-full"
-                  />
-                  <span>{user.display_name || "匿名"}</span>
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-[100] p-4"
+          onClick={() => setShowLikeModal(false)}
+        >
+          <div
+            className="bg-white rounded-[32px] w-full max-w-[340px] max-h-[70vh] overflow-hidden shadow-2xl flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 pb-2">
+              <h3 className="text-lg font-black text-gray-800">いいねしたユーザー</h3>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 py-2">
+              {likeListLoading ? (
+                <div className="flex flex-col items-center justify-center py-10">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mb-2"></div>
+                  <span className="text-gray-500 text-sm">読み込み中...</span>
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-500 text-sm">まだ誰もいいねしていません。</p>
-            )}
-            <button
-              onClick={() => setShowLikeModal(false)}
-              className="mt-3 w-full py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm"
-            >
-              閉じる
-            </button>
+              ) : likeList.length > 0 ? (
+                <div className="space-y-4 py-2">
+                  {likeList.map((user, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded-xl transition-colors"
+                      onClick={() => {
+                        navigate(`/mypage/${user.user_id || user.id}`);
+                        setShowLikeModal(false);
+                      }}
+                    >
+                      <div className="w-10 h-10 rounded-full overflow-hidden shadow-md flex-shrink-0 ml-5">
+                        <img
+                          src={user.profile_image || "/default-avatar.png"}
+                          alt="avatar"
+                          className="w-full h-full object-cover"
+                          onError={(e) => (e.currentTarget.src = "/default-avatar.png")}
+                        />
+                      </div>
+                      <span className="font-bold text-gray-700 text-[15px] ml-5">{user.display_name || "匿名"}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-10 text-center">
+                  <p className="text-gray-400 text-sm font-medium">まだ誰もいいねしていません。</p>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 pt-2">
+              <button
+                onClick={() => setShowLikeModal(false)}
+                className="w-full py-4 bg-white text-gray-700 font-black rounded-2xl shadow-lg active:scale-[0.98] transition-all border-none text-[15px]"
+              >
+                閉じる
+              </button>
+            </div>
           </div>
         </div>
       )}
