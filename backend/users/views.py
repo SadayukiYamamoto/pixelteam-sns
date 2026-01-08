@@ -128,6 +128,7 @@ def google_login_view(request):
             "profile_image": user.profile_image,
             "team": user.team,
             "is_secretary": user.is_secretary,
+        "is_admin": user.is_admin_or_secretary,
             "is_staff": user.is_staff,
             "status": "success"
         })
@@ -178,6 +179,7 @@ def login_view(request):
         "profile_image": user.profile_image, 
         "team": user.team,
         "is_secretary": user.is_secretary,
+        "is_admin": user.is_admin_or_secretary,
         "is_staff": user.is_staff,
         "status": "success"
     })
@@ -222,6 +224,7 @@ def signup_view(request):
             "profile_image": user.profile_image,
             "team": user.team,
             "is_secretary": user.is_secretary,
+        "is_admin": user.is_admin_or_secretary,
             "is_staff": user.is_staff,
             "status": "success"
         }, status=201)
@@ -272,6 +275,7 @@ def mypage_view(request, user_id):
         "badges": badge_data,
         "posts": post_data,
         "is_secretary": user.is_secretary,
+        "is_admin": user.is_admin_or_secretary,
         "is_staff": user.is_staff,
     })
 
@@ -799,3 +803,18 @@ def user_login_popup(request):
             user.save()
             return Response({"message": "Popup marked as seen"})
         return Response({"error": "popup_id is required"}, status=400)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_current_user_profile(request):
+    user = request.user
+    return Response({
+        "user_id": user.user_id,
+        "display_name": user.display_name,
+        "email": user.email,
+        "profile_image": user.profile_image,
+        "is_secretary": user.is_secretary,
+        "is_admin": user.is_admin_or_secretary,
+        "is_staff": user.is_staff,
+        "team": user.team,
+    })

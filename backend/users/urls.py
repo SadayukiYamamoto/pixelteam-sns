@@ -7,6 +7,7 @@ urlpatterns = [
     path('login/google/', views.google_login_view, name='google_login'), 
     path('signup/', views.signup_view, name='signup'), # ← 追加 # ← 追加
     path('mypage/<str:user_id>/', views.mypage_view, name='mypage'),
+    path("profile/me/", views.get_current_user_profile, name="current_user_profile"),
     path('profile/<str:user_id>/', views.public_profile_view, name='public_profile'),
     path('update_profile/', views.update_profile, name='update_profile'),
     path("badges/<str:user_id>/", views.get_user_badges),

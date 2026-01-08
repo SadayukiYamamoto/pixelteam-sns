@@ -2053,3 +2053,48 @@ def admin_interaction_logs(request):
     ]
 
     return Response(data)
+
+# 🟦 コメント編集・削除
+@api_view(['PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def comment_detail(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    
+    # 自分のコメントか、もしくは管理者以外は操作不可
+    if str(comment.user_uid) != str(request.user.user_id) and not request.user.is_admin_or_secretary:
+        return Response({"error": "権限がありません"}, status=403)
+
+    if request.method == 'PUT':
+        if 'content' in request.data:
+            comment.content = request.data.get('content')
+        if 'image_url' in request.data:
+            comment.image_url = request.data.get('image_url')
+        comment.save()
+        serializer = CommentSerializer(comment, context={'request': request})
+        return Response(serializer.data)
+
+    elif request.method == 'DELETE':
+        comment.delete()
+        return Response(status=204)
+
+# 🟦 お宝コメント編集・削除
+@api_view(['PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def treasure_comment_detail(request, pk):
+    comment = get_object_or_404(TreasureComment, pk=pk)
+    
+    if str(comment.user_uid) != str(request.user.user_id) and not request.user.is_admin_or_secretary:
+        return Response({"error": "権限がありません"}, status=403)
+
+    if request.method == 'PUT':
+        if 'content' in request.data:
+            comment.content = request.data.get('content')
+        if 'image_url' in request.data:
+            comment.image_url = request.data.get('image_url')
+        comment.save()
+        serializer = TreasureCommentSerializer(comment, context={'request': request})
+        return Response(serializer.data)
+
+    elif request.method == 'DELETE':
+        comment.delete()
+        return Response(status=204)

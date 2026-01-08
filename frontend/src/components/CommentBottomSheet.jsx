@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { IoClose, IoImageOutline } from "react-icons/io5";
+import { IoClose, IoImageOutline, IoEllipsisVerticalOutline } from "react-icons/io5";
+import { HiDotsVertical } from "react-icons/hi";
 import { FiCamera } from "react-icons/fi";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -48,10 +49,13 @@ const CommentAvatar = ({ src, name, size = "w-8 h-8" }) => {
 };
 
 // 🔹 再帰的にレンダリングするコンポーネント（レンダリング毎の再生成を防ぐため外側に定義）
-const CommentNode = ({ comment, depth = 0, hasNextSibling = false, expandedReplies, toggleReplies, handleReplyBtnClick, handleCommentClick }) => {
+const CommentNode = ({ comment, depth = 0, hasNextSibling = false, expandedReplies, toggleReplies, handleReplyBtnClick, handleCommentClick, currentUserUid, isAdmin, onEdit, onDelete }) => {
   const isExpanded = expandedReplies[comment.id];
   const replies = comment.replies || [];
   const hasReplies = replies.length > 0;
+  const [showMenu, setShowMenu] = useState(false);
+
+  const canModify = String(comment.user_uid) === String(currentUserUid);
 
   const getAllDescendants = (node) => {
     let list = [];
@@ -91,19 +95,70 @@ const CommentNode = ({ comment, depth = 0, hasNextSibling = false, expandedRepli
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center" style={{ gap: '10px', marginBottom: '2px' }}>
-            <p className="font-black text-[13px] text-slate-900 truncate tracking-tight">
-              {comment.display_name || "匿名"}
-            </p>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-              {new Date(comment.created_at).toLocaleDateString()}
-            </span>
+          <div className="flex items-center justify-between" style={{ marginBottom: '2px' }}>
+            <div className="flex items-center" style={{ gap: '10px' }}>
+              <p className="font-black text-[13px] text-slate-900 truncate tracking-tight">
+                {comment.display_name || "匿名"}
+              </p>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                {new Date(comment.created_at).toLocaleDateString()}
+              </span>
+            </div>
+
+            {/* メニューオプション (編集・削除) */}
+            {canModify && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="p-1 text-slate-400 hover:text-slate-600 transition-colors bg-transparent border-none cursor-pointer rounded-full hover:bg-slate-100"
+                >
+                  <HiDotsVertical size={16} />
+                </button>
+                <AnimatePresence>
+                  {showMenu && (
+                    <>
+                      <div className="fixed inset-0 z-[100]" onClick={() => setShowMenu(false)} />
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                        className="absolute right-0 top-full mt-1 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.12)] rounded-xl p-1.5 z-[101] min-w-[100px] border-none"
+                      >
+                        <button
+                          onClick={() => { onEdit(comment); setShowMenu(false); }}
+                          className="w-full text-left px-3 py-2 text-[12px] font-bold text-slate-700 hover:bg-slate-50 rounded-lg border-none bg-transparent cursor-pointer"
+                        >
+                          編集する
+                        </button>
+                        <button
+                          onClick={() => { onDelete(comment.id); setShowMenu(false); }}
+                          className="w-full text-left px-3 py-2 text-[12px] font-bold text-red-500 hover:bg-red-50 rounded-lg border-none bg-transparent cursor-pointer"
+                        >
+                          削除する
+                        </button>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
           <div
             className="text-slate-600 text-[13px] leading-relaxed comment-body-html"
             onClick={handleCommentClick}
             dangerouslySetInnerHTML={{ __html: comment.content }}
           />
+
+          {comment.image_url && (
+            <div className="mt-2.5 rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.08)] max-w-[180px] border-none">
+              <img
+                src={comment.image_url}
+                alt="comment attachment"
+                className="w-full h-auto cursor-pointer"
+                onClick={() => window.open(comment.image_url, '_blank')}
+              />
+            </div>
+          )}
 
           <div className="mt-1 flex items-center gap-4">
             <button
@@ -155,6 +210,10 @@ const CommentNode = ({ comment, depth = 0, hasNextSibling = false, expandedRepli
                   toggleReplies={toggleReplies}
                   handleReplyBtnClick={handleReplyBtnClick}
                   handleCommentClick={handleCommentClick}
+                  currentUserUid={currentUserUid}
+                  isAdmin={isAdmin}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
                 />
               ))}
               <div style={{ paddingLeft: '44px' }} className="py-1">
@@ -173,6 +232,8 @@ const CommentNode = ({ comment, depth = 0, hasNextSibling = false, expandedRepli
   );
 };
 
+import axiosClient from "../api/axiosClient";
+
 const CommentBottomSheet = ({ postId, onClose }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -182,12 +243,24 @@ const CommentBottomSheet = ({ postId, onClose }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null); // { id, display_name }
   const [expandedReplies, setExpandedReplies] = useState({}); // { parentId: boolean }
+  const [editingComment, setEditingComment] = useState(null); // { id, content, image_url }
+  const [currentUser, setCurrentUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser);
+        return { user_id: parsed.userId, is_admin: false }; // fallback
+      } catch (e) { return null; }
+    }
+    return null;
+  });
 
   const fileInputRef = React.useRef(null);
   const API_URL = import.meta.env.VITE_API_URL || "";
   const navigate = useNavigate();
 
   // 🟦 Tiptap Editor 設定
+  // ... (Tiptap config remains)
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -271,9 +344,38 @@ const CommentBottomSheet = ({ postId, onClose }) => {
 
   useEffect(() => {
     fetchComments();
+    axiosClient.get("profile/me/")
+      .then(res => {
+        setCurrentUser(res.data);
+      })
+      .catch(err => console.error("Profile fetch error:", err));
   }, [postId]);
 
-  // 🔹 コメント送信
+  // 🔹 削除ハンドラ
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("このコメントを削除しますか？")) return;
+    try {
+      await axiosClient.delete(`comments/${commentId}/`);
+      fetchComments();
+      window.dispatchEvent(new Event("comment-updated"));
+    } catch (err) {
+      console.error("コメント削除エラー:", err);
+      alert("削除に失敗しました");
+    }
+  };
+
+  // 🔹 編集モード開始ハンドラ
+  const handleEditComment = (comment) => {
+    setEditingComment({ id: comment.id, content: comment.content, image_url: comment.image_url });
+    setReplyingTo(null);
+    setSelectedImage(comment.image_url);
+    if (editor) {
+      editor.commands.setContent(comment.content);
+      editor.commands.focus();
+    }
+  };
+
+  // 🔹 コメント送信 (新規投稿 or 編集更新)
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     if (!editor || editor.isEmpty || isSubmitting) return;
@@ -283,24 +385,37 @@ const CommentBottomSheet = ({ postId, onClose }) => {
     const token = localStorage.getItem("token");
 
     try {
-      await axios.post(
-        `${API_URL}/api/posts/${postId}/comments/`,
-        {
-          content: htmlContent,
-          image_url: selectedImage,
-          parent: replyingTo?.id || null
-        },
-        { headers: { Authorization: `Token ${token}` } }
-      );
+      if (editingComment) {
+        // 更新 (PUT)
+        await axiosClient.put(
+          `comments/${editingComment.id}/`,
+          {
+            content: htmlContent,
+            image_url: selectedImage
+          }
+        );
+      } else {
+        // 新規 (POST)
+        await axiosClient.post(
+          `posts/${postId}/comments/`,
+          {
+            content: htmlContent,
+            image_url: selectedImage,
+            parent: replyingTo?.id || null
+          }
+        );
+      }
 
       editor.commands.clearContent();
       setEditorContent("");
       setSelectedImage(null);
       setReplyingTo(null);
+      setEditingComment(null);
       await fetchComments();
       window.dispatchEvent(new Event("comment-updated"));
     } catch (err) {
       console.error("コメント送信エラー:", err);
+      alert("送信に失敗しました");
     } finally {
       setIsSubmitting(false);
     }
@@ -399,6 +514,10 @@ const CommentBottomSheet = ({ postId, onClose }) => {
                     toggleReplies={toggleReplies}
                     handleReplyBtnClick={handleReplyBtnClick}
                     handleCommentClick={handleCommentClick}
+                    currentUserUid={currentUser?.user_id}
+                    isAdmin={currentUser?.is_admin}
+                    onEdit={handleEditComment}
+                    onDelete={handleDeleteComment}
                   />
                 ))}
                 <div className="h-20" />
@@ -420,23 +539,37 @@ const CommentBottomSheet = ({ postId, onClose }) => {
 
           {/* 固定入力フォーム */}
           <div className="bg-white shrink-0 flex flex-col items-center shadow-[0_-10px_40px_rgba(0,0,0,0.08)] relative z-[11]" style={{ padding: '16px 20px 32px' }}>
-            {/* 返信先インジケーター (Google Chat スタイル改善版) */}
-            {replyingTo && (
+            {/* 返信先 or 編集中のインジケーター */}
+            {(replyingTo || editingComment) && (
               <div className="w-full max-w-[429.333px] relative mb-4 animate-in fade-in slide-in-from-bottom-2">
-                <div className="bg-white rounded-2xl p-3 pr-10 shadow-[0_8px_30px_rgba(0,0,0,0.06)] border-none relative">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <CommentAvatar src={replyingTo.profile_image} name={replyingTo.display_name} size="w-4 h-4" />
-                    <span className="text-[12px] font-black text-slate-700">{replyingTo.display_name}</span>
+                <div
+                  className="rounded-2xl p-5 pr-12 relative border-none animate-in fade-in slide-in-from-bottom-2"
+                  style={{
+                    backgroundColor: editingComment ? '#f0fdf4' : '#ffffff',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.12)'
+                  }}
+                >
+                  <div className="flex items-center gap-1.5 mb-2">
+                    {replyingTo ? (
+                      <>
+                        <CommentAvatar src={replyingTo.profile_image} name={replyingTo.display_name} size="w-4 h-4" />
+                        <span className="text-[12px] font-black text-slate-700">{replyingTo.display_name} へ返信</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-[16px] font-black text-emerald-800 tracking-tight">コメントを編集</span>
+                      </>
+                    )}
                   </div>
 
                   <div
-                    className="text-[11px] text-slate-400 line-clamp-1 opacity-90 pl-0"
-                    dangerouslySetInnerHTML={{ __html: replyingTo.content }}
+                    className={`text-[13px] line-clamp-1 pl-0 ${editingComment ? 'text-emerald-900 font-bold' : 'text-slate-400'}`}
+                    dangerouslySetInnerHTML={{ __html: replyingTo?.content || editingComment?.content }}
                   />
 
                   <button
-                    onClick={() => setReplyingTo(null)}
-                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-slate-50 rounded-full text-slate-400 hover:text-red-500 transition-all active:scale-90 border-none cursor-pointer"
+                    onClick={() => { setReplyingTo(null); setEditingComment(null); if (editingComment) editor.commands.clearContent(); }}
+                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-white/80 rounded-full text-slate-400 hover:text-red-500 transition-all active:scale-90 border-none cursor-pointer shadow-sm"
                   >
                     <IoClose size={16} />
                   </button>
@@ -498,7 +631,7 @@ const CommentBottomSheet = ({ postId, onClose }) => {
                   color: (!editor || (editor.isEmpty && editorContent === "") || isSubmitting) ? '#94a3b8' : '#ffffff',
                 }}
               >
-                {isSubmitting ? "..." : "投稿"}
+                {isSubmitting ? "..." : (editingComment ? "保存" : "投稿")}
               </button>
             </div>
           </div>
