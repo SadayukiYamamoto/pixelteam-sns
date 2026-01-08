@@ -9,6 +9,7 @@ import axiosClient from "../api/axiosClient";
 import FloatingWriteButton from "../components/FloatingWriteButton";
 import CommentBottomSheet from "../components/CommentBottomSheet";
 import { renderPostContent } from "../utils/textUtils";
+import Avatar from "../components/Avatar";
 
 const formatTimeAgo = (dateString) => {
   if (!dateString) return "";
@@ -227,21 +228,20 @@ const Posts = () => {
   };
 
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
     const handleScroll = () => {
       if (loading || !hasNext) return;
-      if (
-        container.scrollTop + container.clientHeight >=
-        container.scrollHeight - 300
-      ) {
+
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const clientHeight = window.innerHeight;
+
+      if (scrollTop + clientHeight >= scrollHeight - 300) {
         setPage((prev) => prev + 1);
       }
     };
 
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [hasNext, loading]);
 
   useEffect(() => {
@@ -258,7 +258,7 @@ const Posts = () => {
             ref={scrollContainerRef}
             className="posts-content px-4 pt-[72px] pb-[100px]"
           >
-            <h2 className="text-xl font-bold mb-4">
+            <h2 className="text-xl font-bold mb-4" style={{ marginTop: '16px' }}>
               {tag ? `#${tag} の詳細` : "投稿一覧"}
             </h2>
 
@@ -315,11 +315,10 @@ const Posts = () => {
                       }
                     }}
                   >
-                    <img
-                      src={post.user?.profileImage || "/default-avatar.png"}
-                      alt="user"
-                      className="user-avatar block"
-                      onError={(e) => (e.currentTarget.src = "/default-avatar.png")}
+                    <Avatar
+                      src={post.user?.profileImage}
+                      name={post.user?.displayName}
+                      size="w-8 h-8"
                     />
                     <div className="ml-2">
                       <p className="font-bold text-sm leading-tight">{post.user?.displayName || "匿名"}</p>
@@ -412,7 +411,7 @@ const Posts = () => {
 
       {showLikeModal && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-[100] p-4"
+          className="fixed inset-0 bg-black/70 backdrop-blur-md flex justify-center items-center z-[110000] p-4"
           onClick={() => setShowLikeModal(false)}
         >
           <div
@@ -440,14 +439,12 @@ const Posts = () => {
                         setShowLikeModal(false);
                       }}
                     >
-                      <div className="w-10 h-10 rounded-full overflow-hidden shadow-md flex-shrink-0 ml-5">
-                        <img
-                          src={user.profile_image || "/default-avatar.png"}
-                          alt="avatar"
-                          className="w-full h-full object-cover"
-                          onError={(e) => (e.currentTarget.src = "/default-avatar.png")}
-                        />
-                      </div>
+                      < Avatar
+                        src={user.profile_image}
+                        name={user.display_name}
+                        size="w-10 h-10"
+                        className="ml-5"
+                      />
                       <span className="font-bold text-gray-700 text-[15px] ml-5">{user.display_name || "匿名"}</span>
                     </div>
                   ))}

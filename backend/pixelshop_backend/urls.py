@@ -7,12 +7,16 @@ from django.conf.urls.static import static
 def home(request):
     return HttpResponse("Welcome to Pixel Shop!")
 
+api_patterns = [
+    path('', include('users.urls')),
+    path('', include('posts.urls')),
+    path('missions/', include('missions.urls')),
+]
+
 urlpatterns = [
     path('', home),
     path('admin/', admin.site.urls),
-    path('api/', include('users.urls')),  # ← MyPageとLoginはこちら
-    path('api/', include('posts.urls')),  # ← 投稿一覧はこちら
-    path('api/missions/', include('missions.urls')),
+    path('api/', include(api_patterns)),
 ]
 
 if settings.DEBUG:

@@ -16,6 +16,7 @@ import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import suggestion from "./tiptap/suggestion";
 import { OGPCard } from "../extentions/OGPCard";
+import Avatar from "./Avatar";
 
 const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
     const [comments, setComments] = useState([]);
@@ -164,14 +165,14 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
     return (
         <AnimatePresence>
             <motion.div
-                className="fixed inset-0 flex justify-center items-end z-[10000]"
+                className="fixed inset-0 flex justify-center items-end z-[110000]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={onClose}
             >
                 {/* 背景（半透明＋ぼかし） */}
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
                 {/* コメントボックス */}
                 <motion.div
@@ -205,9 +206,11 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
                             <div className="space-y-6">
                                 {comments.map((c, i) => (
                                     <div key={i} className="flex items-start space-x-4">
-                                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-sm overflow-hidden flex-shrink-0 border border-slate-50 shadow-sm">
-                                            {c.user_name?.charAt(0) || "U"}
-                                        </div>
+                                        <Avatar
+                                            src={c.profile_image}
+                                            name={c.user_name}
+                                            size="w-10 h-10"
+                                        />
                                         <div className="flex-1">
                                             <div className="flex items-baseline gap-2 mb-1.5">
                                                 <p className="font-bold text-[14px] text-slate-700">

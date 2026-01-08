@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
 import { Heart, MessageCircle, AtSign, Award, CircleDollarSign, Bell, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Avatar from './Avatar';
 import './NoticePopup.css'; // Reuse popup styles
 import '../pages/NotificationsPage.css'; // Reuse notification item styles
 
@@ -82,7 +83,12 @@ const NotificationPopup = ({ onClose }) => {
                                     <div className="notif-sender">
                                         {notif.sender ? (
                                             <>
-                                                <img src={notif.sender.profile_image || '/default-avatar.png'} alt="" className="sender-avatar" />
+                                                <Avatar
+                                                    src={notif.sender.profile_image}
+                                                    name={notif.sender.display_name}
+                                                    size="w-6 h-6"
+                                                    className="sender-avatar"
+                                                />
                                                 <span className="sender-name">{notif.sender.display_name}</span>
                                             </>
                                         ) : (

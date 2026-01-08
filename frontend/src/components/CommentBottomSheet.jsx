@@ -18,35 +18,8 @@ import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import suggestion from "./tiptap/suggestion";
 import { OGPCard } from "../extentions/OGPCard";
+import Avatar from "./Avatar";
 
-// 🟦 アバターコンポーネント (画像がない・エラー時にフォールバックを表示)
-const CommentAvatar = ({ src, name, size = "w-8 h-8" }) => {
-  const [hasError, setHasError] = React.useState(false);
-
-  // Tailwindクラスが動的に解決されない場合への対策としてstyleも併用
-  const sizeValue = size.includes("w-10") ? "40px" : size.includes("w-8") ? "32px" : size.includes("w-6") ? "24px" : "18px";
-
-  if (!src || hasError) {
-    return (
-      <div
-        className={`${size} rounded-full flex items-center justify-center text-white font-bold text-[12px] shadow-sm shrink-0`}
-        style={{ backgroundColor: '#84cc16', width: sizeValue, height: sizeValue }}
-      >
-        {(name || "名")[0]}
-      </div>
-    );
-  }
-
-  return (
-    <img
-      src={src}
-      alt="avatar"
-      className={`${size} rounded-full object-cover shadow-sm bg-white p-0.5 shrink-0`}
-      style={{ width: sizeValue, height: sizeValue }}
-      onError={() => setHasError(true)}
-    />
-  );
-};
 
 // 🔹 再帰的にレンダリングするコンポーネント（レンダリング毎の再生成を防ぐため外側に定義）
 const CommentNode = ({ comment, depth = 0, hasNextSibling = false, expandedReplies, toggleReplies, handleReplyBtnClick, handleCommentClick, currentUserUid, isAdmin, onEdit, onDelete }) => {
@@ -87,7 +60,7 @@ const CommentNode = ({ comment, depth = 0, hasNextSibling = false, expandedRepli
         )}
 
         <div className="flex-shrink-0 relative z-10">
-          <CommentAvatar
+          <Avatar
             src={comment.profile_image}
             name={comment.display_name}
             size={depth > 0 ? "w-6 h-6" : "w-8 h-8"}
@@ -466,9 +439,9 @@ const CommentBottomSheet = ({ postId, onClose }) => {
 
   return (
     <AnimatePresence>
-      <div key="comment-bottom-sheet-root" className="fixed inset-0 flex justify-center items-end z-[10000]">
+      <div key="comment-bottom-sheet-root" className="fixed inset-0 flex justify-center items-end z-[110000]">
         <motion.div
-          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -552,7 +525,7 @@ const CommentBottomSheet = ({ postId, onClose }) => {
                   <div className="flex items-center gap-1.5 mb-2">
                     {replyingTo ? (
                       <>
-                        <CommentAvatar src={replyingTo.profile_image} name={replyingTo.display_name} size="w-4 h-4" />
+                        <Avatar src={replyingTo.profile_image} name={replyingTo.display_name} size="w-4 h-4" />
                         <span className="text-[12px] font-black text-slate-700">{replyingTo.display_name} へ返信</span>
                       </>
                     ) : (

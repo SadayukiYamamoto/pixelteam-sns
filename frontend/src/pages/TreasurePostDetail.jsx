@@ -4,6 +4,7 @@ import { FaHeart, FaRegCommentDots, FaTimes, FaEllipsisV } from "react-icons/fa"
 import Header from "../components/Header";
 import Navigation from "../components/Navigation";
 import TreasureCommentBottomSheet from "../components/TreasureCommentBottomSheet";
+import Avatar from "../components/Avatar";
 import styles from "./TreasurePostDetail.module.css";
 
 import { processHtmlContent } from '../utils/contentHelper'; // Import helper
@@ -160,11 +161,11 @@ export default function TreasurePostDetail() {
 
               {/* ユーザー情報 */}
               <div className={styles.userInfo}>
-                <img
-                  src={post.profile_image || "/default-avatar.png"}
-                  alt="avatar"
+                <Avatar
+                  src={post.profile_image}
+                  name={post.display_name}
+                  size="w-10 h-10"
                   className={styles.userAvatar}
-                  onError={(e) => (e.target.src = "/default-avatar.png")}
                 />
                 <div className={styles.userMeta}>
                   <span className={styles.displayName}>

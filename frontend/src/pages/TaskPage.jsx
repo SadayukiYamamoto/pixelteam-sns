@@ -179,7 +179,7 @@ const TaskPage = () => {
           className="pt-[72px] px-5 pb-[100px] bg-[#f9fafb]"
         >
           <div className="flex justify-center -mb-6 pt-6 relative z-10">
-            <div className="pokepoke-label px-8 shadow-lg scale-110">
+            <div className="pokepoke-label px-8 shadow-lg scale-110" style={{ marginTop: '30px' }}>
               業務一覧
             </div>
           </div>

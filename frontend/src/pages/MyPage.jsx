@@ -10,6 +10,7 @@ import Navigation from "../components/Navigation";
 import PointCard from "../components/PointCard";
 import LoginPopupManager from "../components/LoginPopupManager";
 import PostItem from "../components/PostItem"; // Assuming PostItem is used for list
+import Avatar from "../components/Avatar";
 // Ensure PostItem handles styling internally or wrap it
 
 const ADMIN_UID = "Xx7gnfTCPQMXlNS5ceM4uUltoD03"; // 管理者ID
@@ -83,9 +84,10 @@ const MyPage = () => {
         <div className="mypage-content">
           {/* プロフィール (Reverted Style) */}
           <div className="mypage-profile-section">
-            <img
-              src={profile.profile_image || "/default-avatar.png"}
-              alt="profile"
+            <Avatar
+              src={profile.profile_image}
+              name={profile.display_name}
+              size="w-24 h-24"
               className="mypage-profile-icon"
             />
             <h2 className="mypage-name">{profile.display_name}</h2>
@@ -197,7 +199,19 @@ const MyPage = () => {
                   posts
                     .filter(p => p.category === '雑談' || !p.category || (p.category !== '個人報告' && p.category !== 'individual_report'))
                     .map((post) => (
-                      <PostItem key={post.id} post={post} hideReactions={true} />
+                      <PostItem
+                        key={post.id}
+                        post={{
+                          ...post,
+                          profileImage: profile.profile_image,
+                          user: profile.display_name,
+                          time: new Date(post.created_at).toLocaleDateString(),
+                          likes: post.likes_count || 0,
+                          comments: post.comments_count || 0,
+                          image: post.image_url || post.image
+                        }}
+                        hideReactions={true}
+                      />
                     ))
                 ) : (
                   <div className="text-center py-10 text-gray-400">
@@ -214,7 +228,19 @@ const MyPage = () => {
                   posts
                     .filter(p => p.category === '個人報告' || p.category === 'individual_report')
                     .map((post) => (
-                      <PostItem key={post.id} post={post} hideReactions={true} />
+                      <PostItem
+                        key={post.id}
+                        post={{
+                          ...post,
+                          profileImage: profile.profile_image,
+                          user: profile.display_name,
+                          time: new Date(post.created_at).toLocaleDateString(),
+                          likes: post.likes_count || 0,
+                          comments: post.comments_count || 0,
+                          image: post.image_url || post.image
+                        }}
+                        hideReactions={true}
+                      />
                     ))
                 ) : (
                   <div className="flex flex-col items-center justify-center py-10">
