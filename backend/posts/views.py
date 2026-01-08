@@ -1903,7 +1903,7 @@ def admin_video_feedback(request):
             uid = resp.user_id
             if uid not in user_map:
                 user_obj = User.objects.filter(user_id=uid).first()
-                user_map[uid] = {"user": user_obj, "test": None, "survey": None}
+                user_map[uid] = {"user": user_obj, "test": None, "survey": None, "test_obj": None}
             
             answers = []
             satisfaction = None
