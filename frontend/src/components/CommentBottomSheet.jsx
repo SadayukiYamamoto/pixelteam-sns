@@ -191,11 +191,18 @@ const CommentBottomSheet = ({ postId, onClose }) => {
     }
   };
 
-  // コメントを親子関係で整理する
-  // 今回、comments は作成日逆順（新しい順）で来ている想定。
-  // X/Facebook風なら、親は新着順、返信は古い順（あるいは新着順）が一般的。
-  const parentComments = comments.filter(c => !c.parent);
-  const getReplies = (parentId) => comments.filter(c => c.parent === parentId).reverse(); // 返信は時系列
+  // 再帰的に返信を取得し、階層構造（ツリー）を構築する
+  const getCommentTree = (parentId = null) => {
+    return comments
+      .filter(c => c.parent === parentId)
+      .reverse() // 時系列（古い順）
+      .map(c => ({
+        ...c,
+        replies: getCommentTree(c.id)
+      }));
+  };
+
+  const commentTree = getCommentTree(null);
 
   const toggleReplies = (parentId) => {
     setExpandedReplies(prev => ({
@@ -214,65 +221,147 @@ const CommentBottomSheet = ({ postId, onClose }) => {
     editor.commands.focus();
   };
 
-  const CommentItem = ({ comment, isReply = false, hasNextReply = false }) => (
-    <div className={`flex items-start bg-white group/item ${isReply ? 'ml-0' : 'mb-0.5'}`} style={{ padding: '12px', gap: '14px', position: 'relative' }}>
-      {/* ツリー線 (鍵線コネクタ) */}
-      {isReply && (
-        <div className="absolute left-[28px] top-[-12px] w-[30px] h-[40px]">
-          {/* 縦線（親から下りてくる線） */}
-          <div className="absolute left-0 top-0 bottom-[4px] w-[2px] bg-slate-300" />
-          {/* 曲がり角 & 横線（自分のアバター中心へ向かう線: 12 + 30 + 12 = 54px地点のアバター中心に届くよう調整） */}
-          <div className="absolute left-0 bottom-[4px] w-[26px] h-[14px] border-b-2 border-l-2 border-slate-300" style={{ borderBottomLeftRadius: '10px' }} />
-        </div>
-      )}
+  // 再帰的にレンダリングするコンポーネント
+  const CommentNode = ({ comment, depth = 0, hasNextSibling = false }) => {
+    const isExpanded = expandedReplies[comment.id];
+    const replies = comment.replies || [];
+    const hasReplies = replies.length > 0;
 
-      {/* 返信が続く場合の縦線（自分のアバター(12+30+12=54px地点)の下から次へ続く） */}
-      {isReply && hasNextReply && (
-        <div className="absolute left-[54px] top-[28px] bottom-0 w-[2px] bg-slate-300" />
-      )}
+    // このスレッド以下の全ての返信者アイコンをユニークに取得（最大3名）
+    const getAllDescendants = (node) => {
+      let list = [];
+      node.replies?.forEach(r => {
+        list.push(r);
+        list = list.concat(getAllDescendants(r));
+      });
+      return list;
+    };
+    const allDescendants = getAllDescendants(comment);
+    const replierAvatars = Array.from(new Set(allDescendants.map(r => r.profile_image).filter(Boolean))).slice(0, 3);
 
-      <div className="flex-shrink-0 relative z-10" style={isReply ? { marginLeft: '30px', marginTop: '4px' } : {}}>
-        <CommentAvatar src={comment.profile_image} name={comment.display_name} size={isReply ? "w-6 h-6" : "w-8 h-8"} />
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center" style={{ gap: '10px', marginBottom: '2px' }}>
-          <p className="font-black text-[13px] text-slate-900 truncate tracking-tight">
-            {comment.display_name || "匿名"}
-          </p>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-            {new Date(comment.created_at).toLocaleDateString()}
-          </span>
-        </div>
+    return (
+      <div className="relative bg-white">
         <div
-          className="text-slate-600 text-[13px] leading-relaxed comment-body-html"
-          onClick={handleCommentClick}
-          dangerouslySetInnerHTML={{ __html: comment.content }}
-        />
-        {comment.image_url && (
-          <div className="mt-2.5 rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.08)] max-w-[180px] border-none">
-            <img
-              src={comment.image_url}
-              alt="comment attachment"
-              className="w-full h-auto cursor-pointer"
-              onClick={() => window.open(comment.image_url, '_blank')}
-            />
-          </div>
-        )}
+          className="flex items-start group/item"
+          style={{
+            padding: '12px',
+            gap: '14px',
+            position: 'relative',
+            marginLeft: depth > 0 ? '30px' : '0'
+          }}
+        >
+          {/* ツリー線 (コネクタ) */}
+          {depth > 0 && (
+            <div className="absolute left-[-16px] top-[-12px] w-[30px] h-[36px]">
+              <div className="absolute left-0 top-0 bottom-[4px] w-[1.5px] bg-slate-300" />
+              <div className="absolute left-0 bottom-[4px] w-[26px] h-[10px] border-b-[1.5px] border-l-[1.5px] border-slate-300" style={{ borderBottomLeftRadius: '8px' }} />
+            </div>
+          )}
 
-        {/* 返信ボタン */}
-        <div className="mt-1.5">
-          <button
-            onClick={() => handleReplyBtnClick(comment)}
-            style={{ color: '#10b981' }}
-            className="text-[11px] font-black hover:opacity-70 transition-colors bg-transparent border-none p-0 cursor-pointer"
-          >
-            返信する
-          </button>
+          {/* 親から子へ続く縦線 (深度1以上で、さらに兄弟または開かれた子がある場合) */}
+          {((depth > 0 && hasNextSibling) || (depth > 0 && hasReplies && isExpanded)) && (
+            <div className="absolute left-[-16px] top-[24px] bottom-0 w-[1.5px] bg-slate-300" />
+          )}
+
+          {/* 第一階層(depth=0)から子へ繋ぐ線 */}
+          {depth === 0 && (hasReplies && isExpanded) && (
+            <div className="absolute left-[28px] top-[44px] bottom-0 w-[1.5px] bg-slate-200" />
+          )}
+
+          <div className="flex-shrink-0 relative z-10">
+            <CommentAvatar src={comment.profile_image} name={comment.display_name} size={depth > 0 ? "w-6 h-6" : "w-8 h-8"} />
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center" style={{ gap: '10px', marginBottom: '2px' }}>
+              <p className="font-black text-[13px] text-slate-900 truncate tracking-tight">
+                {comment.display_name || "匿名"}
+              </p>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                {new Date(comment.created_at).toLocaleDateString()}
+              </span>
+            </div>
+            <div
+              className="text-slate-600 text-[13px] leading-relaxed comment-body-html"
+              onClick={handleCommentClick}
+              dangerouslySetInnerHTML={{ __html: comment.content }}
+            />
+            {comment.image_url && (
+              <div className="mt-2.5 rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.08)] max-w-[180px] border-none">
+                <img
+                  src={comment.image_url}
+                  alt="comment attachment"
+                  className="w-full h-auto cursor-pointer"
+                  onClick={() => window.open(comment.image_url, '_blank')}
+                />
+              </div>
+            )}
+
+            {/* アクション: 返信 + 展開ボタン */}
+            <div className="mt-1 flex items-center gap-4">
+              <button
+                onClick={() => handleReplyBtnClick(comment)}
+                style={{ color: '#10b981' }}
+                className="text-[11px] font-black hover:opacity-70 transition-colors bg-transparent border-none p-0 cursor-pointer"
+              >
+                返信する
+              </button>
+
+              {hasReplies && !isExpanded && (
+                <button
+                  onClick={() => toggleReplies(comment.id)}
+                  className="flex items-center gap-2 hover:opacity-70 transition-all bg-transparent border-none p-0 cursor-pointer"
+                >
+                  <div className="flex -space-x-1">
+                    {replierAvatars.map((url, i) => (
+                      <div key={i} className="rounded-full overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.12)] bg-white flex-shrink-0" style={{ width: '18px', height: '18px' }}>
+                        <img src={url} alt="replier" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                    {replierAvatars.length === 0 && <div className="rounded-full bg-slate-100 shadow-sm" style={{ width: '18px', height: '18px' }} />}
+                  </div>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    他{allDescendants.length}件の返信を表示
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
+
+        {/* 子要素（再帰） */}
+        <AnimatePresence>
+          {hasReplies && isExpanded && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="relative" style={{ paddingLeft: '30px' }}>
+                {replies.map((r, idx) => (
+                  <CommentNode
+                    key={r.id}
+                    comment={r}
+                    depth={depth + 1}
+                    hasNextSibling={idx < replies.length - 1}
+                  />
+                ))}
+                <div style={{ paddingLeft: '44px' }} className="py-1">
+                  <button
+                    onClick={() => toggleReplies(comment.id)}
+                    className="text-[11px] font-bold text-slate-400 hover:text-slate-600 bg-transparent border-none cursor-pointer"
+                  >
+                    返信を閉じる
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <AnimatePresence>
@@ -312,58 +401,16 @@ const CommentBottomSheet = ({ postId, onClose }) => {
               <div className="flex justify-center items-center h-full">
                 <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-400 border-t-transparent"></div>
               </div>
-            ) : parentComments.length > 0 ? (
+            ) : commentTree.length > 0 ? (
               <div className="py-2">
-                {parentComments.map((c) => {
-                  const replies = getReplies(c.id);
-                  const isExpanded = expandedReplies[c.id];
-
-                  return (
-                    <div key={c.id} className="mb-0.5 last:mb-0">
-                      <CommentItem comment={c} />
-
-                      {/* 返信エリア */}
-                      {replies.length > 0 && (
-                        <div className="bg-white pb-2 relative">
-                          {!isExpanded ? (
-                            <div className="pl-12">
-                              <button
-                                onClick={() => toggleReplies(c.id)}
-                                className="flex items-center gap-2 py-2 text-[12px] font-black text-slate-500 hover:text-emerald-500 bg-transparent border-none cursor-pointer"
-                              >
-                                <div className="w-6 h-[1.5px] bg-slate-200" />
-                                他{replies.length}件の返信を表示
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="space-y-0 relative">
-                              {/* 親アバター(28px)から最初の返信アバター(36px)へ繋ぐ延長線 */}
-                              <div className="absolute left-[28px] top-[-10px] w-[1.5px] h-[30px] bg-slate-200" />
-
-                              <div className="pl-12">
-                                {replies.map((r, idx) => (
-                                  <CommentItem
-                                    key={r.id}
-                                    comment={r}
-                                    isReply={true}
-                                    hasNextReply={idx < replies.length - 1}
-                                  />
-                                ))}
-                                <button
-                                  onClick={() => toggleReplies(c.id)}
-                                  className="flex items-center gap-1.5 py-2 text-[11px] font-black text-slate-400 hover:text-slate-600 bg-transparent border-none cursor-pointer"
-                                  style={{ marginLeft: '54px' }}
-                                >
-                                  返信を閉じる
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                {commentTree.map((c, idx) => (
+                  <CommentNode
+                    key={c.id}
+                    comment={c}
+                    depth={0}
+                    hasNextSibling={idx < commentTree.length - 1}
+                  />
+                ))}
                 <div className="h-20" />
               </div>
             ) : (
