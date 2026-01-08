@@ -1,25 +1,42 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import { motion, AnimatePresence } from "framer-motion";
-import { IoChevronBack, IoCheckmarkCircle, IoLockClosed } from "react-icons/io5";
-import { Link } from "react-router-dom";
+import { IoClose, IoCheckmarkCircle, IoLockClosed } from "react-icons/io5";
 import confetti from "canvas-confetti";
-
-const API_URL = import.meta.env.VITE_API_URL || "";
+import "../pages/MissionPage.css"; // Reuse the css file
 
 const MissionsPage = () => {
+    const navigate = useNavigate();
     const [missions, setMissions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [claimingId, setClaimingId] = useState(null);
     const [activeTab, setActiveTab] = useState('daily');
 
     const fetchMissions = async () => {
-        const token = localStorage.getItem("token");
         try {
             const res = await axiosClient.get(`missions/`);
-            setMissions(res.data);
+            if (res.data && res.data.length > 0) {
+                setMissions(res.data);
+            } else {
+                // Fallback for UI demo
+                const mockMissions = [
+                    { id: 1, title: "ログインをする", exp_reward: 1, current_count: 0, target_count: 1, is_completed: false, is_claimed: false, mission_type: 'daily' },
+                    { id: 2, title: "個人実績の確認をする", exp_reward: 1, current_count: 0, target_count: 1, is_completed: false, is_claimed: false, mission_type: 'daily' },
+                    { id: 3, title: "店舗実績の確認をする", exp_reward: 1, current_count: 0, target_count: 1, is_completed: false, is_claimed: false, mission_type: 'daily' },
+                    { id: 4, title: "いいねをする", exp_reward: 1, current_count: 1, target_count: 1, is_completed: true, is_claimed: false, mission_type: 'daily' },
+                    { id: 5, title: "コメントをする", exp_reward: 1, current_count: 1, target_count: 1, is_completed: true, is_claimed: true, mission_type: 'daily' },
+                    { id: 10, title: "投稿をする", exp_reward: 1, current_count: 0, target_count: 1, is_completed: false, is_claimed: false, mission_type: 'daily' },
+                    { id: 6, title: "ノウハウを投稿する", exp_reward: 30, current_count: 0, target_count: 1, is_completed: false, is_claimed: false, mission_type: 'weekly' },
+                    { id: 7, title: "事務局だよりを確認する", exp_reward: 10, current_count: 1, target_count: 1, is_completed: true, is_claimed: true, mission_type: 'weekly' },
+                    { id: 8, title: "動画を視聴する", exp_reward: 10, current_count: 1, target_count: 1, is_completed: true, is_claimed: true, mission_type: 'weekly' },
+                    { id: 9, title: "動画のテストを受ける", exp_reward: 30, current_count: 1, target_count: 1, is_completed: true, is_claimed: true, mission_type: 'weekly' },
+                ];
+                setMissions(mockMissions);
+            }
         } catch (err) {
             console.error("Missions fetch error:", err);
+            setMissions([]);
         } finally {
             setLoading(false);
         }
@@ -30,21 +47,17 @@ const MissionsPage = () => {
     }, []);
 
     const handleClaim = async (missionId) => {
-        const token = localStorage.getItem("token");
         setClaimingId(missionId);
         try {
             const res = await axiosClient.post(`missions/${missionId}/claim/`, {});
-
             if (res.status === 200) {
-                // Fireworks!
                 confetti({
                     particleCount: 150,
                     spread: 70,
                     origin: { y: 0.6 },
-                    colors: ['#22c55e', '#a3e635', '#ffffff']
+                    colors: ['#10b981', '#34d399', '#ffffff'],
+                    zIndex: 20000
                 });
-
-                // Refresh missions and update local user data if needed
                 await fetchMissions();
                 const user = JSON.parse(localStorage.getItem("user") || "{}");
                 user.exp = res.data.new_exp;
@@ -53,7 +66,7 @@ const MissionsPage = () => {
             }
         } catch (err) {
             console.error("Claim error:", err);
-            alert("特典の受け取りに失敗しました。時間切れの可能性があります。");
+            alert("特典の受け取りに失敗しました。");
             fetchMissions();
         } finally {
             setClaimingId(null);
@@ -63,145 +76,133 @@ const MissionsPage = () => {
     const MissionCard = ({ mission }) => {
         const progressPercent = Math.min((mission.current_count / mission.target_count) * 100, 100);
         const canClaim = mission.is_completed && !mission.is_claimed;
+        const isAchieved = mission.is_claimed;
 
         return (
-            <motion.div
-                layout
-                className={`bg-white rounded-3xl p-5 mb-4 shadow-sm border border-slate-100 flex items-center gap-4 ${mission.is_claimed ? 'opacity-60' : ''}`}
-            >
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner ${mission.is_claimed ? 'bg-slate-100 text-slate-400' :
-                    mission.is_completed ? 'bg-green-100 text-green-500' : 'bg-slate-50 text-slate-400'
-                    }`}>
-                    {mission.is_claimed ? <IoCheckmarkCircle /> : mission.exp_reward}
+            <div className="premium-mission-card">
+                {/* Left Reward Box */}
+                <div className={`reward-box ${isAchieved ? 'achieved' : canClaim ? 'claimable' : ''}`}>
+                    <span className="reward-val">{mission.exp_reward}</span>
                 </div>
 
-                <div className="flex-1">
-                    <div className="flex justify-between items-baseline mb-1">
-                        <h4 className="font-bold text-slate-800 text-[15px]">{mission.title}</h4>
-                        <span className="text-[11px] font-bold text-slate-400 tracking-wider uppercase">
-                            {mission.exp_reward} EXP
-                        </span>
+                {/* Middle Content */}
+                <div className="mission-info">
+                    <div className="mission-title-row">
+                        <h4 className={`mission-name ${isAchieved ? 'is-achieved-text' : ''}`}>{mission.title}</h4>
+                        <span className={`mission-exp ${isAchieved ? 'is-achieved-text-dim' : ''}`}>{mission.exp_reward} EXP</span>
                     </div>
 
-                    <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden mb-1">
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progressPercent}%` }}
-                            className={`absolute inset-0 rounded-full ${mission.is_completed ? 'bg-green-500' : 'bg-green-400'}`}
-                        />
-                    </div>
-
-                    <div className="flex justify-between items-center text-[10px] font-bold">
-                        <span className={mission.is_completed ? 'text-green-500' : 'text-slate-400'}>
-                            {mission.current_count} / {mission.target_count}
-                        </span>
-                    </div>
-                </div>
-
-                <div>
-                    {mission.is_claimed ? (
-                        <div className="px-4 py-2 rounded-xl bg-slate-50 text-slate-400 text-xs font-bold border border-slate-100">
-                            達成済み
+                    {/* Progress Area */}
+                    <div className="mission-progress-container">
+                        <div className="mission-progress-track">
+                            <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${progressPercent}%` }}
+                                className={`mission-progress-bar ${isAchieved ? 'bar-achieved' : mission.is_completed ? 'bar-completed' : 'bar-ongoing'}`}
+                            />
                         </div>
-                    ) : canClaim ? (
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                        <div className="mission-progress-labels">
+                            <span className={`count-text ${isAchieved ? 'is-achieved-text-dim' : ''}`}>
+                                {mission.current_count} / {mission.target_count}
+                            </span>
+                            {isAchieved && (
+                                <span className="achieved-label">Achieved</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Action */}
+                <div className="action-area">
+                    {canClaim ? (
+                        <button
                             onClick={() => handleClaim(mission.id)}
                             disabled={claimingId === mission.id}
-                            className="px-6 py-2.5 rounded-xl bg-green-500 text-white text-xs font-bold shadow-lg shadow-green-100 border-none animate-pulse"
+                            className="claim-button"
                         >
                             受け取る
-                        </motion.button>
+                        </button>
+                    ) : isAchieved ? (
+                        <div className="achieved-check-icon">
+                            <IoCheckmarkCircle size={24} />
+                        </div>
                     ) : (
-                        <div className="px-4 py-2 rounded-xl bg-slate-50 text-slate-300 text-xs font-bold border border-slate-100 flex items-center gap-1">
-                            <IoLockClosed size={12} />
-                            進行中
+                        <div className="locked-mission-icon">
+                            <IoLockClosed size={18} />
                         </div>
                     )}
                 </div>
-            </motion.div>
+            </div>
         );
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-24">
-            {/* ヘッダー */}
-            <div className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 px-6 py-4 flex items-center gap-4">
-                <Link to="/mypage" className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-600">
-                    <IoChevronBack size={24} />
-                </Link>
-                <h1 className="text-xl font-black text-slate-800 tracking-tight">ミッション</h1>
-            </div>
-
-            <div className="px-6 pt-8 pb-48 max-w-lg mx-auto">
-                <div className="mb-10 text-center">
-                    <p className="text-slate-400 text-[11px] font-bold uppercase tracking-[0.2em] mb-3">Keep it up every day!</p>
-                    <div className="flex justify-center">
-                        <div className="bg-white px-6 py-3 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center min-w-[140px]">
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Reset Time</span>
-                            <span className="text-lg font-black text-slate-800 tabular-nums">AM 03:00</span>
+        <div className="mission-page-root">
+            <div className="mission-page-container">
+                {/* Header Area */}
+                <header className="mission-page-header">
+                    <div className="header-top">
+                        <div className="title-group">
+                            <h2 className="main-title">Missions</h2>
+                            <div className="tag-group">
+                                <span className="tag-dim">DAILY / WEEKLY</span>
+                                <span className="tag-accent">RESET AM 03:00</span>
+                            </div>
                         </div>
+                        <button onClick={() => navigate(-1)} className="close-circle-btn">
+                            <IoClose size={24} />
+                        </button>
                     </div>
-                </div>
 
-                {loading ? (
-                    <div className="flex justify-center py-20">
-                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-500 border-t-transparent"></div>
-                    </div>
-                ) : (
-                    <div className="space-y-6">
-                        {/* Tab Switcher */}
-                        <div className="bg-slate-100 p-1.5 rounded-2xl flex gap-1 mb-8">
-                            {['daily', 'weekly'].map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`flex-1 py-3 rounded-xl text-sm font-black transition-all border-none ${activeTab === tab
-                                        ? 'bg-white text-slate-800 shadow-sm'
-                                        : 'text-slate-400 hover:text-slate-500'
-                                        }`}
-                                >
-                                    {tab === 'daily' ? 'デイリー' : 'ウィークリー'}
-                                </button>
-                            ))}
-                        </div>
-
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={activeTab}
-                                initial={{ x: 10, opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                exit={{ x: -10, opacity: 0 }}
-                                transition={{ duration: 0.2, ease: "easeOut" }}
+                    <div className="tab-capsule">
+                        {['daily', 'weekly'].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
                             >
-                                {activeTab === 'daily' ? (
-                                    <section>
-                                        <div className="flex items-center gap-2 mb-6 px-2">
-                                            <div className="w-1.5 h-5 bg-green-500 rounded-full" />
-                                            <h3 className="font-black text-slate-800 tracking-tight text-sm">今日達成すべきこと</h3>
-                                        </div>
-                                        {missions.filter(m => m.mission_type === 'daily').map(mission => (
-                                            <MissionCard key={mission.id} mission={mission} />
-                                        ))}
-                                    </section>
-                                ) : (
-                                    <section>
-                                        <div className="flex items-center gap-2 mb-6 px-2">
-                                            <div className="w-1.5 h-5 bg-lime-500 rounded-full" />
-                                            <h3 className="font-black text-slate-800 tracking-tight text-sm">今週の目標</h3>
-                                        </div>
-                                        {missions.filter(m => m.mission_type === 'weekly').map(mission => (
-                                            <MissionCard key={mission.id} mission={mission} />
-                                        ))}
-                                    </section>
-                                )}
-                                {/* Bottom Spacer */}
-                                <div className="h-20" />
-                            </motion.div>
-                        </AnimatePresence>
+                                {tab === 'daily' ? 'デイリー' : 'ウィークリー'}
+                            </button>
+                        ))}
                     </div>
-                )}
+                </header>
+
+                <main className="mission-content">
+                    {loading ? (
+                        <div className="loading-spinner-wrap">
+                            <div className="spinner" />
+                        </div>
+                    ) : (
+                        <div className="mission-sections">
+                            <AnimatePresence mode="wait">
+                                <motion.section
+                                    key={activeTab}
+                                    initial={{ opacity: 0, y: 15 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -15 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    <div className="section-label-row">
+                                        <div className={`vertical-bar ${activeTab === 'daily' ? 'bg-emerald' : 'bg-indigo'}`} />
+                                        <h3 className="section-title">
+                                            {activeTab === 'daily' ? '今日のミッション' : '今週の目標'}
+                                        </h3>
+                                    </div>
+                                    <div className="mission-list-container">
+                                        {missions.filter(m => m.mission_type === activeTab).map(mission => (
+                                            <MissionCard key={mission.id} mission={mission} />
+                                        ))}
+                                        {missions.filter(m => m.mission_type === activeTab).length === 0 && (
+                                            <div className="empty-state">
+                                                <p>ALL CLEAR!</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.section>
+                            </AnimatePresence>
+                        </div>
+                    )}
+                </main>
             </div>
         </div>
     );
