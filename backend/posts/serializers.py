@@ -101,17 +101,21 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'post', 'parent', 'user_name', 'user_uid', 'content', 'image_url', 'created_at', 'display_name', 'profile_image']
 
     def get_display_name(self, obj):
+        user = None
         if obj.user_uid:
             user = User.objects.filter(user_id=obj.user_uid).first()
-            if user:
-                return user.display_name or obj.user_name or "匿名"
+        if user:
+            return user.display_name or obj.user_name or "匿名"
         return obj.user_name or "匿名"
 
     def get_profile_image(self, obj):
+        user = None
         if obj.user_uid:
             user = User.objects.filter(user_id=obj.user_uid).first()
-            if user:
-                return user.profile_image
+        if not user and obj.user_name:
+            user = User.objects.filter(display_name=obj.user_name).first()
+        if user:
+            return user.profile_image
         return None
 
 
@@ -293,16 +297,20 @@ class TreasureCommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'post', 'parent', 'user_name', 'user_uid', 'content', 'image_url', 'created_at', 'display_name', 'profile_image']
 
     def get_display_name(self, obj):
+        user = None
         if obj.user_uid:
             user = User.objects.filter(user_id=obj.user_uid).first()
-            if user:
-                return user.display_name or obj.user_name or "匿名"
+        if user:
+            return user.display_name or obj.user_name or "匿名"
         return obj.user_name or "匿名"
 
     def get_profile_image(self, obj):
+        user = None
         if obj.user_uid:
             user = User.objects.filter(user_id=obj.user_uid).first()
-            if user:
-                return user.profile_image
+        if not user and obj.user_name:
+            user = User.objects.filter(display_name=obj.user_name).first()
+        if user:
+            return user.profile_image
         return None
 

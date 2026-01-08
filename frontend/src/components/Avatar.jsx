@@ -11,6 +11,11 @@ import React, { useState } from 'react';
 const Avatar = ({ src, name, size = "w-10 h-10", className = "" }) => {
     const [hasError, setHasError] = useState(false);
 
+    // Reset hasError if src changes
+    React.useEffect(() => {
+        setHasError(false);
+    }, [src]);
+
     // Extract first character of the name or fallback to "U"
     const firstChar = (name || "匿名").trim().charAt(0).toUpperCase();
 
@@ -50,7 +55,9 @@ const Avatar = ({ src, name, size = "w-10 h-10", className = "" }) => {
         height: sizeMap[heightVal] || '40px'
     };
 
-    if (!src || src === "/default-avatar.png" || hasError) {
+    const isFalsySrc = !src || src === "/default-avatar.png" || src === "null" || src === "undefined" || src === "";
+
+    if (isFalsySrc || hasError) {
         return (
             <div
                 className={`${size} rounded-full inline-flex items-center justify-center text-white font-black shadow-sm shrink-0 select-none ${className}`}
@@ -69,7 +76,7 @@ const Avatar = ({ src, name, size = "w-10 h-10", className = "" }) => {
         <img
             src={src}
             alt={name}
-            className={`${size} rounded-full object-cover shadow-sm bg-white p-0.5 shrink-0 ${className}`}
+            className={`${size} rounded-full object-cover shadow-sm bg-slate-100 shrink-0 ${className}`}
             style={inlineSize}
             onError={() => setHasError(true)}
         />
