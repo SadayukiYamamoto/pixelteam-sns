@@ -164,7 +164,7 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
     return (
         <AnimatePresence>
             <motion.div
-                className="fixed inset-0 flex justify-center items-end z-[2000]"
+                className="fixed inset-0 flex justify-center items-end z-[10000]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

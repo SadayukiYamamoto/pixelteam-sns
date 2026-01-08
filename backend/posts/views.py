@@ -107,13 +107,22 @@ def comments_view(request, pk):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        content = request.data.get('content')
+        content = request.data.get('content') or ""
         image_url = request.data.get('image_url')
-        user_name = request.user.display_name  # ✅ Userモデルのdisplay_nameを取得
+        parent_id = request.data.get('parent')
+        user_name = request.user.display_name or request.user.user_id or "匿名"  # ✅ フォールバックを追加
+
+        parent_comment = None
+        if parent_id:
+            try:
+                parent_comment = Comment.objects.get(id=parent_id)
+            except (Comment.DoesNotExist, ValueError, TypeError):
+                parent_comment = None
 
         # Commentモデルに合わせて user_name, user_uid で登録
         comment = Comment.objects.create(
             post=post,
+            parent=parent_comment,
             user_name=user_name,
             user_uid=str(request.user.user_id),
             content=content,
@@ -122,9 +131,25 @@ def comments_view(request, pk):
 
         # --- 通知の作成 ---
         user = request.user
-        # 1. 投稿者への通知（自分以外）
+        
+        # 0. 返信対象のコメント投稿者への通知（自分以外）
+        if parent_comment and str(parent_comment.user_uid) != str(user.user_id):
+            parent_author = User.objects.filter(user_id=parent_comment.user_uid).first()
+            if parent_author:
+                Notification.objects.create(
+                    recipient=parent_author,
+                    sender=user,
+                    notification_type='REPLY',
+                    post_id=str(post.id),
+                    comment_id=comment.id,
+                    message=f"{user.display_name}さんがあなたのコメントに返信しました。"
+                )
+
+        # 1. 投稿者への通知（自分以外 かつ まだ通知してない場合）
         post_author_uid = post.user_uid
-        if post_author_uid and str(post_author_uid) != str(user.user_id):
+        is_post_author_same_as_parent = parent_comment and str(parent_comment.user_uid) == str(post_author_uid)
+        
+        if post_author_uid and str(post_author_uid) != str(user.user_id) and not is_post_author_same_as_parent:
             author = User.objects.filter(user_id=post_author_uid).first()
             if author:
                 Notification.objects.create(

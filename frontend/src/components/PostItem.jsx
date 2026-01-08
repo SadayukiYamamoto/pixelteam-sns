@@ -311,7 +311,7 @@ const PostItem = ({ post, onLike, onComment, hideReactions = false, className = 
       {/* いいねしたユーザーモーダル */}
       {showLikeModal && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-[100] p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-[10000] p-4"
           onClick={() => setShowLikeModal(false)}
         >
           <div

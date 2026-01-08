@@ -132,6 +132,7 @@ class Notification(models.Model):
     NOTIFICATION_TYPES = [
         ('LIKE', 'いいね'),
         ('COMMENT', 'コメント'),
+        ('REPLY', '返信'),
         ('MENTION', 'メンション'),
         ('BADGE', 'バッジ付与'),
         ('POINT', 'ポイント変動'),

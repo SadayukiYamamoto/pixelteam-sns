@@ -98,7 +98,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'post', 'user_name', 'user_uid', 'content', 'image_url', 'created_at', 'display_name', 'profile_image']
+        fields = ['id', 'post', 'parent', 'user_name', 'user_uid', 'content', 'image_url', 'created_at', 'display_name', 'profile_image']
 
     def get_display_name(self, obj):
         if obj.user_uid:
@@ -290,7 +290,7 @@ class TreasureCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TreasureComment
-        fields = ['id', 'post', 'user_name', 'user_uid', 'content', 'image_url', 'created_at', 'display_name', 'profile_image']
+        fields = ['id', 'post', 'parent', 'user_name', 'user_uid', 'content', 'image_url', 'created_at', 'display_name', 'profile_image']
 
     def get_display_name(self, obj):
         if obj.user_uid:

@@ -43,6 +43,7 @@ const NotificationsPage = () => {
         switch (type) {
             case 'LIKE': return <Heart className="notif-icon like" size={20} fill="currentColor" />;
             case 'COMMENT': return <MessageCircle className="notif-icon comment" size={20} />;
+            case 'REPLY': return <MessageCircle className="notif-icon reply" size={20} />;
             case 'MENTION': return <AtSign className="notif-icon mention" size={20} />;
             case 'BADGE': return <Award className="notif-icon badge" size={20} />;
             case 'POINT': return <CircleDollarSign className="notif-icon point" size={20} />;
@@ -52,7 +53,7 @@ const NotificationsPage = () => {
 
     const handleNotifClick = (notif) => {
         if (notif.post_id) {
-            const query = notif.notification_type === 'COMMENT' ? '?openComments=true' : '';
+            const query = (notif.notification_type === 'COMMENT' || notif.notification_type === 'REPLY') ? '?openComments=true' : '';
             navigate(`/posts/${notif.post_id}${query}`);
         }
     };

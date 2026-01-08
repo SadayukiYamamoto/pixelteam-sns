@@ -19,14 +19,17 @@ import suggestion from "./tiptap/suggestion";
 import { OGPCard } from "../extentions/OGPCard";
 
 // 🟦 アバターコンポーネント (画像がない・エラー時にフォールバックを表示)
-const CommentAvatar = ({ src, name }) => {
+const CommentAvatar = ({ src, name, size = "w-8 h-8" }) => {
   const [hasError, setHasError] = React.useState(false);
+
+  // Tailwindクラスが動的に解決されない場合への対策としてstyleも併用
+  const sizeValue = size.includes("w-10") ? "40px" : size.includes("w-8") ? "32px" : size.includes("w-6") ? "24px" : "18px";
 
   if (!src || hasError) {
     return (
       <div
-        className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0"
-        style={{ backgroundColor: '#84cc16' }}
+        className={`${size} rounded-full flex items-center justify-center text-white font-bold text-[12px] shadow-sm shrink-0`}
+        style={{ backgroundColor: '#84cc16', width: sizeValue, height: sizeValue }}
       >
         {(name || "名")[0]}
       </div>
@@ -37,7 +40,8 @@ const CommentAvatar = ({ src, name }) => {
     <img
       src={src}
       alt="avatar"
-      className="w-10 h-10 rounded-full object-cover shadow-sm bg-white p-0.5 shrink-0"
+      className={`${size} rounded-full object-cover shadow-sm bg-white p-0.5 shrink-0`}
+      style={{ width: sizeValue, height: sizeValue }}
       onError={() => setHasError(true)}
     />
   );
@@ -50,6 +54,9 @@ const CommentBottomSheet = ({ postId, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null); // { id, display_name }
+  const [expandedReplies, setExpandedReplies] = useState({}); // { parentId: boolean }
+
   const fileInputRef = React.useRef(null);
   const API_URL = import.meta.env.VITE_API_URL || "";
   const navigate = useNavigate();
@@ -121,17 +128,12 @@ const CommentBottomSheet = ({ postId, onClose }) => {
 
     setIsUploading(true);
     try {
-      // ユーザー要望により240pxに制限
       const optimizedFile = await optimizeImage(file, 240);
-
-      if (!auth.currentUser) {
-        await signInAnonymously(auth);
-      }
+      if (!auth.currentUser) await signInAnonymously(auth);
 
       const storageRef = ref(storage, `comments/${Date.now()}_${file.name}`);
       await uploadBytes(storageRef, optimizedFile);
       const url = await getDownloadURL(storageRef);
-
       setSelectedImage(url);
     } catch (err) {
       console.error("画像アップロードエラー:", err);
@@ -141,7 +143,6 @@ const CommentBottomSheet = ({ postId, onClose }) => {
     }
   };
 
-  // 初回ロード
   useEffect(() => {
     fetchComments();
   }, [postId]);
@@ -160,7 +161,8 @@ const CommentBottomSheet = ({ postId, onClose }) => {
         `${API_URL}/api/posts/${postId}/comments/`,
         {
           content: htmlContent,
-          image_url: selectedImage
+          image_url: selectedImage,
+          parent: replyingTo?.id || null
         },
         { headers: { Authorization: `Token ${token}` } }
       );
@@ -168,6 +170,7 @@ const CommentBottomSheet = ({ postId, onClose }) => {
       editor.commands.clearContent();
       setEditorContent("");
       setSelectedImage(null);
+      setReplyingTo(null);
       await fetchComments();
       window.dispatchEvent(new Event("comment-updated"));
     } catch (err) {
@@ -188,10 +191,92 @@ const CommentBottomSheet = ({ postId, onClose }) => {
     }
   };
 
+  // コメントを親子関係で整理する
+  // 今回、comments は作成日逆順（新しい順）で来ている想定。
+  // X/Facebook風なら、親は新着順、返信は古い順（あるいは新着順）が一般的。
+  const parentComments = comments.filter(c => !c.parent);
+  const getReplies = (parentId) => comments.filter(c => c.parent === parentId).reverse(); // 返信は時系列
+
+  const toggleReplies = (parentId) => {
+    setExpandedReplies(prev => ({
+      ...prev,
+      [parentId]: !prev[parentId]
+    }));
+  };
+
+  const handleReplyBtnClick = (comment) => {
+    setReplyingTo({
+      id: comment.id,
+      display_name: comment.display_name,
+      content: comment.content,
+      profile_image: comment.profile_image
+    });
+    editor.commands.focus();
+  };
+
+  const CommentItem = ({ comment, isReply = false, hasNextReply = false }) => (
+    <div className={`flex items-start bg-white group/item ${isReply ? 'ml-0' : 'mb-0.5'}`} style={{ padding: '12px', gap: '14px', position: 'relative' }}>
+      {/* ツリー線 (鍵線コネクタ) */}
+      {isReply && (
+        <div className="absolute left-[28px] top-[-12px] w-[30px] h-[40px]">
+          {/* 縦線（親から下りてくる線） */}
+          <div className="absolute left-0 top-0 bottom-[4px] w-[2px] bg-slate-300" />
+          {/* 曲がり角 & 横線（自分のアバター中心へ向かう線: 12 + 30 + 12 = 54px地点のアバター中心に届くよう調整） */}
+          <div className="absolute left-0 bottom-[4px] w-[26px] h-[14px] border-b-2 border-l-2 border-slate-300" style={{ borderBottomLeftRadius: '10px' }} />
+        </div>
+      )}
+
+      {/* 返信が続く場合の縦線（自分のアバター(12+30+12=54px地点)の下から次へ続く） */}
+      {isReply && hasNextReply && (
+        <div className="absolute left-[54px] top-[28px] bottom-0 w-[2px] bg-slate-300" />
+      )}
+
+      <div className="flex-shrink-0 relative z-10" style={isReply ? { marginLeft: '30px', marginTop: '4px' } : {}}>
+        <CommentAvatar src={comment.profile_image} name={comment.display_name} size={isReply ? "w-6 h-6" : "w-8 h-8"} />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center" style={{ gap: '10px', marginBottom: '2px' }}>
+          <p className="font-black text-[13px] text-slate-900 truncate tracking-tight">
+            {comment.display_name || "匿名"}
+          </p>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+            {new Date(comment.created_at).toLocaleDateString()}
+          </span>
+        </div>
+        <div
+          className="text-slate-600 text-[13px] leading-relaxed comment-body-html"
+          onClick={handleCommentClick}
+          dangerouslySetInnerHTML={{ __html: comment.content }}
+        />
+        {comment.image_url && (
+          <div className="mt-2.5 rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.08)] max-w-[180px] border-none">
+            <img
+              src={comment.image_url}
+              alt="comment attachment"
+              className="w-full h-auto cursor-pointer"
+              onClick={() => window.open(comment.image_url, '_blank')}
+            />
+          </div>
+        )}
+
+        {/* 返信ボタン */}
+        <div className="mt-1.5">
+          <button
+            onClick={() => handleReplyBtnClick(comment)}
+            style={{ color: '#10b981' }}
+            className="text-[11px] font-black hover:opacity-70 transition-colors bg-transparent border-none p-0 cursor-pointer"
+          >
+            返信する
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <AnimatePresence>
-      <div key="comment-bottom-sheet-root" className="fixed inset-0 flex justify-center items-end z-[2000]">
-        {/* 背景 */}
+      <div key="comment-bottom-sheet-root" className="fixed inset-0 flex justify-center items-end z-[10000]">
         <motion.div
           className="absolute inset-0 bg-black/40 backdrop-blur-sm"
           initial={{ opacity: 0 }}
@@ -200,7 +285,6 @@ const CommentBottomSheet = ({ postId, onClose }) => {
           onClick={onClose}
         />
 
-        {/* コメントボックス */}
         <motion.div
           className="relative bg-white w-full max-w-[480px] rounded-t-[32px] overflow-hidden shadow-2xl flex flex-col"
           style={{ height: '85vh' }}
@@ -211,14 +295,14 @@ const CommentBottomSheet = ({ postId, onClose }) => {
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="shrink-0 flex items-center justify-between" style={{ height: '78px', padding: '0 20px', marginTop: '20px', marginBottom: '20px' }}>
-            <h3 className="font-black text-[22px] text-slate-800 tracking-tight" style={{ margin: 0 }}>コメント</h3>
+          <div className="shrink-0 flex items-center justify-between" style={{ height: '70px', padding: '0 20px', marginTop: '10px' }}>
+            <h3 className="font-black text-[20px] text-slate-800 tracking-tight" style={{ margin: 0 }}>コメント</h3>
             <button
               onClick={onClose}
               className="bg-white rounded-full text-slate-600 hover:bg-slate-50 transition-all active:scale-90 flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.16)] border border-slate-200 z-10"
-              style={{ width: '44px', height: '44px' }}
+              style={{ width: '40px', height: '40px' }}
             >
-              <IoClose size={26} />
+              <IoClose size={24} />
             </button>
           </div>
 
@@ -228,42 +312,59 @@ const CommentBottomSheet = ({ postId, onClose }) => {
               <div className="flex justify-center items-center h-full">
                 <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-400 border-t-transparent"></div>
               </div>
-            ) : comments.length > 0 ? (
+            ) : parentComments.length > 0 ? (
               <div className="py-2">
-                {comments.map((c, i) => (
-                  <div key={c.id || i} className="flex items-start bg-white mb-0.5 last:mb-0" style={{ padding: '12px', gap: '16px' }}>
-                    <div className="flex-shrink-0" style={{ marginLeft: '12px' }}>
-                      <CommentAvatar src={c.profile_image} name={c.display_name} />
-                    </div>
+                {parentComments.map((c) => {
+                  const replies = getReplies(c.id);
+                  const isExpanded = expandedReplies[c.id];
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center" style={{ gap: '12px', marginBottom: '6px' }}>
-                        <p className="font-black text-[14px] text-slate-900 truncate tracking-tight">
-                          {c.display_name || "匿名"}
-                        </p>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-                          {new Date(c.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <div
-                        className="text-slate-600 text-[14px] leading-relaxed comment-body-html"
-                        onClick={handleCommentClick}
-                        dangerouslySetInnerHTML={{ __html: c.content }}
-                      />
-                      {c.image_url && (
-                        <div className="mt-3 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] max-w-[240px] border-none">
-                          <img
-                            src={c.image_url}
-                            alt="comment attachment"
-                            className="w-full h-auto cursor-pointer"
-                            onClick={() => window.open(c.image_url, '_blank')}
-                          />
+                  return (
+                    <div key={c.id} className="mb-0.5 last:mb-0">
+                      <CommentItem comment={c} />
+
+                      {/* 返信エリア */}
+                      {replies.length > 0 && (
+                        <div className="bg-white pb-2 relative">
+                          {!isExpanded ? (
+                            <div className="pl-12">
+                              <button
+                                onClick={() => toggleReplies(c.id)}
+                                className="flex items-center gap-2 py-2 text-[12px] font-black text-slate-500 hover:text-emerald-500 bg-transparent border-none cursor-pointer"
+                              >
+                                <div className="w-6 h-[1.5px] bg-slate-200" />
+                                他{replies.length}件の返信を表示
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="space-y-0 relative">
+                              {/* 親アバター(28px)から最初の返信アバター(36px)へ繋ぐ延長線 */}
+                              <div className="absolute left-[28px] top-[-10px] w-[1.5px] h-[30px] bg-slate-200" />
+
+                              <div className="pl-12">
+                                {replies.map((r, idx) => (
+                                  <CommentItem
+                                    key={r.id}
+                                    comment={r}
+                                    isReply={true}
+                                    hasNextReply={idx < replies.length - 1}
+                                  />
+                                ))}
+                                <button
+                                  onClick={() => toggleReplies(c.id)}
+                                  className="flex items-center gap-1.5 py-2 text-[11px] font-black text-slate-400 hover:text-slate-600 bg-transparent border-none cursor-pointer"
+                                  style={{ marginLeft: '54px' }}
+                                >
+                                  返信を閉じる
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
-                  </div>
-                ))}
-                <div className="h-20" /> {/* 余白 */}
+                  );
+                })}
+                <div className="h-20" />
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full opacity-30 py-20">
@@ -281,54 +382,67 @@ const CommentBottomSheet = ({ postId, onClose }) => {
           </div>
 
           {/* 固定入力フォーム */}
-          <div className="bg-white shrink-0 flex flex-col items-center" style={{ padding: '16px 20px 32px' }}>
-            {selectedImage && (
-              <div className="w-full max-w-[429.333px] mb-6 animate-in fade-in slide-in-from-bottom-2 px-2">
-                <div className="relative inline-block group">
-                  <div className="relative rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.15)] ring-0 border-none">
-                    <img src={selectedImage} alt="preview" className="w-[160px] h-[160px] object-cover" />
+          <div className="bg-white shrink-0 flex flex-col items-center shadow-[0_-10px_40px_rgba(0,0,0,0.08)] relative z-[11]" style={{ padding: '16px 20px 32px' }}>
+            {/* 返信先インジケーター (Google Chat スタイル改善版) */}
+            {replyingTo && (
+              <div className="w-full max-w-[429.333px] relative mb-4 animate-in fade-in slide-in-from-bottom-2">
+                <div className="bg-white rounded-2xl p-3 pr-10 shadow-[0_8px_30px_rgba(0,0,0,0.06)] border-none relative">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <CommentAvatar src={replyingTo.profile_image} name={replyingTo.display_name} size="w-4 h-4" />
+                    <span className="text-[12px] font-black text-slate-700">{replyingTo.display_name}</span>
                   </div>
+
+                  <div
+                    className="text-[11px] text-slate-400 line-clamp-1 opacity-90 pl-0"
+                    dangerouslySetInnerHTML={{ __html: replyingTo.content }}
+                  />
+
                   <button
-                    onClick={() => setSelectedImage(null)}
-                    className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 bg-white text-slate-500 hover:text-red-500 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] border-none p-1.5 transition-all active:scale-90 z-30"
+                    onClick={() => setReplyingTo(null)}
+                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-slate-50 rounded-full text-slate-400 hover:text-red-500 transition-all active:scale-90 border-none cursor-pointer"
                   >
-                    <IoClose size={20} />
+                    <IoClose size={16} />
                   </button>
                 </div>
               </div>
             )}
 
-            <div className="flex items-center bg-slate-50 transition-all shadow-inner overflow-hidden"
+            {selectedImage && (
+              <div className="w-full max-w-[429.333px] mb-4 animate-in fade-in slide-in-from-bottom-2 px-2">
+                <div className="relative inline-block group">
+                  <div className="relative rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+                    <img src={selectedImage} alt="preview" className="w-[120px] h-[120px] object-cover" />
+                  </div>
+                  <button
+                    onClick={() => setSelectedImage(null)}
+                    className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 bg-white text-slate-500 hover:text-red-500 rounded-full shadow-lg border-none p-1 z-30"
+                  >
+                    <IoClose size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center bg-white transition-all shadow-[0_8px_30px_rgba(0,0,0,0.06)] overflow-hidden"
               style={{
                 width: '100%',
                 maxWidth: '429.333px',
-                height: '69px',
-                border: `1.333px solid ${(!editor || (editor.isEmpty && editorContent === "")) ? '#f1f5f9' : '#10b981'}`,
-                borderRadius: '34.5px',
-                padding: '8px',
+                height: '60px',
+                borderRadius: '30px',
+                padding: '5px',
                 position: 'relative',
-                gap: '8px'
+                gap: '6px'
               }}>
 
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden-mobile-input"
-                accept="image/*"
-                onChange={handleImageSelect}
-              />
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageSelect} />
 
               <button
                 onClick={() => fileInputRef.current.click()}
                 disabled={isUploading || isSubmitting}
-                className="flex items-center justify-center text-slate-400 hover:text-emerald-500 transition-all shrink-0 outline-none bg-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] rounded-full hover:shadow-md border-none"
-                style={{ width: '48px', height: '48px' }}
+                className="flex items-center justify-center text-slate-400 hover:text-emerald-500 transition-all shrink-0 bg-slate-50 rounded-full border-none"
+                style={{ width: '46px', height: '46px' }}
               >
-                {isUploading ? (
-                  <div className="w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <IoImageOutline size={28} />
-                )}
+                {isUploading ? <div className="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" /> : <IoImageOutline size={24} />}
               </button>
 
               <div className="tiptap-comment-editor flex-1 notranslate" translate="no">
@@ -338,15 +452,13 @@ const CommentBottomSheet = ({ postId, onClose }) => {
               <button
                 onClick={handleSubmit}
                 disabled={!editor || (editor.isEmpty && editorContent === "") || isSubmitting}
-                className="font-black transition-all text-[15px] border-none flex items-center justify-center shrink-0"
+                className="font-black transition-all text-[14px] border-none flex items-center justify-center shrink-0"
                 style={{
-                  height: '53px',
-                  width: '84px',
-                  borderRadius: '26.5px',
-                  padding: '0',
-                  backgroundColor: (!editor || (editor.isEmpty && editorContent === "") || isSubmitting) ? '#e5e7eb' : '#10b981',
-                  color: '#ffffff',
-                  boxShadow: (editor && !editor.isEmpty && !isSubmitting) ? '0 10px 15px -3px rgba(16, 185, 129, 0.3)' : 'none'
+                  height: '48px',
+                  width: '76px',
+                  borderRadius: '24px',
+                  backgroundColor: (!editor || (editor.isEmpty && editorContent === "") || isSubmitting) ? '#f3f4f6' : '#10b981',
+                  color: (!editor || (editor.isEmpty && editorContent === "") || isSubmitting) ? '#94a3b8' : '#ffffff',
                 }}
               >
                 {isSubmitting ? "..." : "投稿"}
@@ -354,52 +466,21 @@ const CommentBottomSheet = ({ postId, onClose }) => {
             </div>
           </div>
           <style jsx="true">{`
-            .custom-scrollbar::-webkit-scrollbar {
-              width: 4px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-track {
-              background: transparent;
-            }
-            .custom-scrollbar::-webkit-scrollbar-thumb {
-              background: rgba(0,0,0,0.05);
-              border-radius: 10px;
-            }
-            
-            .tiptap-comment-editor .ProseMirror {
-              min-height: 53px;
-              outline: none;
-              font-size: 15px;
-              color: #1e293b;
-              display: flex;
-              align-items: center;
-              padding: 0 16px;
-              line-height: 1.2;
-            }
-            
-            .tiptap-comment-editor .ProseMirror p {
-              margin: 0;
-              width: 100%;
-            }
-            
+            .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+            .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 10px; }
+            .tiptap-comment-editor { position: relative; width: 100%; height: 100%; display: flex; align-items: center; }
+            .tiptap-comment-editor .ProseMirror { outline: none; font-size: 14px; color: #1e293b; width: 100%; padding: 0 12px; line-height: 1.2; }
+            .tiptap-comment-editor .ProseMirror p { margin: 0; }
             .tiptap-comment-editor .ProseMirror p.is-editor-empty:first-child::before {
               content: attr(data-placeholder);
               float: left;
-              color: #adb5bd;
+              color: #cbd5e1;
               pointer-events: none;
               height: 0;
             }
-
-            .comment-body-html .mention {
-              color: #1d9bf0;
-              background-color: rgba(29, 155, 240, 0.1);
-              border-radius: 4px;
-              padding: 0px 4px;
-              font-weight: 500;
-              cursor: pointer;
-            }
-            .comment-body-html .mention:hover {
-              text-decoration: underline;
-            }
+            .comment-body-html .mention { color: #1d9bf0; background-color: rgba(29, 155, 240, 0.1); border-radius: 4px; padding: 0px 4px; font-weight: 500; cursor: pointer; }
+            .comment-body-html .mention:hover { text-decoration: underline; }
           `}</style>
         </motion.div>
       </div>
