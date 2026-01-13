@@ -15,6 +15,7 @@ import VideoTestPage from "./components/VideoTestPage";
 import TestCreatePage from "./pages/TestCreatePage";
 import TreasureCategoryList from './pages/TreasureCategoryList';
 import TreasurePostDetail from './pages/TreasurePostDetail';
+import TreasurePostListPage from './pages/TreasurePostListPage';
 import TreasurePostForm from "./pages/TreasurePostForm";
 import TreasurePixelPage from './pages/TreasurePixelPage';
 import TreasurePixelCategoryPage from './pages/TreasurePixelCategoryPage';
@@ -51,6 +52,7 @@ import LoginPopupAdminPage from "./admin/LoginPopupAdminPage"; // ← 追加
 import AdminExpManagement from "./pages/admin/AdminExpManagement";
 import AdminLevelRewards from "./pages/admin/AdminLevelRewards";
 import VideoFeedbackAdminPage from "./admin/VideoFeedbackAdminPage"; // ← 追加
+import TreasureAdminPage from "./admin/TreasureAdminPage"; // ← 追加
 import ProtectedRoute from "./components/ProtectedRoute";
 
 
@@ -102,6 +104,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Route path="/treasure-categories" element={<ProtectedRoute><TreasurePixelCategoryPage /></ProtectedRoute>} />
       <Route path="/treasure/:category" element={<ProtectedRoute><TreasureCategoryList /></ProtectedRoute>} />
       <Route path="/treasure/:category/:postId" element={<ProtectedRoute><TreasurePostDetail /></ProtectedRoute>} />
+      <Route path="/treasure-list" element={<ProtectedRoute><TreasurePostListPage /></ProtectedRoute>} />
       <Route path="/treasure/new" element={<ProtectedRoute><TreasurePostForm /></ProtectedRoute>} />
       <Route path="/treasure/edit/:id" element={<ProtectedRoute><TreasurePostForm /></ProtectedRoute>} />
 
@@ -131,6 +134,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Route path="/tests/edit/:videoId" element={<ProtectedRoute><TestCreatePage /></ProtectedRoute>} /> {/* ← 編集用パラメータ付き */}
       <Route path="/admin/exp" element={<ProtectedRoute><AdminExpManagement /></ProtectedRoute>} />
       <Route path="/admin/level-rewards" element={<ProtectedRoute><AdminLevelRewards /></ProtectedRoute>} />
+      <Route path="/admin/treasures" element={<ProtectedRoute><TreasureAdminPage /></ProtectedRoute>} />
       <Route path="/analytics/matrix" element={<ProtectedRoute><WatchMatrix /></ProtectedRoute>} />
 
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosClient from "../../api/axiosClient";
 import Header from "../../components/Header";
 import Navigation from "../../components/Navigation";
 import "../../admin/AdminCommon.css";
@@ -22,10 +22,7 @@ const AdminExpManagement = () => {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem("token");
-            const res = await axios.get("/api/admin/analytics/users/", {
-                headers: { Authorization: `Token ${token}` }
-            });
+            const res = await axiosClient.get("/admin/analytics/users/");
             setUsers(res.data);
 
             // Initialize local exp state
@@ -51,12 +48,9 @@ const AdminExpManagement = () => {
     const handleSave = async (user) => {
         const newExp = editingExp[user.user_id];
         try {
-            const token = localStorage.getItem("token");
-            await axios.post("/api/admin/users/update_exp/", {
+            await axiosClient.post("/admin/users/update_exp/", {
                 user_id: user.user_id,
                 exp: newExp
-            }, {
-                headers: { Authorization: `Token ${token}` }
             });
             alert(`${user.display_name} のEXPを更新しました`);
             setEditingUserId(null); // Close edit mode

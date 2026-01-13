@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosClient from "../../api/axiosClient";
 import Header from "../../components/Header";
 import Navigation from "../../components/Navigation";
 import "../../admin/AdminCommon.css";
@@ -27,12 +27,9 @@ const AdminLevelRewards = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem("token");
-            const headers = { Authorization: `Token ${token}` };
-
             const [rewardsRes, badgesRes] = await Promise.all([
-                axios.get("/api/admin/level-rewards/", { headers }),
-                axios.get("/api/admin/badges/list/", { headers })
+                axiosClient.get("/missions/admin/level-rewards/"),
+                axiosClient.get("/admin/badges/")
             ]);
 
             setRewards(rewardsRes.data.sort((a, b) => a.level - b.level));
@@ -49,10 +46,7 @@ const AdminLevelRewards = () => {
         if (!newReward.level || !newReward.badge_id) return;
 
         try {
-            const token = localStorage.getItem("token");
-            await axios.post("/api/admin/level-rewards/", newReward, {
-                headers: { Authorization: `Token ${token}` }
-            });
+            await axiosClient.post("/missions/admin/level-rewards/", newReward);
             setNewReward({ level: "", badge_id: "" });
             setIsFormVisible(false);
             fetchData();
@@ -66,10 +60,7 @@ const AdminLevelRewards = () => {
     const handleDelete = async (id) => {
         if (!window.confirm("この報酬設定を削除しますか？")) return;
         try {
-            const token = localStorage.getItem("token");
-            await axios.delete(`/api/admin/level-rewards/${id}/`, {
-                headers: { Authorization: `Token ${token}` }
-            });
+            await axiosClient.delete(`/missions/admin/level-rewards/${id}/`);
             fetchData();
         } catch (error) {
             console.error("Error deleting reward:", error);

@@ -52,7 +52,7 @@ export default function TreasureCategoryList() {
         <Header title={category} />
 
         <div
-          className="overflow-y-auto pb-32"
+          className="overflow-y-auto pb-32 pt-20"
           style={{ height: "calc(100vh - 120px)" }}
         >
           <main className={styles.container}>

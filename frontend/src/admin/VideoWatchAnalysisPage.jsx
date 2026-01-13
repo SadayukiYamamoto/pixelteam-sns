@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosClient from '../api/axiosClient';
 import { FiSearch, FiPlay } from 'react-icons/fi';
 import Header from '../components/Header';
 import Navigation from '../components/Navigation';
@@ -29,7 +29,7 @@ const VideoWatchAnalysisPage = () => {
             if (filters.start_date) params.append('start_date', filters.start_date);
             if (filters.end_date) params.append('end_date', filters.end_date);
 
-            const res = await axios.get(`/api/videos/view_logs/?${params.toString()}`);
+            const res = await axiosClient.get(`/videos/view_logs/?${params.toString()}`);
             setLogs(res.data);
             setExpandedGroups({}); // Reset expanded state on new search
         } catch (error) {

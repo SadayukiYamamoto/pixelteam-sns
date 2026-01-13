@@ -10,9 +10,6 @@ import styles from "./TreasurePostDetail.module.css";
 import { processHtmlContent } from '../utils/contentHelper'; // Import helper
 
 export default function TreasurePostDetail() {
-  // ... (keep existing lines until return)
-
-
   const { category, postId } = useParams();
   const location = useLocation();
   const parentCategory = location.state?.parentCategory;
@@ -42,8 +39,23 @@ export default function TreasurePostDetail() {
         setLoading(false);
       }
     };
+
+    const markAsRead = async () => {
+      try {
+        await fetch(`${API_URL}/api/treasure_posts/${postId}/read/`, {
+          method: "POST",
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        });
+      } catch (err) {
+        console.error("既読処理エラー:", err);
+      }
+    };
+
     fetchPost();
-  }, [postId]);
+    markAsRead();
+  }, [postId, API_URL]);
 
   if (loading) {
     return (
@@ -73,7 +85,6 @@ export default function TreasurePostDetail() {
       if (res.ok) {
         alert("投稿を削除しました。");
 
-        // Pixel 構造の場合（親カテゴリがある場合）
         if (parentCategory) {
           navigate("/treasure-categories", {
             state: { parentCategory },
@@ -81,12 +92,10 @@ export default function TreasurePostDetail() {
           return;
         }
 
-        // 旧Treasure用（親カテゴリなしのとき）
         navigate(`/treasure/${encodeURIComponent(category)}`);
         return;
       }
 
-      // エラー処理
       let errorText = "不明なエラー";
       try {
         const data = await res.json();
@@ -99,15 +108,10 @@ export default function TreasurePostDetail() {
     }
   };
 
-
-
-
-
   // ✏️ 編集ページへ遷移
   const handleEdit = () => {
     navigate(`/treasure/edit/${postId}`);
   };
-
 
   // 💚 いいね処理
   const handleLike = async () => {
@@ -121,10 +125,9 @@ export default function TreasurePostDetail() {
       const data = await res.json();
       setPost({ ...post, liked: data.liked, likes_count: data.likes_count });
     } catch (err) {
-      console.error("いいねエラー:", err);
+      console.error("いいえエラー:", err);
     }
   };
-
 
   if (!post) return <div className={styles.emptyText}>投稿が見つかりません。</div>;
 
@@ -134,7 +137,7 @@ export default function TreasurePostDetail() {
         <Header />
 
         <div
-          className="overflow-y-auto pb-32"
+          className="overflow-y-auto pb-32 pt-20"
           style={{ height: "calc(100vh - 120px)" }}
         >
           <main className={styles.postContainer}>
@@ -142,7 +145,6 @@ export default function TreasurePostDetail() {
               <div className={styles.headerRow}>
                 <h2 className={styles.title}>{post.title || "（無題）"}</h2>
 
-                {/* 投稿者本人のみ編集・削除メニュー表示 */}
                 {user && (post.user_uid === user.userId) && (
                   <div className={styles.menuWrapper}>
                     <FaEllipsisV
@@ -159,7 +161,6 @@ export default function TreasurePostDetail() {
                 )}
               </div>
 
-              {/* ユーザー情報 */}
               <div className={styles.userInfo}>
                 <Avatar
                   src={post.profile_image}
@@ -177,15 +178,61 @@ export default function TreasurePostDetail() {
                 </div>
               </div>
 
-              {/* コンテンツエリア (Rich Text) */}
-              <div
-                className={styles.contentArea}
-                dangerouslySetInnerHTML={{
-                  __html: processHtmlContent(post.content),
-                }}
-              />
+              {(post.age || post.gender || post.device_used || post.anxiety_needs || post.appeal_points) && (
+                <div className={styles.targetInfoSection}>
+                  <span className={styles.sectionLabel}>ターゲット情報 & ニーズ</span>
 
-              {/* 複数画像対応 - コンテンツとは別に表示する場合（Tiptapに入っていない画像用） */}
+                  {(post.age || post.gender || post.device_used) && (
+                    <div className={styles.targetPills}>
+                      {post.age && (
+                        <div className={styles.targetPill}>
+                          <span className={styles.pillLabel}>年齢</span>
+                          {post.age}
+                        </div>
+                      )}
+                      {post.gender && (
+                        <div className={styles.targetPill}>
+                          <span className={styles.pillLabel}>性別</span>
+                          {post.gender}
+                        </div>
+                      )}
+                      {post.device_used && (
+                        <div className={styles.targetPill}>
+                          <span className={styles.pillLabel}>端末</span>
+                          {post.device_used}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {(post.anxiety_needs || post.appeal_points) && (
+                    <div className={styles.targetGrid}>
+                      {post.anxiety_needs && (
+                        <div className={styles.targetBox}>
+                          <span className={styles.boxLabel}>不安要素 & ニーズ</span>
+                          <div className={styles.boxText}>{post.anxiety_needs}</div>
+                        </div>
+                      )}
+                      {post.appeal_points && (
+                        <div className={styles.targetBox}>
+                          <span className={styles.boxLabel}>訴求ポイント</span>
+                          <div className={styles.boxText}>{post.appeal_points}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className={styles.contentArea}>
+                <span className={styles.contentLabel}>トークの流れ</span>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: processHtmlContent(post.content),
+                  }}
+                />
+              </div>
+
               {post.image_urls && post.image_urls.length > 0 && (
                 <div className={styles.imageGrid}>
                   {post.image_urls.map((url, index) => (
@@ -207,11 +254,9 @@ export default function TreasurePostDetail() {
                 </div>
               )}
 
-              {/* インタラクションバー */}
               <div className={styles.interactionBar}>
                 <button
-                  className={`${styles.actionBtn} ${post.liked ? styles.liked : ""
-                    }`}
+                  className={`${styles.actionBtn} ${post.liked ? styles.liked : ""}`}
                   onClick={handleLike}
                 >
                   <FaHeart />
@@ -244,7 +289,6 @@ export default function TreasurePostDetail() {
           </main>
         </div>
 
-        {/* 🔍 画像プレビュー */}
         {isPreviewOpen && (
           <div
             className={styles.previewOverlay}
@@ -260,7 +304,6 @@ export default function TreasurePostDetail() {
                 className={styles.previewImage}
               />
 
-              {/* ← 左矢印 */}
               {post.image_urls.length > 1 && (
                 <button
                   className={`${styles.arrowButton} ${styles.leftArrow}`}
@@ -275,7 +318,6 @@ export default function TreasurePostDetail() {
                 </button>
               )}
 
-              {/* → 右矢印 */}
               {post.image_urls.length > 1 && (
                 <button
                   className={`${styles.arrowButton} ${styles.rightArrow}`}
@@ -287,7 +329,6 @@ export default function TreasurePostDetail() {
                 </button>
               )}
 
-              {/* ✕ 閉じるボタン */}
               <button
                 className={styles.closeButton}
                 onClick={() => setIsPreviewOpen(false)}
@@ -295,7 +336,6 @@ export default function TreasurePostDetail() {
                 ✕
               </button>
 
-              {/* ページ表示（例：2 / 4） */}
               <div className={styles.counter}>
                 {previewIndex + 1} / {post.image_urls.length}
               </div>
@@ -308,7 +348,6 @@ export default function TreasurePostDetail() {
             postId={postId}
             onClose={() => setIsCommentOpen(false)}
             onCommentAdded={() => {
-              // コメント数リフレッシュ（オプション：再取得するか、手動で+1するか）
               setPost({
                 ...post,
                 comments_count: (post.comments_count || 0) + 1,

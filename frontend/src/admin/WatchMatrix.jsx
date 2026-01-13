@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 import Header from "../components/Header";
 import Navigation from "../components/Navigation";
 import "./AdminCommon.css";
@@ -13,7 +13,7 @@ export default function WatchMatrix() {
 
   useEffect(() => {
     setLoading(true);
-    axios.get("/api/analytics/watch_matrix/")
+    axiosClient.get("/analytics/watch_matrix/")
       .then(res => {
         setUsers(res.data.users);
         setVideos(res.data.videos);

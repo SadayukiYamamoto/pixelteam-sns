@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Navigation from "../components/Navigation";
+import { FiChevronRight, FiBook } from "react-icons/fi";
 import styles from "./TreasurePixelPage.module.css";
 
 export default function TreasurePixelPage() {
@@ -13,7 +14,7 @@ export default function TreasurePixelPage() {
         <Header title="Pixel 広場" />
 
         <div
-          className="overflow-y-auto pb-32"
+          className="overflow-y-auto pb-32 pt-20"
           style={{ height: "calc(100vh - 120px)" }}
         >
           <main className={styles.pixelPageContainer}>
@@ -58,6 +59,27 @@ export default function TreasurePixelPage() {
                 </div>
                 <h3 className={styles.cardTitle}>Event チーム</h3>
                 <p className={styles.cardSubtitle}>ノウハウ宝物庫</p>
+              </div>
+            </div>
+
+            {/* ノウハウ一覧への導線 */}
+            <div className={styles.listSection}>
+              <div
+                className={styles.listButton}
+                onClick={() => navigate("/treasure-list")}
+              >
+                <div className={styles.listButtonContent}>
+                  <div className={styles.listIconWrapper}>
+                    <FiBook className={styles.listIcon} size={32} color="#10b981" />
+                  </div>
+                  <div className={styles.listText}>
+                    <span className={styles.listTitle}>ノウハウ一覧</span>
+                    <span className={styles.listDesc}>すべての投稿を時系列で見る</span>
+                  </div>
+                </div>
+                <div className={styles.listArrow}>
+                  <FiChevronRight size={24} />
+                </div>
               </div>
             </div>
           </main>

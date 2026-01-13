@@ -18,10 +18,12 @@ urlpatterns = [
     
     # Admin API
     path('admin/users/', views.get_all_users, name='admin_users_list'),
+    path('admin/users/update_exp/', views.admin_update_exp),
     path('admin/users/<str:user_id>/', views.admin_user_detail, name='admin_user_detail'),
     path('admin/badges/', views.badge_list_create, name='admin_badges_list'),
     path('admin/badges/assign/', views.assign_badge, name='admin_assign_badge'),
     path('admin/login-popup/', views.admin_login_popup_setting, name='admin_login_popup_setting'),
+    path('admin/shops/list/', views.get_shop_list, name='admin_shop_list'),
 
     # User Login Popup
     path('user/login-popup/', views.user_login_popup, name='user_login_popup'),

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 import { FiArrowLeft, FiSearch, FiAward, FiSmile, FiUser, FiChevronDown, FiChevronRight, FiMessageSquare } from "react-icons/fi";
 import { HiStar } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,10 +21,7 @@ const VideoFeedbackAdminPage = () => {
 
     const fetchFeedbacks = async () => {
         try {
-            const token = localStorage.getItem("token");
-            const res = await axios.get("/api/admin/videos/feedback/", {
-                headers: { Authorization: `Token ${token}` }
-            });
+            const res = await axiosClient.get("/admin/videos/feedback/");
             setFeedbacks(res.data);
         } catch (err) {
             console.error(err);

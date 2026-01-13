@@ -726,6 +726,33 @@ def admin_update_points(request):
         return Response({"detail": "Invalid points value"}, status=400)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def admin_update_exp(request):
+    """
+    管理者用：ユーザーのEXPを直接更新する
+    """
+    if not request.user.is_admin_or_secretary:
+        return Response({"detail": "権限がありません"}, status=403)
+
+    target_user_id = request.data.get("user_id")
+    new_exp = request.data.get("exp")
+
+    if not target_user_id or new_exp is None:
+        return Response({"detail": "user_id and exp are required"}, status=400)
+
+    try:
+        user = User.objects.get(user_id=target_user_id)
+        user.exp = int(new_exp)
+        user.save() # User.save() will recalculate Level
+
+        return Response({"detail": "EXP updated", "new_exp": user.exp, "new_level": user.level})
+    except User.DoesNotExist:
+        return Response({"detail": "User not found"}, status=404)
+    except ValueError:
+        return Response({"detail": "Invalid exp value"}, status=400)
+
+
 # === ログインポップアップ設定 (Admin) ===
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -818,3 +845,15 @@ def get_current_user_profile(request):
         "is_staff": user.is_staff,
         "team": user.team,
     })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_shop_list(request):
+    """
+    全店舗名リスト取得（管理者専用）
+    """
+    if not request.user.is_admin_or_secretary:
+        return Response({"error": "権限がありません"}, status=403)
+        
+    shops = User.objects.exclude(shop_name__in=['', None]).values_list('shop_name', flat=True).distinct()
+    return Response(list(shops))

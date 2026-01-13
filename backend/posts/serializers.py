@@ -180,6 +180,8 @@ class TreasurePostSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField()
     liked = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
+    shop_name = serializers.SerializerMethodField()
+    is_read = serializers.SerializerMethodField()
     user_uid = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
@@ -204,7 +206,13 @@ class TreasurePostSerializer(serializers.ModelSerializer):
             'device_used',
             'anxiety_needs',
             'appeal_points',
+            'shop_name',
+            'is_read',
         ]
+
+    def get_shop_name(self, obj):
+        user = User.objects.filter(user_id=obj.user_uid).first()
+        return user.shop_name if user else ""
 
     def get_image_url(self, obj):
         if obj.image_urls:
@@ -230,6 +238,13 @@ class TreasurePostSerializer(serializers.ModelSerializer):
         user = getattr(request, 'user', None)
         if user and user.is_authenticated:
             return obj.likes.filter(id=user.id).exists()
+        return False
+
+    def get_is_read(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated:
+            return obj.read_by.filter(id=user.id).exists()
         return False
 
 class NoticeSerializer(serializers.ModelSerializer):

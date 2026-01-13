@@ -134,3 +134,78 @@
   font-weight: 600;
   letter-spacing: 0.05em;
 }
+
+/* ノウハウ一覧への導線 */
+.listSection {
+  padding: 0 16px;
+  margin-top: 32px;
+}
+
+.listButton {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 28px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow:
+    0 20px 40px -10px rgba(0, 0, 0, 0.08),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04),
+    inset 0 0 20px rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.listButton:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow:
+    0 30px 60px -12px rgba(16, 185, 129, 0.2),
+    0 0 0 4px rgba(16, 185, 129, 0.1);
+  background: white;
+}
+
+.listButtonContent {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.listIconWrapper {
+  width: 56px;
+  height: 56px;
+  background: #f0fdf4;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.listIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.listText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.listTitle {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.listDesc {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.listArrow {
+  color: #cbd5e1;
+}

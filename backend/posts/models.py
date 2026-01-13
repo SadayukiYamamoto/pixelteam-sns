@@ -113,6 +113,7 @@ class TreasurePost(models.Model):
     device_used = models.CharField(max_length=100, blank=True, null=True)
     anxiety_needs = models.TextField(blank=True, null=True)
     appeal_points = models.TextField(blank=True, null=True)
+    read_by = models.ManyToManyField(User, related_name='read_treasure_posts', blank=True)
 
     def __str__(self):
         return self.title or "(無題)"

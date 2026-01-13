@@ -1,0 +1,131 @@
+.listContainer {
+    padding: 24px 16px 120px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.listHeader {
+    margin-bottom: 32px;
+    padding: 0 8px;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.postList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.postItem {
+    position: relative;
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+    /* For the read badge corner */
+}
+
+.postItem:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
+}
+
+.postInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.postDate {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dateIcon {
+    font-size: 0.9rem;
+}
+
+.postTitle {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #334155;
+    line-height: 1.4;
+}
+
+.arrowIcon {
+    color: #cbd5e1;
+    font-size: 1.4rem;
+}
+
+/* 既読判定バッジ (三角形 / 黄緑色) */
+.readBadge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60px;
+    height: 60px;
+    background: #a3e635;
+    /* Lime green - 400 */
+    clip-path: polygon(100% 0, 0 0, 100% 100%);
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    pointer-events: none;
+}
+
+.readText {
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    transform: rotate(45deg) translate(8px, 16px);
+    white-space: nowrap;
+}
+
+.loading,
+.empty {
+    padding: 80px 0;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.spinner {
+    margin: 0 auto 16px;
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f1f5f9;
+    border-top-color: #10b981;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

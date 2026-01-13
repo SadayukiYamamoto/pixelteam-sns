@@ -82,6 +82,13 @@ const AdminDashboard = () => {
             color: "border-indigo-500",
         },
         {
+            title: "知恵袋管理",
+            description: "知恵袋（ノウハウ）の入力情報やターゲット層を一覧で分析・管理します。",
+            path: "/admin/treasures",
+            icon: <FaListAlt size={40} color="#10b981" />,
+            color: "border-green-500",
+        },
+        {
             title: "動画アップロード",
             description: "新しい動画をアップロードします。",
             path: "/video/upload",
