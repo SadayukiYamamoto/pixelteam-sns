@@ -512,40 +512,66 @@ def video_list(request):
 @api_view(['GET', 'DELETE'])
 @permission_classes([AllowAny])
 def video_detail(request, video_id):
-
+    # IDをクリーンアップ
+    video_id = video_id.strip('/')
+    
     if request.method == 'DELETE':
-        # 管理者チェック
-        if not request.user.is_admin_or_secretary:
+        # 認証 & 管理者チェック
+        if not request.user.is_authenticated:
+            return Response({"detail": "認証が必要です"}, status=401)
+        
+        # AnonymousUser対策のため getattr で安全に取得
+        is_admin = getattr(request.user, 'is_admin_or_secretary', False)
+        if not is_admin:
              return Response({"detail": "権限がありません"}, status=403)
 
+        print(f"DEBUG: DELETE video request for id: {video_id}")
+        
         try:
-             # 1. Firestoreから削除
-             db = firestore.client()
-             db.collection('pixtubePosts').document(video_id).delete()
+             # 1. Firestoreから削除 (オプショナル)
+             try:
+                 if firebase_admin._apps:
+                     db = firestore.client()
+                     db.collection('pixtubePosts').document(video_id).delete()
+                     print(f"DEBUG: Firestore document {video_id} deleted (if existed)")
+             except Exception as fe:
+                 print("Firestore delete warning:", fe)
              
              # 2. Django DBから削除
-             Video.objects.filter(id=video_id).delete()
+             deleted_count, _ = Video.objects.filter(id=video_id).delete()
+             print(f"DEBUG: Django DB Video deleted. Count: {deleted_count}")
 
-             return Response({"message": "Video deleted"}, status=204)
+             return Response({"message": "Video deleted"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
              print("Video delete error:", e)
+             import traceback
+             traceback.print_exc()
              return Response({"error": str(e)}, status=500)
 
+    # --- GET ---
+    print(f"DEBUG: GET video_detail for id: {video_id}")
+    
     # 1. Django DB で検索
     video_obj = Video.objects.filter(id=video_id).first()
+    if video_obj:
+        print(f"DEBUG: Found video in Django DB: {video_obj.title}")
     
     # 2. Firestore からの取得を試みる (情報の補完または同期のため)
     firestore_data = None
     try:
         url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/pixtubePosts/{video_id}"
-        resp = requests.get(url)
+        resp = requests.get(url, timeout=5)
         if resp.status_code == 200:
             firestore_data = resp.json().get("fields", {})
+            print(f"DEBUG: Found video in Firestore: {video_id}")
+        else:
+            print(f"DEBUG: Video not found in Firestore (status: {resp.status_code})")
     except Exception as e:
         print("Firestore fetch error in video_detail:", e)
 
     # Django にもなく Firestore にもない場合は 404
     if not video_obj and not firestore_data:
+        print(f"DEBUG: Video {video_id} not found anywhere (404)")
         return Response({'error': 'Video not found'}, status=404)
 
     # 3. 同期/作成処理 (FirestoreにあってDjangoにない、または情報の更新)
@@ -565,7 +591,6 @@ def video_detail(request, video_id):
         )
 
     # 4. レスポンスの構築
-    # Django の現在の値を優先しつつ、Firestore の作成日時などがあれば使う
     view_count = video_obj.views if video_obj else 0
     total_watch_time = video_obj.watch_time if video_obj else 0
     
@@ -1632,30 +1657,39 @@ def create_video(request):
         title = data.get("title")
         video_url = data.get("video_url")
         
+        print(f"DEBUG: create_video request - id: {video_id}, title: {title}")
+        
         if not video_id or not title or not video_url:
             return Response({"error": "id, title, video_url are required"}, status=400)
             
-        # Video オブジェクト作成
-        video = Video.objects.create(
+        # Video オブジェクト作成 (重複回避のため update_or_create を検討すべきだが、一度 create で様子見)
+        video, created = Video.objects.update_or_create(
             id=video_id,
-            title=title,
-            user=user.display_name or "Anonymous",
-            userAvatar=user.profile_image or "",
-            video_url=video_url,
-            thumb=data.get("thumb", ""),
-            duration=data.get("duration", "0:00"),
-            views=0,
-            watch_time=0
+            defaults={
+                "title": title,
+                "user": user.display_name or "Anonymous",
+                "userAvatar": user.profile_image or "",
+                "video_url": video_url,
+                "thumb": data.get("thumb", ""),
+                "duration": data.get("duration", "0:00"),
+                "views": 0,
+                "watch_time": 0
+            }
         )
+        
+        print(f"DEBUG: Video saved to Django DB. id: {video.id}")
         
         return Response({
             "message": "Video meta created", 
             "id": video.id,
-            "title": video.title
+            "title": video.title,
+            "created": created
         }, status=201)
         
     except Exception as e:
         print("create_video error:", e)
+        import traceback
+        traceback.print_exc()
         return Response({"error": str(e)}, status=500)
 
 @api_view(["PUT"])
