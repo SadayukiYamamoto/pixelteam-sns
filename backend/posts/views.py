@@ -525,7 +525,7 @@ def video_detail(request, video_id):
         if not is_admin:
              return Response({"detail": "権限がありません"}, status=403)
 
-        print(f"DEBUG: DELETE video request for id: {video_id}")
+        print(f"DEBUG: DELETE video request for id: {video_id}", flush=True)
         
         try:
              # 1. Firestoreから削除 (オプショナル)
@@ -533,15 +533,15 @@ def video_detail(request, video_id):
                  if firebase_admin._apps:
                      db = firestore.client()
                      db.collection('pixtubePosts').document(video_id).delete()
-                     print(f"DEBUG: Firestore document {video_id} deleted (if existed)")
+                     print(f"DEBUG: Firestore document {video_id} deleted (if existed)", flush=True)
              except Exception as fe:
-                 print("Firestore delete warning:", fe)
+                 print("Firestore delete warning:", fe, flush=True)
              
              # 2. Django DBから削除
              deleted_count, _ = Video.objects.filter(id=video_id).delete()
-             print(f"DEBUG: Django DB Video deleted. Count: {deleted_count}")
+             print(f"DEBUG: Django DB Video deleted. Count: {deleted_count}", flush=True)
 
-             return Response({"message": "Video deleted"}, status=status.HTTP_204_NO_CONTENT)
+             return Response({"message": "Video deleted"}, status=status.HTTP_200_OK)
         except Exception as e:
              print("Video delete error:", e)
              import traceback
