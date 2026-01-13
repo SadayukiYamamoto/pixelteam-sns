@@ -531,47 +531,62 @@ def video_detail(request, video_id):
              print("Video delete error:", e)
              return Response({"error": str(e)}, status=500)
 
-    # Firestoreの動画フィールド取得
-    url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/pixtubePosts/{video_id}"
-    response = requests.get(url)
+    # 1. Django DB で検索
+    video_obj = Video.objects.filter(id=video_id).first()
+    
+    # 2. Firestore からの取得を試みる (情報の補完または同期のため)
+    firestore_data = None
+    try:
+        url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/pixtubePosts/{video_id}"
+        resp = requests.get(url)
+        if resp.status_code == 200:
+            firestore_data = resp.json().get("fields", {})
+    except Exception as e:
+        print("Firestore fetch error in video_detail:", e)
 
-    if response.status_code != 200:
+    # Django にもなく Firestore にもない場合は 404
+    if not video_obj and not firestore_data:
         return Response({'error': 'Video not found'}, status=404)
 
-    doc = response.json()
-    fields = doc.get("fields", {})
+    # 3. 同期/作成処理 (FirestoreにあってDjangoにない、または情報の更新)
+    if firestore_data:
+        def get_v(f): return firestore_data.get(f, {}).get("stringValue", "")
+        
+        video_obj, created = Video.objects.update_or_create(
+            id=video_id,
+            defaults={
+                "title": get_v("title") or (video_obj.title if video_obj else ""),
+                "user": get_v("author") or (video_obj.user if video_obj else ""),
+                "duration": get_v("duration") or (video_obj.duration if video_obj else ""),
+                "thumb": get_v("thumbnail") or (video_obj.thumb if video_obj else ""),
+                "video_url": get_v("src") or (video_obj.video_url if video_obj else ""),
+                "userAvatar": get_v("userAvatar") or (video_obj.userAvatar if video_obj else ""),
+            }
+        )
 
-    # 🔥 Firestore → Django Video モデルへ同期
-    Video.objects.update_or_create(
-        id=video_id,
-        defaults={
-            "title": fields.get("title", {}).get("stringValue", ""),
-            "user": fields.get("author", {}).get("stringValue", ""),
-            "duration": fields.get("duration", {}).get("stringValue", ""),
-            "thumb": fields.get("thumbnail", {}).get("stringValue", ""),
-            "video_url": fields.get("src", {}).get("stringValue", ""),
-            "userAvatar": fields.get("userAvatar", {}).get("stringValue", ""),
-        }
-    )
-
-    # 🔥 Django の視聴ログから集計... ではなく Video.views を正とする
-    # Video.views は add_video_view でインクリメントされる
-    video_obj = Video.objects.filter(id=video_id).first()
+    # 4. レスポンスの構築
+    # Django の現在の値を優先しつつ、Firestore の作成日時などがあれば使う
     view_count = video_obj.views if video_obj else 0
     total_watch_time = video_obj.watch_time if video_obj else 0
+    
+    created_at_val = ""
+    if firestore_data and "createdAt" in firestore_data:
+        created_at_val = firestore_data.get("createdAt", {}).get("timestampValue", "")
+    elif video_obj and video_obj.created_at:
+        created_at_val = video_obj.created_at.isoformat()
 
     video = {
         "id": video_id,
-        "title": fields.get("title", {}).get("stringValue", ""),
-        "user": fields.get("author", {}).get("stringValue", ""),
-        "duration": fields.get("duration", {}).get("stringValue", ""),
-        "thumb": fields.get("thumbnail", {}).get("stringValue", ""),
-        "video_url": fields.get("src", {}).get("stringValue", ""),
-        "created_at": fields.get("createdAt", {}).get("timestampValue", ""),
-
-        # 🔥 Djangoの値を返す
+        "title": video_obj.title if video_obj else "",
+        "user": video_obj.user if video_obj else "",
+        "duration": video_obj.duration if video_obj else "",
+        "thumb": video_obj.thumb if video_obj else "",
+        "video_url": video_obj.video_url if video_obj else "",
+        "created_at": created_at_val,
         "views": view_count,
         "watch_time": total_watch_time,
+        "is_featured": video_obj.is_featured if video_obj else False,
+        "is_short": video_obj.is_short if video_obj else False,
     }
 
     return Response(video)
@@ -590,16 +605,30 @@ def record_video_view(request):
         if not video_id:
             return Response({"error": "video_id が指定されていません。"}, status=400)
 
-        # Firestoreで存在確認
-        FIREBASE_PROJECT_ID = "pixelshopsns"
-        url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/pixtubePosts/{video_id}"
-        response = requests.get(url)
+        # Django Video オブジェクト取得を優先
+        video_obj = Video.objects.filter(id=video_id).first()
 
-        if response.status_code != 200:
-            return Response({"error": "Firestore上に動画が見つかりません。"}, status=404)
+        if not video_obj:
+            # Firestoreで存在確認 (同期のため)
+            FIREBASE_PROJECT_ID = "pixelshopsns"
+            url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/pixtubePosts/{video_id}"
+            response = requests.get(url)
 
-        # Django Video オブジェクト取得
-        video_obj = Video.objects.get(id=video_id)
+            if response.status_code != 200:
+                return Response({"error": "動画が見つかりません。"}, status=404)
+            
+            # 同期
+            fields = response.json().get("fields", {})
+            def get_v(f): return fields.get(f, {}).get("stringValue", "")
+            video_obj = Video.objects.create(
+                id=video_id,
+                title=get_v("title"),
+                user=get_v("author"),
+                duration=get_v("duration"),
+                thumb=get_v("thumbnail"),
+                video_url=get_v("src"),
+                userAvatar=get_v("userAvatar")
+            )
 
         # 🔥 get_or_create (User単位で1つのログを作る場合)
         log, created = VideoViewLog.objects.get_or_create(
