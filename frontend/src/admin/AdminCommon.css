@@ -120,9 +120,9 @@
 }
 
 .video-card-thumb {
-    width: 100px;
-    aspect-ratio: 1 / 1;
-    border-radius: 16px;
+    width: 120px;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
     overflow: hidden;
     background: #F1F5F9;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -267,9 +267,9 @@
 
 .current-thumb-preview {
     width: 100%;
-    max-width: 320px;
+    max-width: 400px;
     margin: 0 auto 12px;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 16 / 9;
     background: #F3F4F6;
     border-radius: 20px;
     overflow: hidden;

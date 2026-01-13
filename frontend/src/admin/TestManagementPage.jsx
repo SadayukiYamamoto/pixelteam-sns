@@ -108,7 +108,10 @@ export default function TestManagementPage() {
                                             >
                                                 <td className="py-16 px-6">
                                                     <div className="flex justify-center">
-                                                        <div className="w-[180px] h-[100px] rounded-[28px] overflow-hidden bg-gray-50 border border-[#F1F5F9] transition-transform duration-300 group-hover/row:scale-[1.02]">
+                                                        <div
+                                                            className="w-[180px] rounded-[28px] overflow-hidden bg-gray-50 border border-[#F1F5F9] transition-transform duration-300 group-hover/row:scale-[1.02]"
+                                                            style={{ aspectHeight: 'auto', aspectRatio: '16 / 9' }}
+                                                        >
                                                             {video.thumb ? (
                                                                 <img
                                                                     src={video.thumb}
