@@ -183,6 +183,9 @@ export default function VideoTestPage() {
                 <div className="question-title">
                   <span className="q-num">Q{index + 1}</span> {q.text}
                 </div>
+                {q.description && (
+                  <div className="question-description">{q.description}</div>
+                )}
                 <div className="choices-grid">
                   {q.choices.map((choice) => (
                     <div
@@ -208,6 +211,11 @@ export default function VideoTestPage() {
               {survey.questions.map((q) => (
                 <div key={q.id} className="survey-item">
                   <p className="survey-q">{q.text}</p>
+                  {q.description && (
+                    <div className="question-description" style={{ marginTop: '-8px', marginBottom: '12px', borderLeftColor: '#cbd5e1' }}>
+                      {q.description}
+                    </div>
+                  )}
 
                   {q.question_type === "choice" ? (
                     <div className="survey-choices">

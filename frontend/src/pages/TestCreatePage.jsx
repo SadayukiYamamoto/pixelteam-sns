@@ -21,6 +21,7 @@ export default function TestCreatePage() {
   const [questions, setQuestions] = useState([
     {
       text: "",
+      description: "",
       choices: [
         { text: "", is_correct: false },
         { text: "", is_correct: false },
@@ -32,8 +33,8 @@ export default function TestCreatePage() {
 
   // アンケート質問
   const [surveyQuestions, setSurveyQuestions] = useState([
-    { type: "choice", text: "この動画の満足度を教えてください", choices: ["とても満足", "満足", "普通", "不満"] },
-    { type: "text", text: "感想やご意見があればご記入ください", choices: [] }
+    { type: "choice", text: "この動画の満足度を教えてください", description: "", choices: ["とても満足", "満足", "普通", "不満"] },
+    { type: "text", text: "感想やご意見があればご記入ください", description: "", choices: [] }
   ]);
 
   useEffect(() => {
@@ -61,13 +62,12 @@ export default function TestCreatePage() {
 
           try {
             const surveyRes = await axios.get(`/api/videos/${paramVideoId}/survey/`, { headers });
-            if (surveyRes.data && surveyRes.data.questions) {
-              setSurveyQuestions(surveyRes.data.questions.map(q => ({
-                type: q.question_type,
-                text: q.text,
-                choices: q.choices.map(c => c.text)
-              })));
-            }
+            setSurveyQuestions(surveyRes.data.questions.map(q => ({
+              type: q.question_type,
+              text: q.text,
+              description: q.description || "",
+              choices: q.choices.map(c => c.text)
+            })));
           } catch (e) {
             console.log("既存のアンケートなし");
           }
@@ -81,13 +81,16 @@ export default function TestCreatePage() {
   }, [paramVideoId]);
 
   // --- Handlers ---
-  const addQuestion = () => setQuestions([...questions, { text: "", choices: [{ text: "", is_correct: false }, { text: "", is_correct: false }] }]);
+  const addQuestion = () => setQuestions([...questions, { text: "", description: "", choices: [{ text: "", is_correct: false }, { text: "", is_correct: false }] }]);
   const removeQuestion = (idx) => {
     if (questions.length <= 1) return alert("最低1問必要です");
     setQuestions(questions.filter((_, i) => i !== idx));
   };
   const updateQuestionText = (idx, text) => {
     const q = [...questions]; q[idx].text = text; setQuestions(q);
+  };
+  const updateQuestionDescription = (idx, description) => {
+    const q = [...questions]; q[idx].description = description; setQuestions(q);
   };
   const updateChoice = (qi, ci, text) => {
     const q = [...questions]; q[qi].choices[ci].text = text; setQuestions(q);
@@ -107,7 +110,7 @@ export default function TestCreatePage() {
     setQuestions(q);
   };
 
-  const addSurveyQuestion = (type) => setSurveyQuestions([...surveyQuestions, { type, text: "", choices: type === 'choice' ? ["選択肢1"] : [] }]);
+  const addSurveyQuestion = (type) => setSurveyQuestions([...surveyQuestions, { type, text: "", description: "", choices: type === 'choice' ? ["選択肢1"] : [] }]);
   const removeSurveyQuestion = (idx) => setSurveyQuestions(surveyQuestions.filter((_, i) => i !== idx));
   const updateSurveyQuestion = (idx, field, val) => {
     const s = [...surveyQuestions]; s[idx][field] = val; setSurveyQuestions(s);
@@ -129,8 +132,8 @@ export default function TestCreatePage() {
 
     const payload = {
       video_id: videoId, title,
-      questions: questions.map((q, i) => ({ order: i + 1, text: q.text, choices: q.choices })),
-      survey_questions: surveyQuestions.map((s, i) => ({ order: i + 1, type: s.type, text: s.text, choices: s.choices }))
+      questions: questions.map((q, i) => ({ order: i + 1, text: q.text, description: q.description, choices: q.choices })),
+      survey_questions: surveyQuestions.map((s, i) => ({ order: i + 1, type: s.type, text: s.text, description: s.description, choices: s.choices }))
     };
 
     try {
@@ -259,6 +262,25 @@ export default function TestCreatePage() {
                           }}
                         />
 
+                        <textarea
+                          placeholder="問題の説明文（任意）"
+                          value={q.description || ""}
+                          onChange={(e) => updateQuestionDescription(qi, e.target.value)}
+                          style={{
+                            width: '100%',
+                            boxSizing: 'border-box',
+                            padding: '16px 40px',
+                            borderRadius: '16px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            backgroundColor: '#F1F5F9',
+                            border: 'none',
+                            outline: 'none',
+                            minHeight: '80px',
+                            resize: 'none'
+                          }}
+                        />
+
                         <div className="choice-grid">
                           {q.choices.map((choice, ci) => (
                             <div key={ci} className={`choice-item ${choice.is_correct ? 'correct' : ''}`}>
@@ -337,6 +359,25 @@ export default function TestCreatePage() {
                           fontWeight: '900',
                           backgroundColor: '#F8FAFC',
                           color: '#334155'
+                        }}
+                      />
+
+                      <textarea
+                        placeholder="アンケート項目の説明文（任意）"
+                        value={sq.description || ""}
+                        onChange={(e) => updateSurveyQuestion(si, 'description', e.target.value)}
+                        style={{
+                          width: '100%',
+                          boxSizing: 'border-box',
+                          padding: '16px 40px',
+                          borderRadius: '16px',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          backgroundColor: '#F1F5F9',
+                          border: 'none',
+                          outline: 'none',
+                          minHeight: '60px',
+                          resize: 'none'
                         }}
                       />
 
