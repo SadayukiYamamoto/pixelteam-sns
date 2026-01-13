@@ -78,10 +78,15 @@ export default function TreasurePostListPage() {
                                         )}
 
                                         <div className={styles.postInfo}>
-                                            <span className={styles.postDate}>
-                                                <FiClock className={styles.dateIcon} />
-                                                {new Date(post.created_at).toLocaleDateString()}
-                                            </span>
+                                            <div className={styles.dateRow}>
+                                                <span className={styles.postDate}>
+                                                    <FiClock className={styles.dateIcon} />
+                                                    {new Date(post.created_at).toLocaleDateString()}
+                                                </span>
+                                                {post.category && (
+                                                    <span className={styles.categoryTag}>{post.category}</span>
+                                                )}
+                                            </div>
                                             <h3 className={styles.postTitle}>{post.title || "（無題）"}</h3>
                                         </div>
                                         <FiChevronRight className={styles.arrowIcon} />

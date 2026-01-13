@@ -67,6 +67,22 @@
     gap: 6px;
 }
 
+.dateRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.categoryTag {
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 100px;
+    border: 1px solid #e2e8f0;
+}
+
 .dateIcon {
     font-size: 0.9rem;
 }

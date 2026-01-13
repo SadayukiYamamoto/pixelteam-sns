@@ -25,7 +25,7 @@ import IndividualShops from "./components/tasks/IndividualShops";
 import NumberVisitors from "./components/tasks/NumberVisitors";       // ←修正
 import SiftManagement from "./components/tasks/SiftManagement";       // ←修正
 import SwingManagement from "./components/tasks/SwingManagement";
-import NoticePage from "./components/NoticePage.jsx";
+import NoticeListPage from "./pages/NoticeListPage.jsx";
 import NoticeDetailPage from "./pages/NoticeDetailPage"; // ← 追加 // ← 追加 // ← 追加
 import NoticeAdminEditor from "./admin/NoticeAdminEditor"; // ← 追加
 import MissionsPage from "./components/MissionsPage";
@@ -118,7 +118,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Route path="/components/tasks/swing-management" element={<ProtectedRoute><SwingManagement /></ProtectedRoute>} />
 
       {/* おしらせ */}
-      <Route path="/notice" element={<ProtectedRoute><NoticePage /></ProtectedRoute>} />
+      <Route path="/notice" element={<ProtectedRoute><NoticeListPage /></ProtectedRoute>} />
+      <Route path="/notices" element={<ProtectedRoute><NoticeListPage /></ProtectedRoute>} />
       <Route path="/notice/:id" element={<ProtectedRoute><NoticeDetailPage /></ProtectedRoute>} />
       <Route path="/admin/notices/new" element={<ProtectedRoute><NoticeAdminEditor /></ProtectedRoute>} />
       <Route path="/admin/notices/edit/:id" element={<ProtectedRoute><NoticeAdminEditor /></ProtectedRoute>} />

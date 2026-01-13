@@ -222,7 +222,7 @@ const MainContent = ({ setActiveTab }) => {
               }}
               className="archive-button"
             >
-              <span>過去のショート動画</span>
+              <span>過去の動画</span>
             </button>
           </div>
         </div>
