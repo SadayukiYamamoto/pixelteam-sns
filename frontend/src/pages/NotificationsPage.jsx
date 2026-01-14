@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Heart, MessageCircle, AtSign, Award, CircleDollarSign, ChevronLeft, Bell } from 'lucide-react';
+import { Heart, MessageCircle, AtSign, Award, CircleDollarSign, ChevronLeft, Bell, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Avatar from '../components/Avatar';
 import './NotificationsPage.css';
@@ -37,6 +37,21 @@ const NotificationsPage = () => {
             });
         } catch (err) {
             console.error('既読処理に失敗しました:', err);
+        }
+    };
+
+    const handleDelete = async (e, id) => {
+        e.stopPropagation(); // 親要素のクリックイベント（遷移）を防止
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`/api/notifications/${id}/delete/`, {
+                headers: { Authorization: `Token ${token}` }
+            });
+            // 状態を更新して一覧から削除
+            setNotifications(notifications.filter(n => n.id !== id));
+        } catch (err) {
+            console.error('通知の削除に失敗しました:', err);
+            alert('通知の削除に失敗しました');
         }
     };
 
@@ -102,6 +117,13 @@ const NotificationsPage = () => {
                                 <p className="notif-message">{notif.message}</p>
                                 <span className="notif-time">{new Date(notif.created_at).toLocaleString()}</span>
                             </div>
+                            <button
+                                className="notif-delete-btn"
+                                onClick={(e) => handleDelete(e, notif.id)}
+                                title="削除"
+                            >
+                                <Check size={20} />
+                            </button>
                         </div>
                     ))
                 )}

@@ -207,6 +207,7 @@ class VideoTest(models.Model):
 class Question(models.Model):
     test = models.ForeignKey(VideoTest, on_delete=models.CASCADE, related_name="questions")
     text = models.TextField()
+    description = models.TextField(blank=True, null=True)
     order = models.PositiveIntegerField(default=1)
 
     def __str__(self):
@@ -255,6 +256,7 @@ class Survey(models.Model):
 class SurveyQuestion(models.Model):
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE, related_name="questions")
     text = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
     order = models.IntegerField(default=1)
     question_type = models.CharField(max_length=50, default="choice")
 

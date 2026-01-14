@@ -138,3 +138,29 @@
     text-align: center;
     font-weight: 600;
 }
+
+.notif-delete-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+    color: #495057;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    margin-left: 12px;
+    transition: all 0.2s;
+    align-self: center;
+}
+
+.notif-delete-btn:hover {
+    background: #10b981;
+    color: white;
+    transform: scale(1.1);
+}
+
+.notif-delete-btn svg {
+    display: block;
+}

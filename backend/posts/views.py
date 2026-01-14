@@ -1491,6 +1491,11 @@ def create_test(request):
     video_id = data.get("video_id")
     title = data.get("title", "")
     questions_data = data.get("questions", [])
+    
+    # DEBUG
+    print(f"DEBUG: create_test - video_id={video_id}, title={title}", flush=True)
+    print(f"DEBUG: create_test - questions_data={questions_data}", flush=True)
+    print(f"DEBUG: create_test - survey_questions={data.get('survey_questions')}", flush=True)
 
     if not video_id:
         return Response({"error": "video_id が必要です"}, status=400)
@@ -1532,7 +1537,8 @@ def create_test(request):
         question = Question.objects.create(
             test=test,
             order=q.get("order", 1),
-            text=q.get("text", "")
+            text=q.get("text", ""),
+            description=q.get("description", "")
         )
 
         for choice in q.get("choices", []):
@@ -1556,6 +1562,7 @@ def create_test(request):
             sq = SurveyQuestion.objects.create(
                 survey=survey,
                 text=q.get("text", ""),
+                description=q.get("description", ""),
                 order=q.get("order", 1),
                 question_type=q.get("type", "text") # text or choice
             )

@@ -13,6 +13,8 @@ import json
 
 from posts.models import Post, VideoViewLog, UserTestResult, TreasurePost
 from missions.utils import update_mission_progress
+from django.utils import timezone
+from datetime import timedelta
 
 import firebase_admin
 from firebase_admin import auth, credentials
@@ -528,9 +530,34 @@ def public_profile_view(request, user_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def notification_list(request):
-    notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')[:50]
+    # 1ヶ月以前の未読通知を削除
+    one_month_ago = timezone.now() - timedelta(days=30)
+    Notification.objects.filter(
+        recipient=request.user, 
+        created_at__lt=one_month_ago,
+        is_read=False
+    ).delete()
+
+    # 1ヶ月以内の通知のみ取得
+    notifications = Notification.objects.filter(
+        recipient=request.user,
+        created_at__gte=one_month_ago
+    ).order_by('-created_at')[:50]
+    
     serializer = NotificationSerializer(notifications, many=True)
     return Response(serializer.data)
+
+
+# === 通知を削除 ===
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_notification(request, pk):
+    try:
+        notification = Notification.objects.get(pk=pk, recipient=request.user)
+        notification.delete()
+        return Response({"message": "Notification deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+    except Notification.DoesNotExist:
+        return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 # === 通知を既読にする ===

@@ -255,7 +255,7 @@ class NoticeSerializer(serializers.ModelSerializer):
 class ChoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Choice
-        fields = ("id", "text")   # is_correct は返さない（不正防止）
+        fields = ("id", "text", "is_correct")
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -263,7 +263,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ("id", "order", "text", "choices")
+        fields = ("id", "order", "text", "description", "choices")
 
 
 class VideoTestSerializer(serializers.ModelSerializer):
@@ -283,7 +283,7 @@ class SurveyQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SurveyQuestion
-        fields = "__all__"
+        fields = ("id", "text", "description", "order", "choices", "question_type")
 
 class SurveySerializer(serializers.ModelSerializer):
     questions = SurveyQuestionSerializer(many=True)
