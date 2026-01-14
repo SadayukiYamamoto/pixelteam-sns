@@ -4,7 +4,7 @@ import "./VideoPlayer.css";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Navigation from "./Navigation";
-import { ArrowLeft, Volume2, VolumeX, Play, Pause, RotateCcw } from "lucide-react";
+import { ArrowLeft, Volume2, VolumeX, Play, Pause, RotateCcw, Maximize, FastForward } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "";
 
@@ -21,6 +21,8 @@ export default function VideoPlayer() {
   const [showCenterIcon, setShowCenterIcon] = useState(null); // 'play', 'pause', 'seek-forward', 'seek-backward'
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const playerWrapperRef = useRef(null);
 
   const fetchVideo = async () => {
     try {
@@ -157,6 +159,32 @@ export default function VideoPlayer() {
     }
   };
 
+  const cyclePlaybackRate = () => {
+    let newRate = 1;
+    if (playbackRate === 1) newRate = 2;
+    else if (playbackRate === 2) newRate = 4;
+    else newRate = 1;
+
+    setPlaybackRate(newRate);
+    if (videoRef.current) {
+      videoRef.current.playbackRate = newRate;
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (playerWrapperRef.current) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        if (playerWrapperRef.current.requestFullscreen) {
+          playerWrapperRef.current.requestFullscreen();
+        } else if (playerWrapperRef.current.webkitRequestFullscreen) {
+          playerWrapperRef.current.webkitRequestFullscreen();
+        }
+      }
+    }
+  };
+
   const seek = (seconds) => {
     if (videoRef.current) {
       videoRef.current.currentTime += seconds;
@@ -223,7 +251,7 @@ export default function VideoPlayer() {
             </button>
 
             <div className="video-main-section">
-              <div className="video-wrapper" onClick={togglePlay}>
+              <div className="video-wrapper" onClick={togglePlay} ref={playerWrapperRef}>
                 <video
                   ref={videoRef}
                   src={videoData.video_url}
@@ -307,10 +335,24 @@ export default function VideoPlayer() {
 
                   <div className="right-controls">
                     <button
+                      className="speed-toggle-btn"
+                      onClick={cyclePlaybackRate}
+                      title="再生速度"
+                    >
+                      <FastForward size={18} fill={playbackRate > 1 ? "#10b981" : "none"} color={playbackRate > 1 ? "#10b981" : "currentColor"} />
+                      <span>{playbackRate}x</span>
+                    </button>
+
+                    <button className="icon-btn" onClick={toggleFullscreen} title="全画面">
+                      <Maximize size={20} />
+                    </button>
+
+                    <button
                       className="icon-btn"
                       onClick={() => {
                         if (videoRef.current) videoRef.current.currentTime = 0;
                       }}
+                      title="最初から再生"
                     >
                       <RotateCcw size={20} />
                     </button>

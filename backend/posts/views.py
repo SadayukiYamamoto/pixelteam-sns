@@ -1487,8 +1487,9 @@ def submit_test(request, video_id):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def create_test(request):
+    print("DEBUG: create_test called", flush=True)
     data = request.data
-    video_id = data.get("video_id")
+    video_id = data.get("video_id", "").strip().strip('/')
     title = data.get("title", "")
     questions_data = data.get("questions", [])
     
@@ -1500,28 +1501,58 @@ def create_test(request):
     if not video_id:
         return Response({"error": "video_id が必要です"}, status=400)
 
-    # 🔥 Firestoreで存在確認して Video モデルを更新
-    FIREBASE_PROJECT_ID = "pixelshopsns"
-    url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/pixtubePosts/{video_id}"
-    response = requests.get(url)
+    # --- 動画オブジェクトの取得/作成 ---
+    video_obj = Video.objects.filter(id=video_id).first()
 
-    if response.status_code != 200:
-        return Response({"error": "指定された動画が存在しません"}, status=404)
+    if not video_obj:
+        # DBにない場合は Firestore からの取得を試みる
+        FIREBASE_PROJECT_ID = "pixelshopsns"
+        url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/pixtubePosts/{video_id}"
+        response = requests.get(url)
 
-    fields = response.json().get("fields", {})
-
-    # 🔥 Video モデルを同期する（必ず存在させる）
-    video_obj, created = Video.objects.update_or_create(
-        id=video_id,
-        defaults={
-            "title": fields.get("title", {}).get("stringValue", ""),
-            "user": fields.get("author", {}).get("stringValue", ""),
-            "duration": fields.get("duration", {}).get("stringValue", ""),
-            "thumb": fields.get("thumbnail", {}).get("stringValue", ""),
-            "video_url": fields.get("src", {}).get("stringValue", ""),
-            "userAvatar": fields.get("userAvatar", {}).get("stringValue", ""),
-        }
-    )
+        if response.status_code == 200:
+            fields = response.json().get("fields", {})
+            # Firestore にあった場合は DB に作成
+            video_obj = Video.objects.create(
+                id=video_id,
+                title=fields.get("title", {}).get("stringValue", ""),
+                user=fields.get("author", {}).get("stringValue", ""),
+                duration=fields.get("duration", {}).get("stringValue", ""),
+                thumb=fields.get("thumbnail", {}).get("stringValue", ""),
+                video_url=fields.get("src", {}).get("stringValue", ""),
+                userAvatar=fields.get("userAvatar", {}).get("stringValue", ""),
+            )
+        else:
+            # Firestore にもなかった場合
+            print(f"DEBUG: create_test - Video not found anywhere: [{video_id}] (Firestore status: {response.status_code})", flush=True)
+            # 全体の状況を確認するためのデバッグログ
+            v_count = Video.objects.count()
+            sample_ids = list(Video.objects.values_list('id', flat=True)[:5])
+            print(f"DEBUG: Video count in DB: {v_count}, Sample IDs: {sample_ids}", flush=True)
+            return Response({
+                "error": f"指定された動画(ID: {video_id})が見つかりません。",
+                "debug_info": {
+                    "passed_id": video_id,
+                    "db_count": v_count,
+                    "sample_ids": sample_ids
+                }
+            }, status=400)
+    else:
+        # すでにDBにある場合は情報を更新（オプショナル：Firestore同期を一応試みるが失敗しても無視する）
+        try:
+            FIREBASE_PROJECT_ID = "pixelshopsns"
+            url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/pixtubePosts/{video_id}"
+            response = requests.get(url, timeout=3)
+            if response.status_code == 200:
+                fields = response.json().get("fields", {})
+                video_obj.title = fields.get("title", {}).get("stringValue", video_obj.title)
+                video_obj.user = fields.get("author", {}).get("stringValue", video_obj.user)
+                video_obj.duration = fields.get("duration", {}).get("stringValue", video_obj.duration)
+                video_obj.thumb = fields.get("thumbnail", {}).get("stringValue", video_obj.thumb)
+                video_obj.video_url = fields.get("src", {}).get("stringValue", video_obj.video_url)
+                video_obj.save()
+        except:
+            pass
 
     # 🔥 既存テスト削除
     VideoTest.objects.filter(video=video_obj).delete()

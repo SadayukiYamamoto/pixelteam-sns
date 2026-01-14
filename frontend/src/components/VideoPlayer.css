@@ -150,6 +150,39 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.right-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.speed-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 12px;
+  color: #475569;
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.speed-toggle-btn:hover {
+  background: #f1f5f9;
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.speed-toggle-btn span {
+  min-width: 25px;
 }
 
 .left-controls {
