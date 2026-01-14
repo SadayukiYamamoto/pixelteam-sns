@@ -54,6 +54,17 @@ const NotificationPopup = ({ onClose }) => {
         }
     };
 
+    const handleDelete = async (e, id) => {
+        e.stopPropagation();
+        try {
+            await axiosClient.delete(`notifications/${id}/delete/`);
+            setNotifications(notifications.filter(n => n.id !== id));
+        } catch (err) {
+            console.error('通知の削除に失敗しました:', err);
+            alert('通知の削除に失敗しました');
+        }
+    };
+
     return (
         <div className="notice-popup-bg" onClick={onClose}>
             <div className="notice-popup-large" onClick={(e) => e.stopPropagation()}>
@@ -98,6 +109,13 @@ const NotificationPopup = ({ onClose }) => {
                                     <p className="notif-message text-sm text-gray-600">{notif.message}</p>
                                     <span className="notif-time text-xs text-gray-400">{new Date(notif.created_at).toLocaleString()}</span>
                                 </div>
+                                <button
+                                    className="notif-delete-btn"
+                                    onClick={(e) => handleDelete(e, notif.id)}
+                                    title="削除"
+                                >
+                                    <Check size={20} />
+                                </button>
                             </div>
                         ))
                     )}

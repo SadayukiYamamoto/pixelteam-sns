@@ -555,7 +555,7 @@ def delete_notification(request, pk):
     try:
         notification = Notification.objects.get(pk=pk, recipient=request.user)
         notification.delete()
-        return Response({"message": "Notification deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Notification deleted successfully"}, status=status.HTTP_200_OK)
     except Notification.DoesNotExist:
         return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
 
