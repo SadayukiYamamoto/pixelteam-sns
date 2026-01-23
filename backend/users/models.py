@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 # --- カスタムユーザーマネージャー ---
@@ -66,6 +68,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
         null=True,
     )
+    fcm_token = models.CharField(max_length=255, blank=True, null=True)
+    terms_agreed = models.BooleanField(default=False)  # ✅ 利用規約同意フラグ
 
     objects = UserManager()
 
@@ -157,3 +161,39 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.recipient.display_name}への通知 ({self.notification_type})"
+
+
+# --- 通知作成時にプッシュ通知を飛ばすシグナル ---
+@receiver(post_save, sender=Notification)
+def trigger_push_notification(sender, instance, created, **kwargs):
+    if created:
+        from .utils import send_push_notification
+        
+        title = "Pikumaru"
+        # 通知タイプによってタイトルを変える
+        if instance.notification_type == 'LIKE':
+            title = "いいねされました！"
+        elif instance.notification_type == 'COMMENT':
+            title = "コメントが届きました！"
+        elif instance.notification_type == 'REPLY':
+            title = "返信がありました！"
+        elif instance.notification_type == 'MENTION':
+            title = "メンションされました！"
+        elif instance.notification_type == 'BADGE':
+            title = "バッジを獲得しました！"
+        elif instance.notification_type == 'POINT':
+            title = "ポイントを獲得しました！"
+        elif instance.notification_type == 'NEWS':
+            title = "新しいお知らせがあります"
+
+        body = instance.message or "新しい通知があります。"
+        
+        # 通知データをまとめる
+        data = {
+            "type": instance.notification_type,
+            "post_id": instance.post_id or "",
+            "comment_id": instance.comment_id or "",
+        }
+        
+        send_push_notification(instance.recipient, title, body, data=data)
+

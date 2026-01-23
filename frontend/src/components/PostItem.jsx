@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Heart, MessageCircleMore } from 'lucide-react';
+import { AiFillBuild } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
 import { processHtmlContent } from '../utils/contentHelper';
 import { logInteraction } from '../utils/analytics';
@@ -111,10 +112,7 @@ const PostItem = ({ post, onLike, onComment, hideReactions = false, className = 
                 fill="currentColor"
                 className={`heart ${post.liked ? "red" : ""}`}
               />
-              <span
-                className="text-[13px] font-bold cursor-pointer hover:underline"
-                onClick={handleLikesCountClick}
-              >
+              <span className="text-[13px] font-bold">
                 {post.likes}
               </span>
             </button>
@@ -128,6 +126,14 @@ const PostItem = ({ post, onLike, onComment, hideReactions = false, className = 
             </button>
 
             <div className="flex-1" />
+
+            <button
+              onClick={handleLikesCountClick}
+              className="reaction-btn transition-all active:scale-95 group"
+              title="いいね一覧を表示"
+            >
+              <AiFillBuild size={18} />
+            </button>
           </div>
         )}
       </div>

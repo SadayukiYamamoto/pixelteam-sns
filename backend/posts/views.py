@@ -1775,9 +1775,17 @@ def get_home_content(request):
     2. ショート動画 (Video is_short=True)
     3. おすすめ投稿 (Post is_featured=True)
     """
-    # 事務局だより (新モデル OfficeNews を使用)
-    news = OfficeNews.objects.all()[:5]
-    news_data = OfficeNewsSerializer(news, many=True, context={'request': request}).data
+    # 事務局だより (Notice カテゴリが "事務局だより")
+    news = Notice.objects.filter(category="事務局だより").order_by("-created_at")[:5]
+    news_data = []
+    for n in news:
+        news_data.append({
+            "id": n.id,
+            "title": n.title,
+            "thumbnail": n.image_url,
+            "external_url": n.external_url or f"/notice/{n.id}",
+            "created_at": n.created_at
+        })
 
     # ショート動画
     shorts = Video.objects.filter(is_short=True).order_by("-created_at")[:10]

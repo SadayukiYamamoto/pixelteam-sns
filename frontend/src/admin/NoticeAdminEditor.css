@@ -325,8 +325,50 @@
   color: #2563EB;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .editor-grid {
     grid-template-columns: 1fr;
   }
+
+  .editor-sidebar {
+    order: -1;
+  }
+}
+
+.premium-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 2px solid #F1F5F9;
+  background: #F8FAFC;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1E293B;
+  outline: none;
+  transition: all 0.2s;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.premium-textarea:focus {
+  border-color: #3B82F6;
+  background: #FFFFFF;
+}
+
+.premium-input-field {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 2px solid #F1F5F9;
+  background: #F8FAFC;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1E293B;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.premium-input-field:focus {
+  border-color: #3B82F6;
+  background: #FFFFFF;
 }

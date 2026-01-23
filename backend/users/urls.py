@@ -33,4 +33,6 @@ urlpatterns = [
     path('notifications/read/', views.mark_notifications_read, name='mark_notifications_read'),
     path('notifications/<int:pk>/delete/', views.delete_notification, name='delete_notification'),
     path('notifications/unread_count/', views.unread_notification_count, name='unread_notification_count'),
+    path('update_fcm_token/', views.update_fcm_token, name='update_fcm_token'),
+    path('agree_terms/', views.agree_terms, name='agree_terms'),
 ]

@@ -211,6 +211,10 @@ code {
     monospace;
 }
 
+.aspect-video {
+  aspect-ratio: 16 / 9 !important;
+}
+
 /* OGP Card Styles */
 .ogp-card {
   display: flex !important;
@@ -750,7 +754,12 @@ code {
 }
 
 .p-4 {
-  padding: calc(var(--spacing, 0.25rem) * 4);
+  padding: 1rem !important;
+}
+
+.px-4 {
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
 }
 
 .p-0\.5 {

@@ -26,6 +26,7 @@ import NumberVisitors from "./components/tasks/NumberVisitors";       // ←修�
 import SiftManagement from "./components/tasks/SiftManagement";       // ←修正
 import SwingManagement from "./components/tasks/SwingManagement";
 import NoticeListPage from "./pages/NoticeListPage.jsx";
+import PastSecretariatNewsPage from "./pages/PastSecretariatNewsPage";
 import NoticeDetailPage from "./pages/NoticeDetailPage"; // ← 追加 // ← 追加 // ← 追加
 import NoticeAdminEditor from "./admin/NoticeAdminEditor"; // ← 追加
 import MissionsPage from "./components/MissionsPage";
@@ -59,9 +60,16 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 
 
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAgreement from "./pages/TermsAgreement";
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <Routes>
+      <Route path="/terms-of-service" element={<TermsOfService />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms-agreement" element={<TermsAgreement />} />
 
       {/* 全ページ共通レイアウト */}
       <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
@@ -121,6 +129,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Route path="/notice" element={<ProtectedRoute><NoticeListPage /></ProtectedRoute>} />
       <Route path="/notices" element={<ProtectedRoute><NoticeListPage /></ProtectedRoute>} />
       <Route path="/notice/:id" element={<ProtectedRoute><NoticeDetailPage /></ProtectedRoute>} />
+      <Route path="/past-secretariat-news" element={<ProtectedRoute><PastSecretariatNewsPage /></ProtectedRoute>} />
       <Route path="/admin/notices/new" element={<ProtectedRoute><NoticeAdminEditor /></ProtectedRoute>} />
       <Route path="/admin/notices/edit/:id" element={<ProtectedRoute><NoticeAdminEditor /></ProtectedRoute>} />
 

@@ -7,9 +7,10 @@ const isMobile = Capacitor.isNativePlatform();
 
 // ローカルテスト用のフラグ（エミュレータなら10.0.2.2、実機ならPCのIPアドレス）
 // 本番公開時は false にするか、環境変数で管理するのが理想
-const IS_LOCAL_TEST = true;
-const LOCAL_API_URL = "http://10.0.2.2:8000/api/";
-const PROD_API_URL = "https://pixelteamsns.web.app/api/";
+// 本番公開時は false に
+const IS_LOCAL_TEST = false;
+const LOCAL_API_URL = "http://localhost:8000/api/";
+const PROD_API_URL = "https://pixelshop-backend-237007524936.us-central1.run.app/api/";
 
 const baseURL = isMobile
   ? (IS_LOCAL_TEST ? LOCAL_API_URL : PROD_API_URL)
@@ -19,7 +20,7 @@ console.log("Axios initialized with baseURL:", baseURL, "isMobile:", isMobile);
 
 const axiosClient = axios.create({
   baseURL,
-  timeout: 10000,
+  timeout: 30000,
 });
 
 // リクエスト時に localStorage の accessToken を Authorization ヘッダに付与

@@ -1,10 +1,20 @@
 {
   "appId": "com.pixelshopsns.app",
-  "appName": "PixelTeamSNS",
+  "appName": "Pikumaru",
   "webDir": "dist",
   "server": {
     "androidScheme": "https",
+    "iosScheme": "https",
     "hostname": "localhost",
     "allowMixedContent": true
+  },
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": false,
+      "providers": [
+        "google.com"
+      ],
+      "googleClientId": "237007524936-cglimuthved1b2rg19pnm73qo1k8eofq.apps.googleusercontent.com"
+    }
   }
 }

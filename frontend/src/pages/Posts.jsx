@@ -4,6 +4,7 @@ import { FiMoreVertical } from "react-icons/fi";
 import Header from "../components/Header";
 import Navigation from "../components/Navigation";
 import { FaHeart, FaRegCommentDots } from "react-icons/fa";
+import { AiFillBuild } from "react-icons/ai";
 import "./Posts.css";
 import axiosClient from "../api/axiosClient";
 import FloatingWriteButton from "../components/FloatingWriteButton";
@@ -256,7 +257,8 @@ const Posts = () => {
           <Header />
           <div
             ref={scrollContainerRef}
-            className="posts-content px-4 pt-[72px] pb-[100px]"
+            className="posts-content px-4 pb-[100px]"
+            style={{ paddingTop: 'calc(72px + env(safe-area-inset-top, 0px))' }}
           >
             <h2 className="text-xl font-bold mb-4" style={{ marginTop: '16px' }}>
               {tag ? `#${tag} の詳細` : "投稿一覧"}
@@ -356,13 +358,7 @@ const Posts = () => {
                           }`}
                       />
 
-                      <span
-                        className="cursor-pointer hover:underline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          fetchLikeList(post.id);
-                        }}
-                      >
+                      <span>
                         {post.likes || 0}
                       </span>
                     </button>
@@ -375,6 +371,19 @@ const Posts = () => {
                     >
                       <FaRegCommentDots />
                       <span>{post.comments_count || 0}</span>
+                    </button>
+
+                    <div className="flex-1" />
+
+                    <button
+                      className="reaction-btn transition-all active:scale-95 group"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fetchLikeList(post.id);
+                      }}
+                      title="いいね一覧を表示"
+                    >
+                      <AiFillBuild size={18} />
                     </button>
                   </div>
                 </div>

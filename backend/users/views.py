@@ -82,7 +82,8 @@ def google_login_view(request):
         name = decoded_token.get('name') or email.split('@')[0]
         picture = decoded_token.get('picture')
 
-        print(f"DEBUG: Processing user: {email} (UID: {uid})")
+        action = request.data.get('action') # 'login' or 'signup'
+        print(f"DEBUG: Processing user: {email} (UID: {uid}, Action: {action})")
 
         # 2. ユーザー特定 (UID -> Email の順)
         user = None
@@ -96,20 +97,45 @@ def google_login_view(request):
              try:
                  # Email で検索 (既存ユーザーとの紐付け)
                  user = User.objects.get(email=email)
-                 # 注: 既存ユーザーの user_id は変更しない（"admin"などを維持するため）
              except User.DoesNotExist:
-                 # 3. 新規作成
-                 print(f"DEBUG: Creating new user for email: {email}")
-                 user = User.objects.create(
-                     user_id=uid,
-                     email=email,
-                     display_name=name,
-                     profile_image=picture,
-                     password="" 
-                 )
-                 user.set_unusable_password()
-                 user.save()
-                 print(f"DEBUG: User created successfully: {user.display_name}")
+                 pass
+
+        # --- 分け分けロジック ---
+        if action == 'login':
+            if not user:
+                return Response({'error': 'アカウントが見つかりません。先に新規登録を行ってください。'}, status=404)
+        
+        elif action == 'signup':
+            if user:
+                return Response({'error': 'このアカウントは既に登録されています。ログインしてください。'}, status=400)
+            
+            # 新規作成
+            print(f"DEBUG: Creating new user for email: {email}")
+            user = User.objects.create(
+                user_id=uid,
+                email=email,
+                display_name=name,
+                profile_image=picture,
+                password="",
+                terms_agreed=True  # ✅ 新規登録時は同意済みとする
+            )
+            user.set_unusable_password()
+            user.save()
+            print(f"DEBUG: User created successfully: {user.display_name}")
+        
+        else:
+            # 従来の挙動（action未指定の場合）: なければ作る
+            if not user:
+                user = User.objects.create(
+                    user_id=uid,
+                    email=email,
+                    display_name=name,
+                    profile_image=picture,
+                    password="",
+                    terms_agreed=True  # ✅ 新規登録時は同意済みとする
+                )
+                user.set_unusable_password()
+                user.save()
 
         # 4. トークン発行
         token, _ = Token.objects.get_or_create(user=user)
@@ -130,8 +156,9 @@ def google_login_view(request):
             "profile_image": user.profile_image,
             "team": user.team,
             "is_secretary": user.is_secretary,
-        "is_admin": user.is_admin_or_secretary,
+            "is_admin": user.is_admin_or_secretary,
             "is_staff": user.is_staff,
+            "terms_agreed": user.terms_agreed,  # ✅ 追加
             "status": "success"
         })
 
@@ -183,6 +210,7 @@ def login_view(request):
         "is_secretary": user.is_secretary,
         "is_admin": user.is_admin_or_secretary,
         "is_staff": user.is_staff,
+        "terms_agreed": user.terms_agreed,  # ✅ 追加
         "status": "success"
     })
 
@@ -209,7 +237,8 @@ def signup_view(request):
             user_id=user_id,
             email=email,
             password=password,
-            display_name=display_name
+            display_name=display_name,
+            terms_agreed=True  # ✅ 新規登録時は同意済みとする
         )
         token, _ = Token.objects.get_or_create(user=user)
 
@@ -228,6 +257,7 @@ def signup_view(request):
             "is_secretary": user.is_secretary,
         "is_admin": user.is_admin_or_secretary,
             "is_staff": user.is_staff,
+            "terms_agreed": user.terms_agreed,  # ✅ 追加
             "status": "success"
         }, status=201)
     except Exception as e:
@@ -383,6 +413,8 @@ def admin_user_detail(request, user_id):
             target_user.shop_name = data['shop_name']
         if 'is_secretary' in data:
             target_user.is_secretary = bool(data['is_secretary'])
+        if 'terms_agreed' in data:
+            target_user.terms_agreed = bool(data['terms_agreed'])
             
         # バッジの更新 (IDリストを受け取ってセットする)
         if 'badge_ids' in data:
@@ -884,3 +916,31 @@ def get_shop_list(request):
         
     shops = User.objects.exclude(shop_name__in=['', None]).values_list('shop_name', flat=True).distinct()
     return Response(list(shops))
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_fcm_token(request):
+    """
+    FCM トークンを保存・更新する
+    """
+    fcm_token = request.data.get('fcm_token')
+    if not fcm_token:
+        return Response({"error": "fcm_token is required"}, status=400)
+
+    user = request.user
+    user.fcm_token = fcm_token
+    user.save()
+    return Response({"message": "FCM token updated successfully", "fcm_token": fcm_token})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def agree_terms(request):
+    """
+    利用規約に同意する
+    """
+    user = request.user
+    user.terms_agreed = True
+    user.save()
+    return Response({"message": "Terms agreed successfully", "terms_agreed": True})
+

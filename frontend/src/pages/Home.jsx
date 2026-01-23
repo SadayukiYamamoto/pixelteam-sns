@@ -55,7 +55,13 @@ const Home = () => {
         <div className="home-wrapper">
           <Header />
 
-          <div className="pt-[72px]" style={{ backgroundColor: '#f9fafb', paddingBottom: '100px' }}>
+          <div
+            style={{
+              backgroundColor: '#f9fafb',
+              paddingTop: 'calc(72px + env(safe-area-inset-top, 0px))',
+              paddingBottom: '100px'
+            }}
+          >
             <MainContent setActiveTab={setActiveTab} />
           </div>
 
@@ -68,8 +74,9 @@ const Home = () => {
       >
         <button
           onClick={handleMissionClick}
-          className={`absolute bottom-[88px] right-[18px] pointer-events-auto w-[60px] h-[60px] rounded-full flex items-center justify-center shadow-xl transition-all transform hover:scale-110 active:scale-95 border-none ${hasUnclaimed ? 'bg-[#10b981] text-white' : 'bg-white text-[#10b981]'
+          className={`absolute right-[18px] pointer-events-auto w-[60px] h-[60px] rounded-full flex items-center justify-center shadow-xl transition-all transform hover:scale-110 active:scale-95 border-none ${hasUnclaimed ? 'bg-[#10b981] text-white' : 'bg-white text-[#10b981]'
             }`}
+          style={{ bottom: 'calc(88px + env(safe-area-inset-bottom, 0px))' }}
         >
           <ClipboardList
             size={28}

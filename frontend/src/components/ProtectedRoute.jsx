@@ -6,7 +6,7 @@ const ProtectedRoute = ({ children }) => {
     const location = useLocation();
 
     if (!token) {
-        // ログイン画面へリダイレクト（元の場所とメッセージを渡す）
+        // ログイン画面へリダイレクト
         return <Navigate
             to="/login"
             state={{
@@ -16,6 +16,17 @@ const ProtectedRoute = ({ children }) => {
             replace
         />;
     }
+
+    // ✅ 規約同意チェック (既存ユーザーも入れるようにコメントアウト、または削除)
+    // ユーザー要望により、同意しなくてもOKにする
+    /*
+    const hasAgreed = localStorage.getItem("terms_agreed") === "true";
+    const isAgreementPath = ["/terms-agreement", "/terms-of-service", "/privacy-policy"].includes(location.pathname);
+
+    if (!hasAgreed && !isAgreementPath) {
+        return <Navigate to="/terms-agreement" state={{ from: location }} replace />;
+    }
+    */
 
     return children;
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Mail, Bell, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
+import { Capacitor } from '@capacitor/core';
 import './HeaderFooter.css';
 
 import NoticePopup from "./NoticePopup";
@@ -10,6 +11,7 @@ import NotificationPopup from "./NotificationPopup";
 
 const Header = ({ onProfileClick, className = "" }) => {
   const navigate = useNavigate();
+  const isIos = Capacitor.getPlatform() === 'ios';
   const [unreadCount, setUnreadCount] = useState(0);
   const [noticeUnreadCount, setNoticeUnreadCount] = useState(0);
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
@@ -89,16 +91,32 @@ const Header = ({ onProfileClick, className = "" }) => {
 
   return (
     <>
-      <div className={`fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] h-[72px] flex justify-between items-center bg-white shadow-sm z-[9999] px-8 border-b border-gray-100 ${className}`}>
+      <div
+        className={`fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] flex justify-between items-center bg-white shadow-sm z-[9999] px-8 border-b border-gray-100 ${className}`}
+        style={{
+          height: isIos
+            ? 'calc(20px + env(safe-area-inset-top, 0px))'
+            : 'calc(72px + env(safe-area-inset-top, 0px))',
+          paddingTop: 'env(safe-area-inset-top, 0px)'
+        }}
+      >
 
-        <div className="flex items-center flex-shrink-0 ml-6">
-          <h1
-            className="text-2xl font-black text-[#15803d] leading-none tracking-tight"
-            style={{ marginLeft: '20px' }}
-          >
-            GarageGateway
-          </h1>
-        </div>
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center flex-shrink-0 cursor-pointer ml-6 sm:ml-0"
+          style={{ background: 'none', border: 'none', padding: 0, boxShadow: 'none' }}
+          aria-label="ホームへ戻る"
+        >
+          <img
+            src="/images/pikumaru-logo3.webp"
+            alt="Pikumaru Logo"
+            className="w-auto object-contain"
+            style={{
+              height: isIos ? '24px' : (window.innerWidth < 640 ? '24px' : '40px'),
+              marginLeft: '20px'
+            }}
+          />
+        </button>
 
         {/* 右側アイコン */}
         <div className="flex items-center space-x-3 mr-10">

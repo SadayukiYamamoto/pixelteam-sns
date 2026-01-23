@@ -21,6 +21,7 @@ const UserAdminPage = () => {
         badge_ids: [],
         is_secretary: false,
         shop_name: "",
+        terms_agreed: false,
     });
     const [uploading, setUploading] = useState(false);
 
@@ -63,6 +64,7 @@ const UserAdminPage = () => {
             badge_ids: user.badges ? user.badges.map((b) => b.id) : [],
             is_secretary: user.is_secretary || false,
             shop_name: user.shop_name || "",
+            terms_agreed: user.terms_agreed || false,
         });
         setEditing(true);
     };
@@ -129,6 +131,7 @@ const UserAdminPage = () => {
                                             <p className="user-meta">
                                                 Team: {user.team} | Pts: {user.points}
                                                 {user.shop_name && <> | {user.shop_name}</>}
+                                                | 同意: {user.terms_agreed ? "✅" : "❌"}
                                             </p>
                                         </div>
                                     </div>
@@ -201,6 +204,17 @@ const UserAdminPage = () => {
                                         onChange={(e) => setFormData({ ...formData, is_secretary: e.target.checked })}
                                     />
                                     <span style={{ marginLeft: "8px" }}>事務局として設定する</span>
+                                </label>
+                            </div>
+
+                            <div className="form-group-checkbox">
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.terms_agreed}
+                                        onChange={(e) => setFormData({ ...formData, terms_agreed: e.target.checked })}
+                                    />
+                                    <span style={{ marginLeft: "8px" }}>利用規約・プライバシーポリシーに同意済みとする</span>
                                 </label>
                             </div>
 

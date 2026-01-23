@@ -158,6 +158,9 @@ class Notice(models.Model):
     # 外部リンク (事務局だよりのURLなど)
     external_url = models.URLField(max_length=1000, blank=True, null=True)
 
+    # 箇条書き項目 (事務局だよりカード表示用)
+    summary_points = models.TextField(blank=True, null=True)
+
     # 本文のどこにサムネイルを置くか（必須）
     image_position = models.CharField(
         max_length=20,

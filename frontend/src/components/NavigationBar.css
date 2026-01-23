@@ -11,10 +11,12 @@
   box-shadow: 0 -4px 12px #0000000d;
   border-radius: 16px 16px 0 0;
   padding: 6px 0;
+  padding-bottom: env(safe-area-inset-bottom, 0);
   display: flex;
   justify-content: space-around;
   align-items: center;
-  height: 68px;
+  height: auto;
+  min-height: 68px;
   max-width: 480px;
   margin: 0 auto;
 }

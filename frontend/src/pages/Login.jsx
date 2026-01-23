@@ -6,11 +6,14 @@ import { auth, GoogleAuthProvider, signInWithPopup } from "../firebase"; // Impo
 import { FcGoogle } from "react-icons/fc"; // Optional: Google Icon
 import { initializePushNotifications } from "../utils/push-notifications"; // ✅ 追加
 import { Capacitor } from "@capacitor/core";
+import { FirebaseAuthentication } from "@capacitor-firebase/authentication";
 
 const Login = () => {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [logoClickCount, setLogoClickCount] = useState(0);
+  const [showAdminFields, setShowAdminFields] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -54,6 +57,24 @@ const Login = () => {
     }
     localStorage.setItem("accounts", JSON.stringify(existingAccounts));
 
+    // ✅ 規約同意チェック（既存ユーザーは同意不要に変更）
+    localStorage.setItem("terms_agreed", data.terms_agreed ? "true" : "false");
+    /*
+    const hasAgreed = data.terms_agreed === true;
+
+    if (!hasAgreed) {
+      console.log("➡️ 規約同意が必要なため TermsAgreement へ遷移");
+      navigate("/terms-agreement", {
+        state: {
+          nextPath: !data.team ? `/profile-edit/${data.user_id}` : from,
+          userId: data.user_id
+        },
+        replace: true
+      });
+      return;
+    }
+    */
+
     if (!data.team) {
       console.log("➡️ チーム未設定のためプロフィール編集へ遷移");
       navigate(`/profile-edit/${data.user_id}`);
@@ -68,31 +89,79 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setError("");
+    console.log("🚀 Googleログインを開始します...");
+
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const idToken = await user.getIdToken();
+      let idToken = "";
 
-      console.log("🔹 Firebase Auth Success:", user.email);
+      if (Capacitor.isNativePlatform()) {
+        try {
+          console.log("📱 Native platform detected, calling FirebaseAuthentication.signInWithGoogle...");
+          const result = await FirebaseAuthentication.signInWithGoogle({
+            googleClientId: "237007524936-cglimuthved1b2rg19pnm73qo1k8eofq.apps.googleusercontent.com"
+          });
+          console.log("📱 Native Google login result received:", !!result);
 
-      // Backend verification
-      const res = await axiosClient.post(
-        "login/google/",
-        { id_token: idToken }
-      );
-
-      if (res.data.token) {
-        handleLoginSuccess(res.data);
+          // ⬇️ ここが重要！Firebase用のIDトークンを再取得します
+          const tokenResult = await FirebaseAuthentication.getIdToken();
+          idToken = tokenResult.token;
+          console.log("📱 Firebase ID Token obtained:", !!idToken);
+        } catch (nativeErr) {
+          console.error("❌ Native Sign-In Error:", nativeErr);
+          setError(`Googleログイン(Native)でエラーが発生しました: ${nativeErr.message || JSON.stringify(nativeErr)}`);
+          throw nativeErr;
+        }
       } else {
-        setError("サーバー認証に失敗しました。");
+        console.log("🌐 Web platform detected, calling signInWithPopup...");
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        idToken = await result.user.getIdToken();
+      }
+
+      if (!idToken) {
+        throw new Error("GoogleからIDトークンを取得できませんでした。");
+      }
+
+      console.log("📡 バックエンドにIDトークンを送信中...");
+      try {
+        const res = await axiosClient.post(
+          "login/google/",
+          {
+            id_token: idToken,
+            action: 'login'
+          }
+        );
+
+        if (res.data.token) {
+          handleLoginSuccess(res.data);
+        } else {
+          setError("サーバー認証に失敗しました。レスポンスにトークンがありません。");
+        }
+      } catch (axiosErr) {
+        console.error("❌ Backend Error:", axiosErr.response?.data || axiosErr.message);
+        setError(`サーバー認証エラー: ${axiosErr.response?.data?.error || axiosErr.message}`);
       }
 
     } catch (err) {
       console.error("Google Login Error:", err);
-      setError("Googleログインに失敗しました。");
+      const errorMsg = err.message || JSON.stringify(err);
+      setError(`Googleログインに失敗しました: ${errorMsg}`);
+      // alert(`詳細なエラー: ${errorMsg}`);
+    }
+  };
+
+  const handleLogoClick = () => {
+    const newCount = logoClickCount + 1;
+    setLogoClickCount(newCount);
+    if (newCount >= 10) {
+      setShowAdminFields(true);
+      console.log("🔓 Admin fields revealed");
     }
   };
 
@@ -139,7 +208,23 @@ const Login = () => {
         onSubmit={handleLogin}
         sx={{ display: "flex", flexDirection: "column", gap: 2 }}
       >
-        <Typography variant="h5" align="center" fontWeight="bold">GarageGateway</Typography>
+        <Box
+          display="flex"
+          justifyContent="center"
+          mt={{ xs: 2, sm: 4 }}
+          mb={{ xs: 3, sm: 6 }}
+          onClick={handleLogoClick}
+          sx={{
+            cursor: 'pointer',
+            userSelect: 'none',
+            '& img': {
+              height: { xs: '40px', sm: '60px' },
+              width: 'auto'
+            }
+          }}
+        >
+          <img src="/images/pikumaru-logo3.webp" alt="Pikumaru Logo" />
+        </Box>
 
         {message && (
           <Box sx={{ bgcolor: 'rgba(255, 152, 0, 0.1)', p: 2, borderRadius: 2, border: '1px solid #ff9800' }}>
@@ -150,9 +235,10 @@ const Login = () => {
         )}
 
         <Button
+          type="button" // ⬅️ 重要：送信ボタンとして動かないようにする
           variant="outlined"
           fullWidth
-          onClick={handleGoogleLogin}
+          onClick={(e) => handleGoogleLogin(e)}
           sx={{
             py: 1.5,
             borderColor: '#dadce0',
@@ -171,30 +257,32 @@ const Login = () => {
           Googleでログイン
         </Button>
 
-        <Divider>または</Divider>
+        <Box sx={{ display: showAdminFields ? 'flex' : 'none', flexDirection: 'column', gap: 2 }}>
+          <Divider>または</Divider>
 
-        {error && <Typography color="error" align="center">{error}</Typography>}
-        <TextField
-          label="ユーザーID"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          required
-        />
-        <TextField
-          label="パスワード"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <Button type="submit" variant="contained" color="primary" sx={{ py: 1.5 }}>
-          ログイン
-        </Button>
+          {error && <Typography color="error" align="center">{error}</Typography>}
+          <TextField
+            label="ユーザーID"
+            value={userId}
+            onChange={(e) => setUserId(e.target.value)}
+            required
+          />
+          <TextField
+            label="パスワード"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <Button type="submit" variant="contained" color="primary" sx={{ py: 1.5 }}>
+            ログイン
+          </Button>
 
-        <Box textAlign="center" mt={2}>
-          <Typography variant="body2">
-            アカウントをお持ちでないですか？ <Link to="/signup" style={{ textDecoration: 'none', color: '#1976d2' }}>新規作成</Link>
-          </Typography>
+          <Box textAlign="center" mt={2}>
+            <Typography variant="body2">
+              アカウントをお持ちでないですか？ <Link to="/signup" style={{ textDecoration: 'none', color: '#1976d2' }}>新規作成</Link>
+            </Typography>
+          </Box>
         </Box>
       </Box>
     </Container>

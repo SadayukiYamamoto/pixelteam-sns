@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, MessageSquare, PlayCircle, BookOpen, Briefcase, ClipboardList } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
+import { Capacitor } from '@capacitor/core';
 import MissionBottomSheet from './MissionBottomSheet';
 import './NavigationBar.css';
 
@@ -9,6 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL || "";
 
 const Navigation = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
+  const isIos = Capacitor.getPlatform() === 'ios';
 
   const triggerMission = async (actionType) => {
     try {
@@ -46,15 +48,27 @@ const Navigation = ({ activeTab, setActiveTab }) => {
   ];
 
   return (
-    <nav className="navbar">
+    <nav
+      className="navbar"
+      style={{
+        height: isIos
+          ? 'calc(20px + env(safe-area-inset-bottom, 0px))'
+          : 'auto',
+        minHeight: isIos ? '0' : '68px'
+      }}
+    >
       {navItems.map(({ name, icon: Icon, tab }) => (
         <button
           key={tab}
           onClick={() => handleNavClick(tab)}
           className={`nav-button ${activeTab === tab ? 'active' : ''}`}
+          style={{ padding: isIos ? '0' : 'inherit' }}
         >
-          <Icon className="nav-icon" />
-          <span>{name}</span>
+          <Icon
+            className="nav-icon"
+            style={isIos ? { fontSize: '14px', marginBottom: '0' } : {}}
+          />
+          {!isIos && <span>{name}</span>}
         </button>
       ))}
     </nav>

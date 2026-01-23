@@ -1,4 +1,5 @@
 import { PushNotifications } from '@capacitor/push-notifications';
+import { FCM } from '@capacitor-community/fcm';
 import { Capacitor } from '@capacitor/core';
 import axiosClient from '../api/axiosClient';
 
@@ -8,9 +9,7 @@ export const initializePushNotifications = async () => {
     console.log('Push notifications: initializePushNotifications called.');
 
     if (isInitialized) {
-        console.log('Push notifications already initialized, skipping listeners setup.');
         if (Capacitor.getPlatform() !== 'web') {
-            console.log('Push notifications: Re-registering to ensure token is fresh.');
             await PushNotifications.register();
         }
         return;
@@ -22,50 +21,46 @@ export const initializePushNotifications = async () => {
     }
 
     try {
-        console.log('Push notifications: Requesting permissions.');
+        console.log('Push notifications: Checking permissions.');
         let permStatus = await PushNotifications.checkPermissions();
 
         if (permStatus.receive === 'prompt') {
             permStatus = await PushNotifications.requestPermissions();
         }
 
-        if (permStatus.receive !== 'granted') {
-            console.warn('Push notifications: User denied permissions!');
-            return;
-        }
-
-        console.log('Push notifications: Permissions granted. Setting up listeners.');
-
-        // On success, we should be able to receive notifications
+        // トークン登録時のリスナー
         PushNotifications.addListener('registration', async (token) => {
-            console.log('Push notifications: Registration success, token:', token.value);
+            console.log('Push notifications: Registration success (APNs):', token.value);
+
             try {
-                // Backend にトークンを送信してユーザーに紐付ける
-                const res = await axiosClient.post('update_fcm_token/', { fcm_token: token.value });
-                console.log('Push notifications: FCM token synced with backend:', res.data);
+                let fcmTokenValue = token.value;
+                if (Capacitor.getPlatform() === 'ios') {
+                    // iOSの場合はFCMトークンに変換して取得
+                    const fcmRes = await FCM.getToken();
+                    fcmTokenValue = fcmRes.token;
+                    console.log('Push notifications: FCM TOKEN OBTAINED:', fcmTokenValue);
+                }
+
+                // Backend に FCM トークンを送信
+                const res = await axiosClient.post('update_fcm_token/', { fcm_token: fcmTokenValue });
+                console.log('Push notifications: Token synced with backend:', res.data);
             } catch (err) {
-                console.error('Push notifications: Failed to sync FCM token with backend:', err.response?.data || err.message);
+                console.error('Push notifications: Error during FCM token sync:', err);
             }
         });
 
-        // Some issue with our setup and push will not work
         PushNotifications.addListener('registrationError', (error) => {
-            console.error('Push notifications: Error on registration: ' + JSON.stringify(error));
+            console.error('Push notifications: Error on registration:', JSON.stringify(error));
         });
 
-        // Show us the notification payload if the app is open on our device
         PushNotifications.addListener('pushNotificationReceived', (notification) => {
-            console.log('Push notifications: Received: ' + JSON.stringify(notification));
+            console.log('Push notifications: Received:', JSON.stringify(notification));
         });
 
-        // Method called when tapping on a notification
-        PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-            console.log('Push notifications: Action performed: ' + JSON.stringify(notification));
-        });
-
-        console.log('Push notifications: Calling PushNotifications.register().');
+        console.log('Push notifications: Calling PushNotifications.register()...');
         await PushNotifications.register();
         isInitialized = true;
+
     } catch (e) {
         console.error('Push notifications: Critical error during initialization:', e);
     }

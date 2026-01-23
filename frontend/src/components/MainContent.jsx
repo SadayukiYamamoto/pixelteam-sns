@@ -146,7 +146,7 @@ const MainContent = ({ setActiveTab }) => {
                   onClick={() => logInteraction('news', n.id, n.title)}
                   className="pokepoke-card block group"
                 >
-                  <div className="aspect-[4/3] w-full overflow-hidden bg-gray-50">
+                  <div className="aspect-video w-full overflow-hidden bg-gray-50">
                     {n.thumbnail ? (
                       <img src={n.thumbnail} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                     ) : (
@@ -167,7 +167,7 @@ const MainContent = ({ setActiveTab }) => {
             <button
               onClick={() => {
                 logInteraction('news', 'archive_news', '過去の事務局だより');
-                window.open('https://drive.google.com/drive/u/0/folders/1UZLCOUok0lKeMwyOw0SXKO4yTKpcvKcZ', '_blank');
+                window.location.href = '/past-secretariat-news';
               }}
               className="archive-button"
             >
@@ -200,7 +200,7 @@ const MainContent = ({ setActiveTab }) => {
                   }}
                   className="pokepoke-card block group cursor-pointer"
                 >
-                  <div className="aspect-[4/3] w-full overflow-hidden relative bg-gray-50">
+                  <div className="aspect-video w-full overflow-hidden relative bg-gray-50">
                     <img src={v.thumb} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/5 backdrop-blur-[1px]">
                       <div className="bg-white/90 p-3 rounded-full shadow-md text-[#059669]"><Play size={20} fill="currentColor" /></div>

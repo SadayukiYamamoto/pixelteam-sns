@@ -40,6 +40,8 @@ export default function NoticeAdminEditor() {
   const [imageUrl, setImageUrl] = useState("");
   const [imagePosition, setImagePosition] = useState("header");
   const [body, setBody] = useState("");
+  const [summaryPoints, setSummaryPoints] = useState("");
+  const [externalUrl, setExternalUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isThumbUploading, setIsThumbUploading] = useState(false);
 
@@ -96,6 +98,8 @@ export default function NoticeAdminEditor() {
       setCategory(n.category);
       setImageUrl(n.image_url || "");
       setImagePosition(n.image_position || "header");
+      setSummaryPoints(n.summary_points || "");
+      setExternalUrl(n.external_url || "");
 
       if (editor) editor.commands.setContent(n.body || "");
     } catch (err) {
@@ -146,6 +150,8 @@ export default function NoticeAdminEditor() {
       body,
       image_url: imageUrl,
       image_position: imagePosition,
+      summary_points: summaryPoints,
+      external_url: externalUrl,
       text_color: "#000000",
       admin_name: "事務局",
     };
@@ -368,6 +374,30 @@ export default function NoticeAdminEditor() {
                         </div>
                       </div>
                     )}
+                  </div>
+
+                  <div className="sidebar-card">
+                    <h3>項目の記載</h3>
+                    <p className="text-[10px] text-gray-400 mb-2">※過去の事務局だよりカードに表示される3行の箇条書き</p>
+                    <textarea
+                      className="premium-textarea"
+                      rows={4}
+                      value={summaryPoints}
+                      onChange={(e) => setSummaryPoints(e.target.value)}
+                      placeholder="・項目1&#10;・項目2&#10;・項目3"
+                    />
+                  </div>
+
+                  <div className="sidebar-card">
+                    <h3>URLを記載</h3>
+                    <p className="text-[10px] text-gray-400 mb-2">※事務局だよりの詳細ページや外部URL</p>
+                    <input
+                      className="premium-input-field"
+                      type="url"
+                      value={externalUrl}
+                      onChange={(e) => setExternalUrl(e.target.value)}
+                      placeholder="https://..."
+                    />
                   </div>
                 </aside>
               </div>

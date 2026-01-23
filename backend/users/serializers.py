@@ -27,6 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
             "expMax",
             "level",
             "is_secretary",
+            "terms_agreed",
             "badges", 
         ]
 

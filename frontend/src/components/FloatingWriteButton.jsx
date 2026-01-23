@@ -1,9 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FaPen } from "react-icons/fa";
+import { Capacitor } from "@capacitor/core";
 
 const FloatingWriteButton = ({ userTeam, isAbsolute = false }) => {
   const navigate = useNavigate();
+  const isIos = Capacitor.getPlatform() === 'ios';
 
   // Pixel-Event チームは投稿不可
   if (userTeam === "event") return null;
@@ -11,9 +13,13 @@ const FloatingWriteButton = ({ userTeam, isAbsolute = false }) => {
   const buttonContent = (
     <button
       onClick={() => navigate("/post")}
-      className="absolute bottom-[88px] right-[18px] pointer-events-auto bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-xl transition-all transform hover:scale-110 flex items-center justify-center border-none allow-fill"
+      className={`absolute right-[18px] pointer-events-auto bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-xl transition-all transform hover:scale-110 flex items-center justify-center border-none allow-fill`}
       aria-label="新規投稿"
-      style={{ width: '60px', height: '60px' }}
+      style={{
+        width: '60px',
+        height: '60px',
+        bottom: isIos ? 'calc(40px + env(safe-area-inset-bottom, 0px))' : '88px'
+      }}
     >
       <FaPen size={24} />
     </button>
