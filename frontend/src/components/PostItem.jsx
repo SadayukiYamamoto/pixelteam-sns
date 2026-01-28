@@ -8,7 +8,7 @@ import axiosClient from '../api/axiosClient';
 import Avatar from './Avatar';
 import { renderPostContent } from '../utils/textUtils';
 
-const PostItem = ({ post, onLike, onComment, hideReactions = false, className = "", variant = "default" }) => {
+const PostItem = ({ post, onLike, onComment, hideReactions = false, disableCardClick = false, className = "", variant = "default" }) => {
   const navigate = useNavigate();
   const isFeatured = variant === "featured";
   const [showLikeModal, setShowLikeModal] = useState(false);
@@ -44,6 +44,7 @@ const PostItem = ({ post, onLike, onComment, hideReactions = false, className = 
   };
 
   const handleCardClick = () => {
+    if (disableCardClick) return;
     logInteraction('post', post.id, post.title || post.content.substring(0, 30));
     navigate(`/posts?highlight=${post.id}`);
   };

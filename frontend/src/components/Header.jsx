@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Bell, User } from 'lucide-react';
+import { Mail, Bell, User, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { Capacitor } from '@capacitor/core';
@@ -92,34 +92,32 @@ const Header = ({ onProfileClick, className = "" }) => {
   return (
     <>
       <div
-        className={`fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] flex justify-between items-center bg-white shadow-sm z-[9999] px-8 border-b border-gray-100 ${className}`}
+        className={`fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[548px] flex justify-between items-center bg-white shadow-sm z-[9999] px-4 border-b border-gray-100 ${className}`}
         style={{
-          height: isIos
-            ? 'calc(20px + env(safe-area-inset-top, 0px))'
-            : 'calc(72px + env(safe-area-inset-top, 0px))',
+          height: 'calc(60px + env(safe-area-inset-top, 0px))',
           paddingTop: 'env(safe-area-inset-top, 0px)'
         }}
       >
-
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center flex-shrink-0 cursor-pointer ml-6 sm:ml-0"
-          style={{ background: 'none', border: 'none', padding: 0, boxShadow: 'none' }}
-          aria-label="ホームへ戻る"
-        >
-          <img
-            src="/images/pikumaru-logo3.webp"
-            alt="Pikumaru Logo"
-            className="w-auto object-contain"
-            style={{
-              height: isIos ? '24px' : (window.innerWidth < 640 ? '24px' : '40px'),
-              marginLeft: '20px'
-            }}
-          />
-        </button>
+        <div className="flex items-center">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center flex-shrink-0 cursor-pointer"
+            style={{ background: 'none', border: 'none', padding: 0, boxShadow: 'none' }}
+            aria-label="ホームへ戻る"
+          >
+            <img
+              src="/images/pikumaru-logo3.webp"
+              alt="Pikumaru Logo"
+              className="w-auto object-contain"
+              style={{
+                height: '32px'
+              }}
+            />
+          </button>
+        </div>
 
         {/* 右側アイコン */}
-        <div className="flex items-center space-x-3 mr-10">
+        <div className="flex items-center space-x-3">
           <button
             onClick={handleNoticeClick}
             className="header-icon relative"
@@ -149,7 +147,6 @@ const Header = ({ onProfileClick, className = "" }) => {
           <button
             onClick={handleProfileClick}
             className="header-icon"
-            style={{ marginRight: '20px' }}
             aria-label="マイページ"
           >
             <User size={20} className="text-gray-400" />

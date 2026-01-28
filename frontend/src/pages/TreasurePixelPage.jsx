@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import Navigation from "../components/Navigation";
 import { FiChevronRight, FiBook } from "react-icons/fi";
 import styles from "./TreasurePixelPage.module.css";
+import TreasureFAB from "../components/TreasureFAB";
 
 export default function TreasurePixelPage() {
   const navigate = useNavigate();
@@ -14,8 +15,8 @@ export default function TreasurePixelPage() {
         <Header title="Pixel 広場" />
 
         <div
-          className="overflow-y-auto pb-32 pt-20"
-          style={{ height: "calc(100vh - 120px)" }}
+          className="overflow-y-auto pb-32"
+          style={{ height: "calc(100vh - 120px)", paddingTop: "calc(112px + env(safe-area-inset-top, 0px))" }}
         >
           <main className={styles.pixelPageContainer}>
             {/* Pixel グリーンの大きなバナー */}
@@ -85,6 +86,7 @@ export default function TreasurePixelPage() {
           </main>
         </div>
 
+        <TreasureFAB />
         <Navigation activeTab="knowledge" />
       </div>
     </div>

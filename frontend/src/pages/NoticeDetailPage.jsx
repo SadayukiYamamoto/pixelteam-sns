@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 import Header from "../components/Header";
 import Navigation from "../components/Navigation";
 import { logInteraction } from "../utils/analytics";
 import "./NoticeDetailPage.css";
-
-const API_URL = import.meta.env.VITE_API_URL || "";
 
 const NoticeDetailPage = () => {
     const { id } = useParams();
@@ -20,7 +18,7 @@ const NoticeDetailPage = () => {
             try {
                 // publicなのでToken不要だが、閲覧制限があるならTokenありで取得
                 // ここでは公開のお知らせと仮定して取得（Tokenあっても問題ない）
-                const res = await axios.get(`${API_URL}/api/notices/${id}/`);
+                const res = await axiosClient.get(`/notices/${id}/`);
                 setNotice(res.data);
 
                 // 🔥 ミッション進捗更新（事務局だよりを確認する）
@@ -71,7 +69,11 @@ const NoticeDetailPage = () => {
                 <Header />
                 <div
                     className="overflow-y-auto pb-32"
-                    style={{ height: "calc(100vh - 120px)", background: "white" }}
+                    style={{
+                        height: "calc(100vh - 120px)",
+                        background: "white",
+                        paddingTop: 'calc(80px + env(safe-area-inset-top, 0px))'
+                    }}
                 >
                     <div className="notice-detail-container" style={{ paddingBottom: "100px" }}>
 

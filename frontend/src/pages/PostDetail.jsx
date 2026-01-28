@@ -99,36 +99,37 @@ const PostDetail = () => {
     }
 
     return (
-        <div className="bg-[#f6f7f9] min-h-screen pb-24">
-            {/* ヘッダー */}
-            <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-50 flex items-center px-4 max-w-[480px] mx-auto">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="w-10 h-10 flex items-center justify-center bg-white shadow-md rounded-full text-slate-700 border-none transition-all active:scale-95 mr-3"
+        <div className="home-container">
+            <div className="home-wrapper">
+                <Header />
+
+                <div
+                    className="overflow-y-auto px-4 pb-[100px]"
+                    style={{
+                        height: "calc(100vh - 120px)",
+                        paddingTop: "calc(112px + env(safe-area-inset-top, 0px))",
+                        backgroundColor: "#f6f7f9"
+                    }}
                 >
-                    <ArrowLeft size={22} />
-                </button>
-                <span className="font-black text-lg text-gray-800">投稿詳細</span>
-            </div>
-
-            <div className="pt-20 px-4 max-w-[480px] mx-auto">
-                <div style={{ marginTop: '40px' }}>
-                    <PostItem
-                        post={post}
-                        onLike={handleLike}
-                        onComment={handleComment}
-                    />
+                    <div className="max-w-[548px] mx-auto">
+                        <PostItem
+                            post={post}
+                            onLike={handleLike}
+                            onComment={handleComment}
+                            disableCardClick={true}
+                        />
+                    </div>
                 </div>
+
+                <Navigation activeTab="home" />
+
+                {showCommentSheet && (
+                    <CommentBottomSheet
+                        postId={id}
+                        onClose={() => setShowCommentSheet(false)}
+                    />
+                )}
             </div>
-
-            <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
-
-            {showCommentSheet && (
-                <CommentBottomSheet
-                    postId={id}
-                    onClose={() => setShowCommentSheet(false)}
-                />
-            )}
         </div>
     );
 };

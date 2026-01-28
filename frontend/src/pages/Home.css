@@ -13,7 +13,7 @@
   padding-bottom: calc(var(--spacing, .25rem) * 20);
   --tw-shadow: 0 20px 25px -5px var(--tw-shadow-color, #0000001a), 0 8px 10px -6px var(--tw-shadow-color, #0000001a);
   box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  max-width: 480px;
+  max-width: 548px;
   margin-inline: auto;
 }
 

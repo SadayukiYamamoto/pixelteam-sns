@@ -151,6 +151,7 @@ class Notification(models.Model):
     post_id = models.CharField(max_length=255, blank=True, null=True) # UUID or ID
     comment_id = models.IntegerField(blank=True, null=True)
     badge_name = models.CharField(max_length=255, blank=True, null=True)
+    is_treasure_post = models.BooleanField(default=False)
     message = models.TextField(blank=True, null=True)
     
     is_read = models.BooleanField(default=False)
@@ -193,6 +194,7 @@ def trigger_push_notification(sender, instance, created, **kwargs):
             "type": instance.notification_type,
             "post_id": instance.post_id or "",
             "comment_id": instance.comment_id or "",
+            "is_treasure": "true" if instance.is_treasure_post else "false",
         }
         
         send_push_notification(instance.recipient, title, body, data=data)

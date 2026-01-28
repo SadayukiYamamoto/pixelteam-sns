@@ -1,4 +1,5 @@
 import React from "react";
+import { getFullUrl } from "../utils/contentHelper";
 import "./VideoThumbnailCard.css";
 import { PlayCircle, Medal } from "lucide-react";
 
@@ -33,7 +34,7 @@ const VideoThumbnailCard = ({ video, onClick }) => {
   return (
     <div className="video-card" onClick={onClick}>
       <div className="thumbnail-container">
-        <img src={video.thumb} alt={video.title} className="thumbnail" />
+        <img src={getFullUrl(video.thumb)} alt={video.title} className="thumbnail" />
         {badge}
         <div className="thumbnail-overlay">
           <PlayCircle size={48} className="play-icon" />
@@ -51,7 +52,7 @@ const VideoThumbnailCard = ({ video, onClick }) => {
           ></div>
         ) : (
           <img
-            src={video.userAvatar}
+            src={getFullUrl(video.userAvatar)}
             alt={video.user}
             className="avatar"
           />

@@ -7,6 +7,8 @@ import './PostForm.css';
 import { useNavigate } from "react-router-dom";
 import MentionInput from '../components/MentionInput';
 
+import axiosClient from '../api/axiosClient';
+
 const formats = ['image'];
 
 const PostForm = () => {
@@ -83,12 +85,13 @@ const PostForm = () => {
       if (scheduleDate) formData.append("scheduled_at", scheduleDate.toISOString());
       if (imageFile) formData.append("image", imageFile);
 
-      const res = await fetch("/api/posts/", {
-        method: "POST",
-        body: formData,
+      const res = await axiosClient.post("posts/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      if (res.ok) {
+      if (res.status === 200 || res.status === 201) {
         alert(isScheduled ? "投稿を予約しました！" : "投稿しました！");
         setTitle('');
         setContent('');

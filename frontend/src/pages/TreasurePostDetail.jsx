@@ -6,6 +6,7 @@ import Navigation from "../components/Navigation";
 import TreasureCommentBottomSheet from "../components/TreasureCommentBottomSheet";
 import Avatar from "../components/Avatar";
 import styles from "./TreasurePostDetail.module.css";
+import axiosClient from "../api/axiosClient";
 
 import { processHtmlContent } from '../utils/contentHelper'; // Import helper
 
@@ -26,13 +27,8 @@ export default function TreasurePostDetail() {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/treasure_posts/${postId}/`, {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`,
-          },
-        });
-        const data = await res.json();
-        setPost(data);
+        const res = await axiosClient.get(`treasure_posts/${postId}/`);
+        setPost(res.data);
       } catch (err) {
         console.error("投稿詳細エラー:", err);
       } finally {
@@ -42,12 +38,7 @@ export default function TreasurePostDetail() {
 
     const markAsRead = async () => {
       try {
-        await fetch(`${API_URL}/api/treasure_posts/${postId}/read/`, {
-          method: "POST",
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`,
-          },
-        });
+        await axiosClient.post(`treasure_posts/${postId}/read/`);
       } catch (err) {
         console.error("既読処理エラー:", err);
       }
@@ -55,7 +46,7 @@ export default function TreasurePostDetail() {
 
     fetchPost();
     markAsRead();
-  }, [postId, API_URL]);
+  }, [postId]);
 
   if (loading) {
     return (
@@ -71,18 +62,13 @@ export default function TreasurePostDetail() {
     if (!window.confirm("本当にこの投稿を削除しますか？")) return;
 
     try {
-      const res = await fetch(`${API_URL}/api/treasure_posts/${postId}/`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
+      const res = await axiosClient.delete(`treasure_posts/${postId}/`, {
+        data: {
           user_uid: user?.userId || null,
-        }),
+        }
       });
 
-      if (res.ok) {
+      if (res.status === 200 || res.status === 204) {
         alert("投稿を削除しました。");
 
         if (parentCategory) {
@@ -95,16 +81,14 @@ export default function TreasurePostDetail() {
         navigate(`/treasure/${encodeURIComponent(category)}`);
         return;
       }
-
-      let errorText = "不明なエラー";
-      try {
-        const data = await res.json();
-        errorText = data.error || errorText;
-      } catch (e) { }
-      alert(`削除に失敗しました: ${errorText}`);
+      alert("削除に失敗しました。");
     } catch (err) {
       console.error("削除エラー:", err);
-      alert("削除中にエラーが発生しました。");
+      let errorText = "削除中にエラーが発生しました。";
+      if (err.response && err.response.data) {
+        errorText = err.response.data.error || errorText;
+      }
+      alert(errorText);
     }
   };
 
@@ -116,14 +100,8 @@ export default function TreasurePostDetail() {
   // 💚 いいね処理
   const handleLike = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/treasure_posts/${postId}/like/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`,
-        },
-      });
-      const data = await res.json();
-      setPost({ ...post, liked: data.liked, likes_count: data.likes_count });
+      const res = await axiosClient.post(`treasure_posts/${postId}/like/`);
+      setPost({ ...post, liked: res.data.liked, likes_count: res.data.likes_count });
     } catch (err) {
       console.error("いいえエラー:", err);
     }
@@ -137,8 +115,8 @@ export default function TreasurePostDetail() {
         <Header />
 
         <div
-          className="overflow-y-auto pb-32 pt-20"
-          style={{ height: "calc(100vh - 120px)" }}
+          className="overflow-y-auto pb-32"
+          style={{ height: "calc(100vh - 120px)", paddingTop: "calc(112px + env(safe-area-inset-top, 0px))" }}
         >
           <main className={styles.postContainer}>
             <div className={styles.card}>
@@ -278,8 +256,12 @@ export default function TreasurePostDetail() {
                   navigate(`/treasure-categories`, {
                     state: { parentCategory },
                   });
-                } else {
+                } else if (category && category !== 'post') {
                   navigate(`/treasure/${encodeURIComponent(category)}`);
+                } else if (post?.category) {
+                  navigate(`/treasure/${encodeURIComponent(post.category)}`);
+                } else {
+                  navigate(`/treasure-list`);
                 }
               }}
               className={styles.backButton}

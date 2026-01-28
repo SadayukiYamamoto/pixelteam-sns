@@ -30,7 +30,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 480px;
+  max-width: 548px;
   margin-bottom: 24px;
 }
 
@@ -65,7 +65,7 @@
 /* Main Card */
 .profile-edit-card {
   width: 100%;
-  max-width: 480px;
+  max-width: 548px;
   background: var(--card-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
@@ -329,7 +329,7 @@
 }
 
 /* Mobile Adjustments */
-@media (max-width: 480px) {
+@media (max-width: 548px) {
   .profile-edit-card {
     padding: 24px 16px;
   }

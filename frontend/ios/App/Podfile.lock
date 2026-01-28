@@ -7,6 +7,8 @@ PODS:
     - AppAuth/Core
   - Capacitor (5.7.8):
     - CapacitorCordova
+  - CapacitorApp (5.0.8):
+    - Capacitor
   - CapacitorCommunityFcm (5.0.3):
     - Capacitor
     - Firebase/Messaging
@@ -18,7 +20,7 @@ PODS:
   - CapacitorFirebaseAuthentication/Google (5.4.1):
     - Capacitor
     - FirebaseAuth (~> 10.8)
-    - GoogleSignIn (= 7.0.0)
+    - GoogleSignIn (~> 7.1.0)
   - CapacitorFirebaseAuthentication/Lite (5.4.1):
     - Capacitor
     - FirebaseAuth (~> 10.8)
@@ -61,10 +63,10 @@ PODS:
     - GoogleUtilities/Environment (~> 7.7)
     - nanopb (< 2.30911.0, >= 2.30908.0)
     - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleSignIn (7.0.0):
-    - AppAuth (~> 1.5)
-    - GTMAppAuth (< 3.0, >= 1.3)
-    - GTMSessionFetcher/Core (< 4.0, >= 1.1)
+  - GoogleSignIn (7.1.0):
+    - AppAuth (< 2.0, >= 1.7.3)
+    - GTMAppAuth (< 5.0, >= 4.1.1)
+    - GTMSessionFetcher/Core (~> 3.3)
   - GoogleUtilities/AppDelegateSwizzler (7.13.3):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
@@ -90,9 +92,9 @@ PODS:
   - GoogleUtilities/UserDefaults (7.13.3):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
-  - GTMAppAuth (2.0.0):
-    - AppAuth/Core (~> 1.6)
-    - GTMSessionFetcher/Core (< 4.0, >= 1.5)
+  - GTMAppAuth (4.1.1):
+    - AppAuth/Core (~> 1.7)
+    - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher/Core (3.5.0)
   - nanopb (2.30910.0):
     - nanopb/decode (= 2.30910.0)
@@ -104,6 +106,7 @@ PODS:
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCommunityFcm (from `../../node_modules/@capacitor-community/fcm`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorFirebaseAuthentication (from `../../node_modules/@capacitor-firebase/authentication`)"
@@ -132,6 +135,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   Capacitor:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorApp:
+    :path: "../../node_modules/@capacitor/app"
   CapacitorCommunityFcm:
     :path: "../../node_modules/@capacitor-community/fcm"
   CapacitorCordova:
@@ -144,9 +149,10 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   Capacitor: 9686e5711b48a1aa84671ede795d0175848abcba
+  CapacitorApp: 8026f7ce1ac72780258d05a90c07deb5c724c0fa
   CapacitorCommunityFcm: 88f7c584a0ffef06ea428103647a85787da63a78
   CapacitorCordova: 31ab98dca2ddcee051027a1afe7e8c85c82f7297
-  CapacitorFirebaseAuthentication: e43850fae93a034c5a9fcdf9c5adaac504231500
+  CapacitorFirebaseAuthentication: 79e76a6d5d3c8b27d036ae53a51502b6c2a75734
   CapacitorPushNotifications: 95dc889e9f3540e3c4f118f7ed53fd61db82100b
   Firebase: cec914dab6fd7b1bd8ab56ea07ce4e03dd251c2d
   FirebaseAppCheckInterop: 6a1757cfd4067d8e00fccd14fcc1b8fd78cfac07
@@ -156,14 +162,14 @@ SPEC CHECKSUMS:
   FirebaseInstallations: 913cf60d0400ebd5d6b63a28b290372ab44590dd
   FirebaseMessaging: 7b5d8033e183ab59eb5b852a53201559e976d366
   GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
-  GoogleSignIn: b232380cf495a429b8095d3178a8d5855b42e842
+  GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
-  GTMAppAuth: 99fb010047ba3973b7026e45393f51f27ab965ae
+  GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
 
-PODFILE CHECKSUM: 4702b4b8fb35a8d17a241c02b2e88690cd5a47d7
+PODFILE CHECKSUM: 74356f03c49673084042c620b933fd3b74dda1f0
 
 COCOAPODS: 1.16.2

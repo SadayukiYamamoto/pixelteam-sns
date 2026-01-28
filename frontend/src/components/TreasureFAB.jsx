@@ -38,7 +38,7 @@ export default function TreasureFAB() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 pointer-events-none flex justify-center z-[1000]">
-      <div className="w-full max-w-[480px] relative h-32">
+      <div className="w-full max-w-[548px] relative h-32">
         <button
           onClick={() =>
             navigate("/treasure/new", {
@@ -48,8 +48,12 @@ export default function TreasureFAB() {
               },
             })
           }
-          className="absolute bottom-24 right-5 pointer-events-auto bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center border-none cursor-pointer"
-          style={{ width: '64px', height: '64px' }}
+          className="absolute right-5 pointer-events-auto bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center border-none cursor-pointer"
+          style={{
+            width: '64px',
+            height: '64px',
+            bottom: 'calc(110px + env(safe-area-inset-bottom, 0px))'
+          }}
         >
           <Pencil size={30} color="#ffffff" strokeWidth={2.5} />
         </button>

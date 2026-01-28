@@ -27,7 +27,6 @@ import {
   FiBold,
   FiUnderline,
   FiCode,
-  FiLink,
   FiImage,
   FiMessageSquare,
   FiArrowLeft,
@@ -379,12 +378,7 @@ export default function PostPage() {
               <button type="button" className="t-btn" onClick={() => editor.chain().focus().toggleCodeBlock().run()} title="コード">
                 <FiCode />
               </button>
-              <button type="button" className="t-btn" onClick={() => {
-                const url = prompt("リンクURLを入力してください");
-                if (url) editor.chain().focus().setLink({ href: url }).run();
-              }} title="リンク">
-                <FiLink />
-              </button>
+
               <button type="button" className="t-btn t-img" onClick={() => fileInputRef.current.click()} title="画像を追加">
                 <FiImage />
               </button>

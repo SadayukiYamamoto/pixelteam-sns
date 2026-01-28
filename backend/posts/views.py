@@ -801,6 +801,7 @@ def toggle_treasure_like(request, pk):
                     sender=user,
                     notification_type='LIKE',
                     post_id=str(post.id),
+                    is_treasure_post=True,
                     message=f"{user.display_name}さんがあなたのノウハウ投稿にいいねしました。"
                 )
 
@@ -857,6 +858,7 @@ def treasure_post_list(request):
                         sender=user,
                         notification_type='MENTION',
                         post_id=str(post.id),
+                        is_treasure_post=True,
                         message=f"{user.display_name}さんがノウハウ投稿で全員をメンションしました。"
                     )
             else:
@@ -869,6 +871,7 @@ def treasure_post_list(request):
                                 sender=user,
                                 notification_type='MENTION',
                                 post_id=str(post.id),
+                                is_treasure_post=True,
                                 message=f"{user.display_name}さんがノウハウ投稿であなたをメンションしました。"
                             )
 
@@ -938,6 +941,7 @@ def treasure_comments_view(request, pk):
                     notification_type='COMMENT',
                     post_id=str(post.id),
                     comment_id=comment.id,
+                    is_treasure_post=True,
                     message=f"{user.display_name or user_name}さんがあなたのノウハウ投稿にコメントしました。"
                 )
 
@@ -959,6 +963,7 @@ def treasure_comments_view(request, pk):
                         notification_type='MENTION',
                         post_id=str(post.id),
                         comment_id=comment.id,
+                        is_treasure_post=True,
                         message=f"{user.display_name or user_name}さんがコメントで全員をメンションしました。"
                     )
             else:
@@ -972,6 +977,7 @@ def treasure_comments_view(request, pk):
                                 notification_type='MENTION',
                                 post_id=str(post.id),
                                 comment_id=comment.id,
+                                is_treasure_post=True,
                                 message=f"{user.display_name or user_name}さんがコメントであなたをメンションしました。"
                             )
 
@@ -1775,15 +1781,15 @@ def get_home_content(request):
     2. ショート動画 (Video is_short=True)
     3. おすすめ投稿 (Post is_featured=True)
     """
-    # 事務局だより (Notice カテゴリが "事務局だより")
-    news = Notice.objects.filter(category="事務局だより").order_by("-created_at")[:5]
+    # 事務局だより (OfficeNews モデルから全取得)
+    news = OfficeNews.objects.all().order_by("-created_at")[:5]
     news_data = []
     for n in news:
         news_data.append({
             "id": n.id,
             "title": n.title,
-            "thumbnail": n.image_url,
-            "external_url": n.external_url or f"/notice/{n.id}",
+            "thumbnail": n.thumbnail,
+            "external_url": n.external_url,
             "created_at": n.created_at
         })
 
@@ -1806,8 +1812,9 @@ def get_home_content(request):
 @permission_classes([IsAuthenticated])
 def office_news_list_create(request):
     """事務局だよりの一覧取得・新規作成"""
-    if not request.user.is_admin_or_secretary:
-        return Response({"detail": "権限がありません"}, status=403)
+    if request.method == 'POST':
+        if not request.user.is_admin_or_secretary:
+            return Response({"detail": "権限がありません"}, status=403)
 
     if request.method == 'GET':
         news = OfficeNews.objects.all()
@@ -1825,8 +1832,9 @@ def office_news_list_create(request):
 @permission_classes([IsAuthenticated])
 def office_news_detail(request, pk):
     """事務局だよりの詳細・更新・削除"""
-    if not request.user.is_admin_or_secretary:
-        return Response({"detail": "権限がありません"}, status=403)
+    if request.method in ['PUT', 'DELETE']:
+        if not request.user.is_admin_or_secretary:
+            return Response({"detail": "権限がありません"}, status=403)
 
     news = get_object_or_404(OfficeNews, pk=pk)
 

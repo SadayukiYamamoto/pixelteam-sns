@@ -20,8 +20,11 @@ export default function SwingManagement() {
 
       {/* スクロール領域 */}
       <div
-        className="flex-1 overflow-y-auto px-3 pt-4 pb-32"
-        style={{ height: "calc(100vh - 120px)" }}
+        className="flex-1 overflow-y-auto px-3 pb-32"
+        style={{
+          height: "calc(100vh - 120px)",
+          paddingTop: "calc(112px + env(safe-area-inset-top, 0px))"
+        }}
       >
         <h2 className="text-2xl font-bold mb-2">スイング管理（店舗一覧）</h2>
         <p className="text-gray-600 text-sm mb-4">

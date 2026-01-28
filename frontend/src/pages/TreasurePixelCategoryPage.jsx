@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Navigation from "../components/Navigation";
+import axiosClient from "../api/axiosClient";
 import styles from "./TreasurePixelCategoryPage.module.css";
 import TreasureFAB from "../components/TreasureFAB";
 
@@ -29,11 +30,10 @@ export default function TreasurePixelCategoryPage() {
 
     const fetchCounts = async () => {
       try {
-        const res = await fetch(
-          `${API_URL}/api/treasure_posts/category_counts/?parent_category=${parentCategory}`
+        const res = await axiosClient.get(
+          `treasure_posts/category_counts/?parent_category=${parentCategory}`
         );
-        const data = await res.json();
-        setCounts(data);
+        setCounts(res.data);
       } catch (err) {
         console.error("件数取得エラー:", err);
       } finally {
@@ -53,7 +53,7 @@ export default function TreasurePixelCategoryPage() {
 
         <div
           className="overflow-y-auto pb-32"
-          style={{ height: "calc(100vh - 120px)" }}
+          style={{ height: "calc(100vh - 120px)", paddingTop: "calc(112px + env(safe-area-inset-top, 0px))" }}
         >
           <main className={styles.container}>
             <h2 className={styles.title}>{parentCategory} のカテゴリー一覧</h2>

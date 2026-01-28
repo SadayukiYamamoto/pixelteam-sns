@@ -3,7 +3,9 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import Navigation from "../components/Navigation";
 import styles from "./TreasureCategoryList.module.css";
+import axiosClient from "../api/axiosClient";
 import { logInteraction } from "../utils/analytics";
+import TreasureFAB from "../components/TreasureFAB";
 
 export default function TreasureCategoryList() {
   const { category } = useParams();
@@ -19,10 +21,10 @@ export default function TreasureCategoryList() {
     const fetchTitles = async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `${API_URL}/api/treasure_posts/titles/?parent_category=${parentCategory}`
+        const res = await axiosClient.get(
+          `treasure_posts/titles/?parent_category=${parentCategory}`
         );
-        const data = await res.json();
+        const data = res.data;
         const filtered = data.filter(
           (p) =>
             (p.category || "").trim() === category &&
@@ -52,8 +54,8 @@ export default function TreasureCategoryList() {
         <Header title={category} />
 
         <div
-          className="overflow-y-auto pb-32 pt-20"
-          style={{ height: "calc(100vh - 120px)" }}
+          className="overflow-y-auto pb-32"
+          style={{ height: "calc(100vh - 120px)", paddingTop: "calc(112px + env(safe-area-inset-top, 0px))" }}
         >
           <main className={styles.container}>
             <h2 className={styles.title}>{category} の投稿タイトル一覧</h2>
@@ -90,6 +92,7 @@ export default function TreasureCategoryList() {
             )}
           </main>
         </div>
+        <TreasureFAB />
         <Navigation activeTab="knowledge" />
       </div>
     </div>

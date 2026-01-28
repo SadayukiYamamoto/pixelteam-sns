@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 import "./VideoPlayer.css";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Navigation from "./Navigation";
 import { ArrowLeft, Volume2, VolumeX, Play, Pause, RotateCcw, Maximize, FastForward } from "lucide-react";
+import { getFullUrl } from "../utils/contentHelper";
 
-const API_URL = import.meta.env.VITE_API_URL || "";
+const API_URL = import.meta.env.VITE_API_URL || "https://pixelshop-backend-237007524936.us-central1.run.app/api/";
+const BASE_URL = API_URL.replace(/\/api\/?$/, "");
 
 export default function VideoPlayer() {
   const { id } = useParams();
@@ -26,7 +28,7 @@ export default function VideoPlayer() {
 
   const fetchVideo = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/videos/${id}/`);
+      const res = await axiosClient.get(`/videos/${id}/`);
       setVideoData(res.data);
     } catch (err) {
       console.error("動画データ取得エラー:", err);
@@ -41,10 +43,9 @@ export default function VideoPlayer() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      await axios.post(
-        `${API_URL}/api/videos/save_log/`,
-        { video_id: id, watch_time: sec },
-        { headers: { Authorization: `Token ${token}` } }
+      await axiosClient.post(
+        `/videos/save_log/`,
+        { video_id: id, watch_time: sec }
       );
     } catch (err) {
       console.error("❌ 視聴ログ送信エラー:", err);
@@ -94,11 +95,9 @@ export default function VideoPlayer() {
 
       // 1. 再生回数インクリメント (認証/未認証問わずカウントする場合はToken無しでもOKだが、APIに合わせて)
       try {
-        await axios.post(
-          `${API_URL}/api/videos/add_view/`,
-          { video_id: id },
-          // トークンがあれば送るが、AllowAnyなら無くても通る
-          token ? { headers: { Authorization: `Token ${token}` } } : {}
+        await axiosClient.post(
+          `/videos/add_view/`,
+          { video_id: id }
         );
       } catch (err) {
         console.error("再生数カウントエラー:", err);
@@ -107,10 +106,9 @@ export default function VideoPlayer() {
       // 2. 視聴ログ開始 (Token必須)
       if (token) {
         try {
-          await axios.post(
-            `${API_URL}/api/videos/save_log/`,
-            { video_id: id, watch_time: 0 },
-            { headers: { Authorization: `Token ${token}` } }
+          await axiosClient.post(
+            `/videos/save_log/`,
+            { video_id: id, watch_time: 0 }
           );
         } catch (err) {
           console.error("視聴ログ開始エラー:", err);
@@ -242,7 +240,7 @@ export default function VideoPlayer() {
 
         <div
           className="overflow-y-auto pb-32"
-          style={{ height: "calc(100vh - 120px)" }}
+          style={{ height: "calc(100vh - 120px)", paddingTop: 'calc(76px + env(safe-area-inset-top, 0px))' }}
         >
           <div className="video-player-scroll-area" style={{ padding: "0 10px" }}>
             <button className="back-btn" onClick={() => navigate(-1)}>
@@ -254,8 +252,9 @@ export default function VideoPlayer() {
               <div className="video-wrapper" onClick={togglePlay} ref={playerWrapperRef}>
                 <video
                   ref={videoRef}
-                  src={videoData.video_url}
+                  src={getFullUrl(videoData.video_url)}
                   playsInline
+                  webkit-playsinline="true"
                   onPlay={() => {
                     handlePlay();
                     setIsPlaying(true);

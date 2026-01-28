@@ -9,6 +9,7 @@
   align-items: flex-start;
   /* 上寄せ */
   padding: 20px;
+  padding-top: calc(40px + env(safe-area-inset-top, 0px));
   z-index: 110000;
   overflow-y: auto;
 }
@@ -16,7 +17,7 @@
 /* === ポップアップ本体 === */
 .notice-popup-large {
   width: 92%;
-  max-width: 480px;
+  max-width: 548px;
   max-height: 85vh;
   /* Popupの最大高さ */
   background: #fff;

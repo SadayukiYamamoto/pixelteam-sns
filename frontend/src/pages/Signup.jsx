@@ -117,7 +117,14 @@ const Signup = () => {
             }
         } catch (err) {
             console.error("Google Signup Error:", err);
-            setError(`Googleでの登録に失敗しました: ${err.message || "不明なエラー"}`);
+            if (err.response && err.response.status === 400 && err.response.data.error) {
+                if (err.response.data.error.includes("既に登録されています")) {
+                    alert("このアカウントは既に登録されています。ログインしてください。");
+                    navigate("/login");
+                    return;
+                }
+            }
+            setError(`Googleでの登録に失敗しました: ${err.response?.data?.error || err.message || "不明なエラー"}`);
         }
     };
 
@@ -155,7 +162,13 @@ const Signup = () => {
         } catch (err) {
             console.error("Signup Error:", err);
             if (err.response) {
-                setError(err.response.data.error || "登録に失敗しました。");
+                const errorMsg = err.response.data.error || "登録に失敗しました。";
+                if (err.response.status === 400 && errorMsg.includes("既に")) {
+                    alert(errorMsg);
+                    navigate("/login");
+                    return;
+                }
+                setError(errorMsg);
             } else {
                 setError("サーバーに接続できません。");
             }

@@ -134,7 +134,7 @@ const Login = () => {
           "login/google/",
           {
             id_token: idToken,
-            action: 'login'
+            // action 'login' を削除（バックエンド側で「なければ作成」させる）
           }
         );
 

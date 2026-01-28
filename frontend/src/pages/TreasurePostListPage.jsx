@@ -5,6 +5,7 @@ import Navigation from "../components/Navigation";
 import axiosClient from "../api/axiosClient";
 import styles from "./TreasurePostListPage.module.css";
 import { FiChevronRight, FiClock } from "react-icons/fi";
+import TreasureFAB from "../components/TreasureFAB";
 
 export default function TreasurePostListPage() {
     const [posts, setPosts] = useState([]);
@@ -48,8 +49,8 @@ export default function TreasurePostListPage() {
                 <Header title="ノウハウ一覧" />
 
                 <div
-                    className="overflow-y-auto pb-32 pt-20"
-                    style={{ height: "calc(100vh - 120px)" }}
+                    className="overflow-y-auto pb-32"
+                    style={{ height: "calc(100vh - 120px)", paddingTop: "calc(112px + env(safe-area-inset-top, 0px))" }}
                 >
                     <main className={styles.listContainer}>
                         <div className={styles.listHeader}>
@@ -101,6 +102,7 @@ export default function TreasurePostListPage() {
                     </main>
                 </div>
 
+                <TreasureFAB />
                 <Navigation activeTab="knowledge" />
             </div>
         </div>

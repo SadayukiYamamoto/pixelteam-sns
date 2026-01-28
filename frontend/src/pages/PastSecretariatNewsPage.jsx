@@ -6,6 +6,8 @@ import axiosClient from "../api/axiosClient";
 import { FiArrowRight, FiInfo } from "react-icons/fi";
 import "./PastSecretariatNewsPage.css";
 
+import PullToRefresh from "../components/PullToRefresh";
+
 export default function PastSecretariatNewsPage() {
     const [notices, setNotices] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -18,7 +20,7 @@ export default function PastSecretariatNewsPage() {
     const fetchSecretariatNews = async () => {
         try {
             setLoading(true);
-            // 事務局だよりカテゴリーのみ取得
+            // お知らせ（Notice）から事務局だよりカテゴリーのみ取得
             const res = await axiosClient.get("/notices/");
             const filtered = (res.data || [])
                 .filter(n => n.category === "事務局だより")
@@ -29,6 +31,10 @@ export default function PastSecretariatNewsPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleRefresh = async () => {
+        await fetchSecretariatNews();
     };
 
     const handleCardClick = (notice) => {
@@ -44,7 +50,7 @@ export default function PastSecretariatNewsPage() {
             <div className="home-wrapper">
                 <Header title="過去の事務局だより" />
 
-                <div className="news-page-content pb-32 pt-20 overflow-y-auto">
+                <PullToRefresh onRefresh={handleRefresh} className="news-page-content pb-32 overflow-y-auto" style={{ paddingTop: 'calc(112px + env(safe-area-inset-top, 0px))' }}>
                     <div className="news-page-header">
                         <h2 className="news-page-title">Archives</h2>
                         <p className="news-page-subtitle">過去の事務局だより一覧</p>
@@ -101,7 +107,8 @@ export default function PastSecretariatNewsPage() {
                             <p>過去の事務局だよりはありません。</p>
                         </div>
                     )}
-                </div>
+                </PullToRefresh>
+
 
                 <Navigation activeTab="home" />
             </div>

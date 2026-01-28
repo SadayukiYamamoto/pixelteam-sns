@@ -1,7 +1,7 @@
 import Header from "../components/Header";
 import Navigation from "../components/Navigation";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 import { useParams, useNavigate } from "react-router-dom";
 import "./VideoTestPage.css";
 
@@ -28,7 +28,7 @@ export default function VideoTestPage() {
         const headers = { Authorization: `Token ${token}` };
 
         // テスト＆アンケート取得
-        const res = await axios.get(`/api/videos/${videoId}/test/`, { headers });
+        const res = await axiosClient.get(`/videos/${videoId}/test/`);
         setTest(res.data);
 
         if (res.data && res.data.questions) {
@@ -37,7 +37,7 @@ export default function VideoTestPage() {
           setAnswers(initial);
         }
 
-        const surveyRes = await axios.get(`/api/videos/${videoId}/survey/`, { headers });
+        const surveyRes = await axiosClient.get(`/videos/${videoId}/survey/`);
         setSurvey(surveyRes.data);
 
         if (surveyRes.data && surveyRes.data.questions) {
@@ -66,6 +66,7 @@ export default function VideoTestPage() {
   // 🔥 回答を Django に送信（採点API呼び出し）
   const submitAnswers = async () => {
     // バリデーション
+    if (!test || !test.questions) return;
     const unansweredTest = test.questions.some((q) => answers[q.id] === null);
     if (unansweredTest) return alert("すべてのテスト問題に回答してください！");
 
@@ -82,18 +83,16 @@ export default function VideoTestPage() {
       const headers = { Authorization: `Token ${token}` };
 
       // 1. テスト送信
-      const testRes = await axios.post(
-        `/api/videos/${videoId}/test/submit/`,
-        { answers },
-        { headers }
+      const testRes = await axiosClient.post(
+        `/videos/${videoId}/test/submit/`,
+        { answers }
       );
 
       // 2. アンケート送信
       if (survey) {
-        await axios.post(
-          `/api/videos/${videoId}/survey/submit/`,
-          { answers: surveyAnswers },
-          { headers }
+        await axiosClient.post(
+          `/videos/${videoId}/survey/submit/`,
+          { answers: surveyAnswers }
         );
       }
 
@@ -128,7 +127,7 @@ export default function VideoTestPage() {
       <div className="home-wrapper">
         <Header />
 
-        <div className="test-page-container" style={{ paddingBottom: '100px', flex: 1, overflowY: 'auto' }}>
+        <div className="test-page-container" style={{ paddingTop: 'calc(76px + env(safe-area-inset-top, 0px))', paddingBottom: '100px', flex: 1, overflowY: 'auto' }}>
           {/* --- 結果モーダル --- */}
           {result && (
             <div className="result-overlay">
@@ -178,7 +177,7 @@ export default function VideoTestPage() {
           </div>
 
           <div className="questions-container">
-            {test.questions.map((q, index) => (
+            {test?.questions?.map((q, index) => (
               <div key={q.id} className="question-card">
                 <div className="question-title">
                   <span className="q-num">Q{index + 1}</span> {q.text}
@@ -208,7 +207,7 @@ export default function VideoTestPage() {
               <h3>📝 アンケート</h3>
               <p className="survey-desc">今後の改善のため、ご協力をお願いします。</p>
 
-              {survey.questions.map((q) => (
+              {survey?.questions?.map((q) => (
                 <div key={q.id} className="survey-item">
                   <p className="survey-q">{q.text}</p>
                   {q.description && (

@@ -55,6 +55,7 @@ import AdminLevelRewards from "./pages/admin/AdminLevelRewards";
 import VideoFeedbackAdminPage from "./admin/VideoFeedbackAdminPage"; // ← 追加
 import TreasureAdminPage from "./admin/TreasureAdminPage"; // ← 追加
 import ProtectedRoute from "./components/ProtectedRoute";
+import BackButtonHandler from "./components/BackButtonHandler";
 
 
 
@@ -66,6 +67,7 @@ import TermsAgreement from "./pages/TermsAgreement";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
+    <BackButtonHandler />
     <Routes>
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -112,6 +114,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Route path="/treasure-categories" element={<ProtectedRoute><TreasurePixelCategoryPage /></ProtectedRoute>} />
       <Route path="/treasure/:category" element={<ProtectedRoute><TreasureCategoryList /></ProtectedRoute>} />
       <Route path="/treasure/:category/:postId" element={<ProtectedRoute><TreasurePostDetail /></ProtectedRoute>} />
+      <Route path="/treasure/post/:postId" element={<ProtectedRoute><TreasurePostDetail /></ProtectedRoute>} />
       <Route path="/treasure-list" element={<ProtectedRoute><TreasurePostListPage /></ProtectedRoute>} />
       <Route path="/treasure/new" element={<ProtectedRoute><TreasurePostForm /></ProtectedRoute>} />
       <Route path="/treasure/edit/:id" element={<ProtectedRoute><TreasurePostForm /></ProtectedRoute>} />

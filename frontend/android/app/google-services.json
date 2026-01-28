@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "237007524936-5i6m57dgafci5u90nrs5o4fnvset69l2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pixelshopsns.app",
+            "certificate_hash": "567d3f407ec5170fc183330a4e94fb7563b261b9"
+          }
+        },
+        {
           "client_id": "237007524936-cglimuthved1b2rg19pnm73qo1k8eofq.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,13 @@
             {
               "client_id": "237007524936-cglimuthved1b2rg19pnm73qo1k8eofq.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "237007524936-3t3knds89rck4nq1htgskd5c5cjafo7d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pixelshopsns.app"
+              }
             }
           ]
         }

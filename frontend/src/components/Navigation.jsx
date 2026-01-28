@@ -51,10 +51,8 @@ const Navigation = ({ activeTab, setActiveTab }) => {
     <nav
       className="navbar"
       style={{
-        height: isIos
-          ? 'calc(20px + env(safe-area-inset-bottom, 0px))'
-          : 'auto',
-        minHeight: isIos ? '0' : '68px'
+        height: 'calc(68px + env(safe-area-inset-bottom, 0px))',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
       }}
     >
       {navItems.map(({ name, icon: Icon, tab }) => (
@@ -62,13 +60,11 @@ const Navigation = ({ activeTab, setActiveTab }) => {
           key={tab}
           onClick={() => handleNavClick(tab)}
           className={`nav-button ${activeTab === tab ? 'active' : ''}`}
-          style={{ padding: isIos ? '0' : 'inherit' }}
         >
           <Icon
             className="nav-icon"
-            style={isIos ? { fontSize: '14px', marginBottom: '0' } : {}}
           />
-          {!isIos && <span>{name}</span>}
+          <span>{name}</span>
         </button>
       ))}
     </nav>

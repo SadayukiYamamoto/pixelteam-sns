@@ -18,3 +18,12 @@ export const processHtmlContent = (htmlContent) => {
 
     return doc.body.innerHTML;
 };
+export const getFullUrl = (path) => {
+    if (!path) return "";
+    if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("blob:")) {
+        return path;
+    }
+    const baseUrl = "https://pixelshop-backend-237007524936.us-central1.run.app";
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    return `${baseUrl}${normalizedPath}`;
+};

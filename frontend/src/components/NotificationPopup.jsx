@@ -3,6 +3,7 @@ import axiosClient from '../api/axiosClient';
 import { Heart, MessageCircle, AtSign, Award, CircleDollarSign, Bell, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Avatar from './Avatar';
+import { handleNotificationRedirection } from '../utils/notification-handler';
 import './NoticePopup.css'; // Reuse popup styles
 import '../pages/NotificationsPage.css'; // Reuse notification item styles
 
@@ -47,11 +48,7 @@ const NotificationPopup = ({ onClose }) => {
     };
 
     const handleNotifClick = (notif) => {
-        if (notif.post_id) {
-            const query = notif.notification_type === 'COMMENT' ? '?openComments=true' : '';
-            navigate(`/posts/${notif.post_id}${query}`);
-            onClose();
-        }
+        handleNotificationRedirection(notif, navigate, onClose);
     };
 
     const handleDelete = async (e, id) => {

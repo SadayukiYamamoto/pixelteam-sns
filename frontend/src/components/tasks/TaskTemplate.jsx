@@ -10,8 +10,11 @@ export default function TaskTemplate({ title, description, items }) {
 
       {/* スクロール領域 */}
       <div
-        className="flex-1 overflow-y-auto px-4 pt-6 pb-32"
-        style={{ height: "calc(100vh - 120px)" }}
+        className="flex-1 overflow-y-auto px-4 pb-32"
+        style={{
+          height: "calc(100vh - 120px)",
+          paddingTop: "calc(112px + env(safe-area-inset-top, 0px))"
+        }}
       >
         <div className="flex justify-center -mb-2">
           <div className="pokepoke-label scale-100 shadow-lg px-8">

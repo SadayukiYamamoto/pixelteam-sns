@@ -8,7 +8,7 @@
 
 .home-wrapper {
   width: 100%;
-  max-width: 480px;
+  max-width: 548px;
   background: #ffffff;
   display: flex;
   flex-direction: column;
@@ -18,7 +18,7 @@
 
 /* === マイページ全体 === */
 .mypage-content {
-  padding: calc(88px + env(safe-area-inset-top, 0px)) 16px 16px;
+  padding: calc(112px + env(safe-area-inset-top, 0px)) 16px 16px;
   margin-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
 }
 

@@ -60,6 +60,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             "notification_type",
             "post_id",
             "comment_id",
+            "is_treasure_post",
             "badge_name",
             "message",
             "is_read",

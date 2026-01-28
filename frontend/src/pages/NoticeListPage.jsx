@@ -46,8 +46,11 @@ export default function NoticeListPage() {
                 <Header title="お知らせ" />
 
                 <div
-                    className="overflow-y-auto pb-32 pt-20"
-                    style={{ height: "calc(100vh - 120px)" }}
+                    className="overflow-y-auto pb-32"
+                    style={{
+                        height: "calc(100vh - 120px)",
+                        paddingTop: 'calc(80px + env(safe-area-inset-top, 0px))'
+                    }}
                 >
                     <main className="notice-list-container">
                         <div className="notice-list-header">

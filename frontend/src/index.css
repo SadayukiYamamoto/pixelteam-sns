@@ -67,6 +67,7 @@ body {
   background-color: #f6f7f9;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  overscroll-behavior-y: contain;
 }
 
 p {
@@ -123,7 +124,7 @@ p {
   padding-bottom: calc(var(--spacing, .25rem) * 20);
   --tw-shadow: 0 20px 25px -5px var(--tw-shadow-color, #0000001a), 0 8px 10px -6px var(--tw-shadow-color, #0000001a);
   box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  max-width: 480px;
+  max-width: 548px;
   margin-inline: auto;
   position: relative;
   display: flex;
@@ -131,8 +132,8 @@ p {
 }
 
 /* Utility Classes from Snippets */
-.max-w-\[480px\] {
-  max-width: 480px !important;
+.max-w-\[548px\] {
+  max-width: 548px !important;
   width: 100% !important;
   /* Ensure it tries to take full width up to max */
 }

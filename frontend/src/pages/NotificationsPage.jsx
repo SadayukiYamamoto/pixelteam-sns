@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Heart, MessageCircle, AtSign, Award, CircleDollarSign, ChevronLeft, Bell, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { handleNotificationRedirection } from '../utils/notification-handler';
 import Avatar from '../components/Avatar';
 import './NotificationsPage.css';
+
+import PullToRefresh from '../components/PullToRefresh';
 
 const NotificationsPage = () => {
     const [notifications, setNotifications] = useState([]);
@@ -27,6 +30,10 @@ const NotificationsPage = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleRefresh = async () => {
+        await fetchNotifications();
     };
 
     const markAllAsRead = async () => {
@@ -68,10 +75,7 @@ const NotificationsPage = () => {
     };
 
     const handleNotifClick = (notif) => {
-        if (notif.post_id) {
-            const query = (notif.notification_type === 'COMMENT' || notif.notification_type === 'REPLY') ? '?openComments=true' : '';
-            navigate(`/posts/${notif.post_id}${query}`);
-        }
+        handleNotificationRedirection(notif, navigate);
     };
 
     if (loading) return <div className="loading">読み込み中...</div>;
@@ -85,49 +89,51 @@ const NotificationsPage = () => {
                 <h1>通知</h1>
             </header>
 
-            <div className="notif-list">
-                {notifications.length === 0 ? (
-                    <div className="empty-notif">通知はありません。</div>
-                ) : (
-                    notifications.map((notif) => (
-                        <div
-                            key={notif.id}
-                            className={`notif-item ${!notif.is_read ? 'unread' : ''}`}
-                            onClick={() => handleNotifClick(notif)}
-                        >
-                            <div className="notif-left">
-                                {getIcon(notif.notification_type)}
-                            </div>
-                            <div className="notif-right">
-                                <div className="notif-sender">
-                                    {notif.sender ? (
-                                        <>
-                                            <Avatar
-                                                src={notif.sender.profile_image}
-                                                name={notif.sender.display_name}
-                                                size="w-6 h-6"
-                                                className="sender-avatar"
-                                            />
-                                            <span className="sender-name">{notif.sender.display_name}</span>
-                                        </>
-                                    ) : (
-                                        <span className="sender-name">システム</span>
-                                    )}
-                                </div>
-                                <p className="notif-message">{notif.message}</p>
-                                <span className="notif-time">{new Date(notif.created_at).toLocaleString()}</span>
-                            </div>
-                            <button
-                                className="notif-delete-btn"
-                                onClick={(e) => handleDelete(e, notif.id)}
-                                title="削除"
+            <PullToRefresh onRefresh={handleRefresh} className="flex-1 overflow-hidden">
+                <div className="notif-list pb-24">
+                    {notifications.length === 0 ? (
+                        <div className="empty-notif" style={{ padding: '40px' }}>通知はありません。</div>
+                    ) : (
+                        notifications.map((notif) => (
+                            <div
+                                key={notif.id}
+                                className={`notif-item ${!notif.is_read ? 'unread' : ''}`}
+                                onClick={() => handleNotifClick(notif)}
                             >
-                                <Check size={20} />
-                            </button>
-                        </div>
-                    ))
-                )}
-            </div>
+                                <div className="notif-left">
+                                    {getIcon(notif.notification_type)}
+                                </div>
+                                <div className="notif-right">
+                                    <div className="notif-sender">
+                                        {notif.sender ? (
+                                            <>
+                                                <Avatar
+                                                    src={notif.sender.profile_image}
+                                                    name={notif.sender.display_name}
+                                                    size="w-6 h-6"
+                                                    className="sender-avatar"
+                                                />
+                                                <span className="sender-name">{notif.sender.display_name}</span>
+                                            </>
+                                        ) : (
+                                            <span className="sender-name">システム</span>
+                                        )}
+                                    </div>
+                                    <p className="notif-message">{notif.message}</p>
+                                    <span className="notif-time">{new Date(notif.created_at).toLocaleString()}</span>
+                                </div>
+                                <button
+                                    className="notif-delete-btn"
+                                    onClick={(e) => handleDelete(e, notif.id)}
+                                    title="削除"
+                                >
+                                    <Check size={20} />
+                                </button>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </PullToRefresh>
         </div>
     );
 };

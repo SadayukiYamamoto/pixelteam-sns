@@ -449,7 +449,7 @@ const CommentBottomSheet = ({ postId, onClose }) => {
         />
 
         <motion.div
-          className="relative bg-white w-full max-w-[480px] rounded-t-[32px] overflow-hidden shadow-2xl flex flex-col"
+          className="relative bg-white w-full max-w-[548px] rounded-t-[32px] overflow-hidden shadow-2xl flex flex-col"
           style={{ height: '85vh' }}
           initial={{ y: "100%" }}
           animate={{ y: 0 }}

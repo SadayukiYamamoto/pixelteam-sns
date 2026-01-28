@@ -16,8 +16,10 @@ import Underline from "@tiptap/extension-underline";
 import Placeholder from "@tiptap/extension-placeholder";
 import { OGPCard } from "../extentions/OGPCard";
 
+import axiosClient from "../api/axiosClient";
+
 import "./TreasurePostForm.css";
-import { FiBold, FiUnderline, FiLink, FiImage, FiMessageSquare, FiCode, FiChevronLeft } from "react-icons/fi";
+import { FiBold, FiUnderline, FiImage, FiMessageSquare, FiCode, FiChevronLeft } from "react-icons/fi";
 
 export default function TreasurePostForm() {
   const { id } = useParams(); // For edit mode
@@ -125,8 +127,8 @@ export default function TreasurePostForm() {
     if (id && editor) {
       const fetchPost = async () => {
         try {
-          const res = await fetch(`${API_URL}/api/treasure_posts/${id}/`);
-          const data = await res.json();
+          const res = await axiosClient.get(`treasure_posts/${id}/`);
+          const data = res.data;
           setTitle(data.title);
           setCategory(data.category);
           setPCategory(data.parent_category);
@@ -214,19 +216,12 @@ export default function TreasurePostForm() {
     };
 
     try {
-      const method = id ? "PUT" : "POST";
-      const url = id ? `${API_URL}/api/treasure_posts/${id}/` : `${API_URL}/api/treasure_posts/`;
+      const url = id ? `treasure_posts/${id}/` : `treasure_posts/`;
+      const res = id
+        ? await axiosClient.put(url, payload)
+        : await axiosClient.post(url, payload);
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
+      if (res.status === 200 || res.status === 201) {
         alert(id ? "更新しました！" : "投稿しました！");
         if (pCategory) {
           navigate("/treasure-categories", { state: { parentCategory: pCategory } });
@@ -238,6 +233,7 @@ export default function TreasurePostForm() {
       }
     } catch (err) {
       console.error("Submit error:", err);
+      alert("投稿に失敗しました。");
     } finally {
       setLoading(false);
     }
@@ -259,6 +255,21 @@ export default function TreasurePostForm() {
       <div className="treasure-form-card">
         <form onSubmit={handleSubmit}>
           <div className="form-grid-2">
+            <div className="form-field-item">
+              <label className="field-label">所属チーム</label>
+              <select
+                className="treasure-select"
+                value={pCategory}
+                onChange={(e) => setPCategory(e.target.value)}
+                required
+                disabled={!!parentCategory}
+              >
+                <option value="">選択してください</option>
+                <option value="Pixel-Shop">Shop チーム</option>
+                <option value="Pixel-Event">Event チーム</option>
+              </select>
+            </div>
+
             <div className="form-field-item">
               <label className="field-label">カテゴリー</label>
               <select
@@ -331,13 +342,48 @@ export default function TreasurePostForm() {
                 onChange={(e) => setDeviceUsed(e.target.value)}
               >
                 <option value="">選択してください</option>
-                <option value="iPhone Proシリーズ">iPhone Proシリーズ</option>
-                <option value="iPhone Normal シリーズ">iPhone Normal シリーズ</option>
-                <option value="iPhone SE・Plus・Air シリーズ">iPhone SE・Plus・Air シリーズ</option>
-                <option value="Galaxy ハイエンドモデル">Galaxy ハイエンドモデル</option>
-                <option value="Galaxy ミドルレンズモデル">Galaxy ミドルレンズモデル</option>
-                <option value="Xperia ハイエンドモデル">Xperia ハイエンドモデル</option>
-                <option value="Xperia ミドルレンズモデル">Xperia ミドルレンズモデル</option>
+                <option value="Pixel 9a">Pixel 9a</option>
+                <option value="Pixel 9 Pro / 9 Pro XL">Pixel 9 Pro / 9 Pro XL</option>
+                <option value="Pixel 9">Pixel 9</option>
+                <option value="Pixel 8a">Pixel 8a</option>
+                <option value="Pixel 8 Pro">Pixel 8 Pro</option>
+                <option value="Pixel 8">Pixel 8</option>
+                <option value="Pixel 7a">Pixel 7a</option>
+                <option value="Pixel 7 Pro">Pixel 7 Pro</option>
+                <option value="Pixel 7">Pixel 7</option>
+                <option value="その他のPixel">その他のPixel</option>
+                <option value="iPhone 16 Pro Max / iPhone 16 Pro">iPhone 16 Pro Max / iPhone 16 Pro</option>
+                <option value="iPhone 16 / iPhone 16 Plus">iPhone 16 / iPhone 16 Plus</option>
+                <option value="iPhone 16e">iPhone 16e</option>
+                <option value="iPhone 15 Pro Max / iPhone 15 Pro">iPhone 15 Pro Max / iPhone 15 Pro</option>
+                <option value="iPhone 15 / iPhone 15 Plus">iPhone 15 / iPhone 15 Plus</option>
+                <option value="iPhone 14 Pro Max / iPhone 14 Pro">iPhone 14 Pro Max / iPhone 14 Pro</option>
+                <option value="iPhone 14 / iPhone 14 Plus">iPhone 14 / iPhone 14 Plus</option>
+                <option value="iPhone 13 Pro Max / iPhone 13 Pro">iPhone 13 Pro Max / iPhone 13 Pro</option>
+                <option value="iPhone 13 / iPhone 13 mini">iPhone 13 / iPhone 13 mini</option>
+                <option value="iPhone 12 Pro Max / iPhone 12 Pro">iPhone 12 Pro Max / iPhone 12 Pro</option>
+                <option value="iPhone 12 / iPhone 12 mini">iPhone 12 / iPhone 12 mini</option>
+                <option value="iPhone SE シリーズ">iPhone SE シリーズ</option>
+                <option value="その他のiPhone">その他のiPhone</option>
+                <option value="Galaxy Z Flip7 / Z Flip6 / Galaxy Z Flip6">Galaxy Z Flip7 / Z Flip6 / Galaxy Z Flip6</option>
+                <option value="Galaxy Z Fold7 / Z Fold5 / Galaxy Z Fold5">Galaxy Z Fold7 / Z Fold5 / Galaxy Z Fold5</option>
+                <option value="Galaxy S25 Ultra">Galaxy S25 Ultra</option>
+                <option value="Galaxy S25">Galaxy S25</option>
+                <option value="Galaxy A25">Galaxy A25</option>
+                <option value="Galaxy S24 Ultra">Galaxy S24 Ultra</option>
+                <option value="Galaxy S24">Galaxy S24</option>
+                <option value="Galaxy S23 Ultra">Galaxy S23 Ultra</option>
+                <option value="Galaxy S23">Galaxy S23</option>
+                <option value="その他Galaxy シリーズ">その他Galaxy シリーズ</option>
+                <option value="Xperia 1 Ⅶ">Xperia 1 Ⅶ</option>
+                <option value="Xperia 1 Ⅵ">Xperia 1 Ⅵ</option>
+                <option value="Xperia 10 Ⅵ">Xperia 10 Ⅵ</option>
+                <option value="Xperia 1 V">Xperia 1 V</option>
+                <option value="Xperia 5 V">Xperia 5 V</option>
+                <option value="Xperia 10 V">Xperia 10 V</option>
+                <option value="Xperia Ace III">Xperia Ace III</option>
+                <option value="その他Xperia シリーズ">その他Xperia シリーズ</option>
+                <option value="その他のAndroid 端末">その他のAndroid 端末</option>
               </select>
             </div>
           </div>
@@ -381,12 +427,7 @@ export default function TreasurePostForm() {
               <button type="button" className="t-btn" onClick={() => editor.chain().focus().toggleCodeBlock().run()}>
                 <FiCode />
               </button>
-              <button type="button" className="t-btn" onClick={() => {
-                const url = prompt("リンクを入力:");
-                if (url) editor.chain().focus().setLink({ href: url }).run();
-              }}>
-                <FiLink />
-              </button>
+
               <button type="button" className="t-btn" onClick={() => fileInputRef.current.click()}>
                 <FiImage />
               </button>

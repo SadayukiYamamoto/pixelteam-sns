@@ -11,6 +11,7 @@ import FloatingWriteButton from "../components/FloatingWriteButton";
 import CommentBottomSheet from "../components/CommentBottomSheet";
 import { renderPostContent } from "../utils/textUtils";
 import Avatar from "../components/Avatar";
+import PullToRefresh from "../components/PullToRefresh";
 
 const formatTimeAgo = (dateString) => {
   if (!dateString) return "";
@@ -89,6 +90,7 @@ const Posts = () => {
       }));
 
       setPosts((prev) => {
+        if (offset === 0) return fetchedPosts;
         const existingIds = new Set(prev.map(p => p.id));
         const newPosts = fetchedPosts.filter(p => !existingIds.has(p.id));
         return [...prev, ...newPosts];
@@ -101,6 +103,15 @@ const Posts = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    if (highlightId) {
+      await loadHighlightedPost();
+    } else {
+      await loadPostsFromDjango(0);
+    }
+    setPage(0);
   };
 
   const loadHighlightedPost = async () => {
@@ -127,10 +138,10 @@ const Posts = () => {
       };
 
       setPosts([highlightedPost]);
-      loadPostsFromDjango(0);
+      await loadPostsFromDjango(0);
     } catch (error) {
       console.error("ハイライト投稿の取得失敗:", error);
-      loadPostsFromDjango(0);
+      await loadPostsFromDjango(0);
     }
   };
 
@@ -255,157 +266,160 @@ const Posts = () => {
       <div className="home-container">
         <div className="home-wrapper">
           <Header />
-          <div
-            ref={scrollContainerRef}
-            className="posts-content px-4 pb-[100px]"
-            style={{ paddingTop: 'calc(72px + env(safe-area-inset-top, 0px))' }}
-          >
-            <h2 className="text-xl font-bold mb-4" style={{ marginTop: '16px' }}>
-              {tag ? `#${tag} の詳細` : "投稿一覧"}
-            </h2>
+          <PullToRefresh onRefresh={handleRefresh} className="min-h-screen">
+            <div
+              ref={scrollContainerRef}
+              className="posts-content px-4 pb-[100px]"
+              style={{ paddingTop: 'calc(112px + env(safe-area-inset-top, 0px))' }}
+            >
+              <h2 className="text-xl font-bold mb-4" style={{ marginTop: '16px' }}>
+                {tag ? `#${tag} の詳細` : "投稿一覧"}
+              </h2>
 
-            <div className="space-y-4">
-              {posts.map((post, index) => (
-                <div
-                  key={`${post.id}-${index}`}
-                  className={`post-card ${post.isHighlighted ? 'border-2 border-green-500 shadow-xl' : ''}`}
-                  onClick={() => toggleExpand(post.id)}
-                >
-                  {String(post.user_uid) === String(currentUserId) && (
-                    <div className="post-menu-container z-30">
-                      <div
-                        className="post-menu-trigger"
+              <div className="space-y-4">
+                {posts.map((post, index) => (
+                  <div
+                    key={`${post.id}-${index}`}
+                    className={`post-card ${post.isHighlighted ? 'border-2 border-green-500 shadow-xl' : ''}`}
+                    onClick={() => toggleExpand(post.id)}
+                  >
+                    {String(post.user_uid) === String(currentUserId) && (
+                      <div className="post-menu-container z-30">
+                        <div
+                          className="post-menu-trigger"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMenuOpen(menuOpen === post.id ? null : post.id);
+                          }}
+                        >
+                          <FiMoreVertical />
+                        </div>
+
+                        {menuOpen === post.id && (
+                          <div className="post-menu-dropdown z-40" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              className="post-menu-item"
+                              onClick={() => {
+                                setMenuOpen(null);
+                                handleEdit(post.id);
+                              }}
+                            >
+                              ✏️ 編集
+                            </button>
+                            <button
+                              className="post-menu-item delete"
+                              onClick={() => {
+                                setMenuOpen(null);
+                                handleDelete(post.id);
+                              }}
+                            >
+                              🗑️ 削除
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div
+                      className="post-user-info cursor-pointer hover:bg-gray-100 active:bg-gray-200 rounded-lg p-1.5 -ml-1 transition-all duration-200 relative z-10 inline-flex items-center w-fit max-w-[85%]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (post.user_uid) {
+                          navigate(`/mypage/${post.user_uid}`);
+                        }
+                      }}
+                    >
+                      <Avatar
+                        src={post.user?.profileImage}
+                        name={post.user?.displayName}
+                        size="w-8 h-8"
+                      />
+                      <div className="ml-2">
+                        <p className="font-bold text-sm leading-tight">{post.user?.displayName || "匿名"}</p>
+                        <p className="text-[10px] text-gray-400">{formatTimeAgo(post.createdAt)}</p>
+                      </div>
+                    </div>
+
+                    <div className="post-content-wrapper">
+                      {renderPostContent(post.content, post.isExpanded, () => toggleExpand(post.id), post.category)}
+                    </div>
+
+                    {post.imageUrl && (
+                      <img
+                        src={post.imageUrl}
+                        alt="投稿画像"
+                        className="post-image rounded-lg mt-2 w-full object-contain max-h-[500px]"
+                        onError={(e) => (e.currentTarget.style.display = "none")}
+                      />
+                    )}
+
+                    <div className="reaction-bar flex items-center space-x-5 mt-3 text-gray-600">
+                      <button
+                        className="reaction-btn flex items-center space-x-1 transition"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setMenuOpen(menuOpen === post.id ? null : post.id);
+                          handleLike(post.id);
                         }}
                       >
-                        <FiMoreVertical />
-                      </div>
+                        <FaHeart
+                          className={`heart ${post.liked ? "red" : ""} ${post.animating
+                            ? post.animationType === "like"
+                              ? "pop"
+                              : "fade"
+                            : ""
+                            }`}
+                        />
 
-                      {menuOpen === post.id && (
-                        <div className="post-menu-dropdown z-40" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            className="post-menu-item"
-                            onClick={() => {
-                              setMenuOpen(null);
-                              handleEdit(post.id);
-                            }}
-                          >
-                            ✏️ 編集
-                          </button>
-                          <button
-                            className="post-menu-item delete"
-                            onClick={() => {
-                              setMenuOpen(null);
-                              handleDelete(post.id);
-                            }}
-                          >
-                            🗑️ 削除
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                        <span>
+                          {post.likes || 0}
+                        </span>
+                      </button>
+                      <button
+                        className="reaction-btn flex items-center space-x-1 hover:text-blue-500 transition"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleComment(post.id);
+                        }}
+                      >
+                        <FaRegCommentDots />
+                        <span>{post.comments_count || 0}</span>
+                      </button>
 
-                  <div
-                    className="post-user-info cursor-pointer hover:bg-gray-100 active:bg-gray-200 rounded-lg p-1.5 -ml-1 transition-all duration-200 relative z-10 inline-flex items-center w-fit max-w-[85%]"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (post.user_uid) {
-                        navigate(`/mypage/${post.user_uid}`);
-                      }
-                    }}
-                  >
-                    <Avatar
-                      src={post.user?.profileImage}
-                      name={post.user?.displayName}
-                      size="w-8 h-8"
-                    />
-                    <div className="ml-2">
-                      <p className="font-bold text-sm leading-tight">{post.user?.displayName || "匿名"}</p>
-                      <p className="text-[10px] text-gray-400">{formatTimeAgo(post.createdAt)}</p>
+                      <div className="flex-1" />
+
+                      <button
+                        className="reaction-btn transition-all active:scale-95 group"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          fetchLikeList(post.id);
+                        }}
+                        title="いいね一覧を表示"
+                      >
+                        <AiFillBuild size={18} />
+                      </button>
                     </div>
                   </div>
+                ))}
 
-                  <div className="post-content-wrapper">
-                    {renderPostContent(post.content, post.isExpanded, () => toggleExpand(post.id), post.category)}
+                {loading && (
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
+                    <span className="text-gray-500 text-sm">読み込み中...</span>
                   </div>
-
-                  {post.imageUrl && (
-                    <img
-                      src={post.imageUrl}
-                      alt="投稿画像"
-                      className="post-image rounded-lg mt-2 w-full object-contain max-h-[500px]"
-                      onError={(e) => (e.currentTarget.style.display = "none")}
-                    />
-                  )}
-
-                  <div className="reaction-bar flex items-center space-x-5 mt-3 text-gray-600">
-                    <button
-                      className="reaction-btn flex items-center space-x-1 transition"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLike(post.id);
-                      }}
-                    >
-                      <FaHeart
-                        className={`heart ${post.liked ? "red" : ""} ${post.animating
-                          ? post.animationType === "like"
-                            ? "pop"
-                            : "fade"
-                          : ""
-                          }`}
-                      />
-
-                      <span>
-                        {post.likes || 0}
-                      </span>
-                    </button>
-                    <button
-                      className="reaction-btn flex items-center space-x-1 hover:text-blue-500 transition"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleComment(post.id);
-                      }}
-                    >
-                      <FaRegCommentDots />
-                      <span>{post.comments_count || 0}</span>
-                    </button>
-
-                    <div className="flex-1" />
-
-                    <button
-                      className="reaction-btn transition-all active:scale-95 group"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        fetchLikeList(post.id);
-                      }}
-                      title="いいね一覧を表示"
-                    >
-                      <AiFillBuild size={18} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-
-              {loading && (
-                <div className="flex flex-col items-center justify-center py-10">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
-                  <span className="text-gray-500 text-sm">読み込み中...</span>
-                </div>
-              )}
-              {!hasMore && !loading && posts.length > 0 && (
-                <p className="text-center text-gray-400 mt-2">すべて読み込みました</p>
-              )}
+                )}
+                {!hasMore && !loading && posts.length > 0 && (
+                  <p className="text-center text-gray-400 mt-2">すべて読み込みました</p>
+                )}
+              </div>
             </div>
-          </div>
+          </PullToRefresh>
         </div>
       </div>
 
+
       {/* 🔴 FLOATING BUTTONS - Standardized Centering Wrapper 🔴 */}
       <div
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] h-0 pointer-events-none z-[60]"
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[548px] h-0 pointer-events-none z-[60]"
         style={{ bottom: '0px' }}
       >
         <FloatingWriteButton userTeam={userProfile?.team} isAbsolute={true} />

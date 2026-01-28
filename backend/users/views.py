@@ -100,42 +100,20 @@ def google_login_view(request):
              except User.DoesNotExist:
                  pass
 
-        # --- 分け分けロジック ---
-        if action == 'login':
-            if not user:
-                return Response({'error': 'アカウントが見つかりません。先に新規登録を行ってください。'}, status=404)
-        
-        elif action == 'signup':
-            if user:
-                return Response({'error': 'このアカウントは既に登録されています。ログインしてください。'}, status=400)
-            
-            # 新規作成
-            print(f"DEBUG: Creating new user for email: {email}")
+        # ユーザーがいなければ作成（actionに関わらず登録を許容してループを防ぐ）
+        if not user:
+            print(f"DEBUG: Auto-creating account for email: {email}")
             user = User.objects.create(
                 user_id=uid,
                 email=email,
                 display_name=name,
                 profile_image=picture,
                 password="",
-                terms_agreed=True  # ✅ 新規登録時は同意済みとする
+                terms_agreed=True
             )
             user.set_unusable_password()
             user.save()
             print(f"DEBUG: User created successfully: {user.display_name}")
-        
-        else:
-            # 従来の挙動（action未指定の場合）: なければ作る
-            if not user:
-                user = User.objects.create(
-                    user_id=uid,
-                    email=email,
-                    display_name=name,
-                    profile_image=picture,
-                    password="",
-                    terms_agreed=True  # ✅ 新規登録時は同意済みとする
-                )
-                user.set_unusable_password()
-                user.save()
 
         # 4. トークン発行
         token, _ = Token.objects.get_or_create(user=user)

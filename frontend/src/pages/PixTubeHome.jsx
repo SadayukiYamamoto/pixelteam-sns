@@ -6,8 +6,11 @@ import Header from '../components/Header';
 import Navigation from '../components/Navigation';
 import { logInteraction } from '../utils/analytics';
 import { PlayCircle, ChevronLeft, ChevronRight, Film, Medal } from 'lucide-react';
+import { getFullUrl } from '../utils/contentHelper';
 import './PixTubeHome.css';
 import '../components/VideoThumbnailCard.css'; // Badge styles
+
+import PullToRefresh from '../components/PullToRefresh';
 
 const PixTubeHome = () => {
   const [videos, setVideos] = useState([]);
@@ -19,26 +22,31 @@ const PixTubeHome = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        const response = await axiosClient.get('videos/');
-        // 🔽 response.data が配列であることを確認してからソート
-        const rawData = Array.isArray(response.data) ? response.data :
-          (response.data && Array.isArray(response.data.results) ? response.data.results : []);
+  const fetchVideos = async () => {
+    try {
+      const response = await axiosClient.get('videos/');
+      // 🔽 response.data が配列であることを確認してからソート
+      const rawData = Array.isArray(response.data) ? response.data :
+        (response.data && Array.isArray(response.data.results) ? response.data.results : []);
 
-        const sorted = [...rawData].sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at)
-        );
-        setVideos(sorted);
-      } catch (error) {
-        console.error('動画取得エラー:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const sorted = [...rawData].sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+      setVideos(sorted);
+    } catch (error) {
+      console.error('動画取得エラー:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchVideos();
   }, []);
+
+  const handleRefresh = async () => {
+    await fetchVideos();
+  };
 
   // ✅ 注目の動画（is_featured=true のものがあればそれ、なければ最新）
   const featuredVideo = videos.find(v => v.is_featured);
@@ -83,73 +91,67 @@ const PixTubeHome = () => {
   return (
     <div className="home-container">
       <div className="home-wrapper">
-        <Header className="header pxtube" />
-        <div
-          className="overflow-y-auto pb-32"
-          style={{ height: 'calc(100vh - 120px)' }}
-        >
-          <div className="pix-content">
-            {loading && (
+        <Header />
+        <PullToRefresh onRefresh={handleRefresh} className="min-h-screen">
+          <div className="pix-content pb-[100px]" style={{ paddingTop: 'calc(80px + env(safe-area-inset-top, 0px))' }}>
+            {loading ? (
               <div className="video-loading-screen">
                 <div className="pixtube-loading-spinner"></div>
                 <p>読み込み中...</p>
               </div>
-            )}
-            {!loading && (
-              <div className="pix-content">
-                <>
-                  {/* 🎥 注目の動画 (Featured) */}
-                  {heroVideo && (
-                    <section className="long-video-section">
-                      <h2 className="section-title">注目の動画</h2>
-                      <div
-                        className="carousel-slide cursor-pointer"
-                        onClick={() => {
-                          logInteraction('video', heroVideo.id, heroVideo.title);
-                          navigate(`/video/${heroVideo.id}`);
-                        }} // 🎯 クリックで遷移
-                      >
-                        <img
-                          src={heroVideo.thumb}
-                          alt={heroVideo.title}
-                          className="carousel-image"
-                        />
-                        {renderBadge(heroVideo)}
-                        <div className="carousel-overlay">
-                          <p className="carousel-meta">
-                            <Film size={14} className="icon" />
-                            {heroVideo.duration} | {heroVideo.user}
-                          </p>
-                          <h3 className="carousel-title">{heroVideo.title}</h3>
-                        </div>
-                        <PlayCircle className="play-icon" size={50} />
+            ) : (
+              <>
+                {/* 🎥 注目の動画 (Featured) */}
+                {heroVideo && (
+                  <section className="long-video-section">
+                    <h2 className="section-title">注目の動画</h2>
+                    <div
+                      className="carousel-slide cursor-pointer"
+                      onClick={() => {
+                        logInteraction('video', heroVideo.id, heroVideo.title);
+                        navigate(`/video/${heroVideo.id}`);
+                      }} // 🎯 クリックで遷移
+                    >
+                      <img
+                        src={getFullUrl(heroVideo.thumb)}
+                        alt={heroVideo.title}
+                        className="carousel-image"
+                      />
+                      {renderBadge(heroVideo)}
+                      <div className="carousel-overlay">
+                        <p className="carousel-meta">
+                          <Film size={14} className="icon" />
+                          {heroVideo.duration} | {heroVideo.user}
+                        </p>
+                        <h3 className="carousel-title">{heroVideo.title}</h3>
                       </div>
-                    </section>
-                  )}
-
-                  {/* 🎬 その他の動画 (以前のショート動画セクション) */}
-                  <section className="short-video-section">
-                    <h2 className="section-title">その他の動画</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      {otherVideos.map((video) => (
-                        <div
-                          key={video.id}
-                          className="cursor-pointer"
-                        >
-                          <VideoThumbnailCard
-                            video={video}
-                            onClick={() => {
-                              logInteraction('video', video.id, video.title);
-                              setTransitionLoading(true);
-                              navigate(`/video/${video.id}`);
-                            }}
-                          />
-                        </div>
-                      ))}
+                      <PlayCircle className="play-icon" size={50} />
                     </div>
                   </section>
-                </>
-              </div>
+                )}
+
+                {/* 🎬 その他の動画 (以前のショート動画セクション) */}
+                <section className="short-video-section">
+                  <h2 className="section-title">その他の動画</h2>
+                  <div className="grid grid-cols-2 gap-4">
+                    {otherVideos.map((video) => (
+                      <div
+                        key={video.id}
+                        className="cursor-pointer"
+                      >
+                        <VideoThumbnailCard
+                          video={video}
+                          onClick={() => {
+                            logInteraction('video', video.id, video.title);
+                            setTransitionLoading(true);
+                            navigate(`/video/${video.id}`);
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </>
             )}
             {transitionLoading && (
               <div className="video-transition-overlay">
@@ -157,7 +159,8 @@ const PixTubeHome = () => {
               </div>
             )}
           </div>
-        </div>
+        </PullToRefresh>
+
         <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
     </div>

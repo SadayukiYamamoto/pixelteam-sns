@@ -13,12 +13,12 @@ const FloatingWriteButton = ({ userTeam, isAbsolute = false }) => {
   const buttonContent = (
     <button
       onClick={() => navigate("/post")}
-      className={`absolute right-[18px] pointer-events-auto bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-xl transition-all transform hover:scale-110 flex items-center justify-center border-none allow-fill`}
+      className={`absolute right-[20px] pointer-events-auto bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-xl transition-all transform hover:scale-110 flex items-center justify-center border-none allow-fill`}
       aria-label="新規投稿"
       style={{
         width: '60px',
         height: '60px',
-        bottom: isIos ? 'calc(40px + env(safe-area-inset-bottom, 0px))' : '88px'
+        bottom: 'calc(110px + env(safe-area-inset-bottom, 0px))'
       }}
     >
       <FaPen size={24} />
@@ -28,7 +28,7 @@ const FloatingWriteButton = ({ userTeam, isAbsolute = false }) => {
   if (isAbsolute) return buttonContent;
 
   return (
-    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] h-0 pointer-events-none z-50">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[548px] h-0 pointer-events-none z-50">
       {buttonContent}
     </div>
   );
