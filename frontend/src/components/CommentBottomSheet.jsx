@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { IoClose, IoImageOutline, IoEllipsisVerticalOutline } from "react-icons/io5";
 import { HiDotsVertical } from "react-icons/hi";
 import { FiCamera } from "react-icons/fi";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 import { storage, auth } from "../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -205,7 +205,7 @@ const CommentNode = ({ comment, depth = 0, hasNextSibling = false, expandedRepli
   );
 };
 
-import axiosClient from "../api/axiosClient";
+// 🟦 Tiptap
 
 const CommentBottomSheet = ({ postId, onClose }) => {
   const [comments, setComments] = useState([]);
@@ -229,7 +229,6 @@ const CommentBottomSheet = ({ postId, onClose }) => {
   });
 
   const fileInputRef = React.useRef(null);
-  const API_URL = import.meta.env.VITE_API_URL || "";
   const navigate = useNavigate();
 
   // 🟦 Tiptap Editor 設定
@@ -279,13 +278,9 @@ const CommentBottomSheet = ({ postId, onClose }) => {
 
   // 🔹 コメント一覧取得関数
   const fetchComments = async () => {
-    const token = localStorage.getItem("token");
     try {
-      const res = await axios.get(
-        `${API_URL}/api/posts/${postId}/comments/`,
-        { headers: { Authorization: `Token ${token}` } }
-      );
-      setComments(res.data);
+      const res = await axiosClient.get(`posts/${postId}/comments/`);
+      setComments(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("コメント取得エラー:", err);
     } finally {
@@ -408,6 +403,7 @@ const CommentBottomSheet = ({ postId, onClose }) => {
   // 再帰的に返信を取得し、階層構造（ツリー）を構築する
   const commentTree = useMemo(() => {
     const buildTree = (parentId = null) => {
+      if (!Array.isArray(comments)) return [];
       return comments
         .filter(c => c.parent === parentId)
         .reverse()

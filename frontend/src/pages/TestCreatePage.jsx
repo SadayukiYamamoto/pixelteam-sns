@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiTrash2, FiSave, FiArrowLeft, FiPlus, FiCheck } from "react-icons/fi";
 import { FaGamepad } from "react-icons/fa";
@@ -40,10 +40,7 @@ export default function TestCreatePage() {
   useEffect(() => {
     const init = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const headers = { Authorization: `Token ${token}` };
-
-        const res = await axios.get("/api/videos/");
+        const res = await axiosClient.get("videos/");
         setVideos(res.data);
 
         if (paramVideoId) {
@@ -51,7 +48,7 @@ export default function TestCreatePage() {
           setLoading(true);
 
           try {
-            const testRes = await axios.get(`/api/videos/${paramVideoId}/test/`, { headers });
+            const testRes = await axiosClient.get(`videos/${paramVideoId}/test/`);
             if (testRes.data) {
               setTitle(testRes.data.title);
               setQuestions(testRes.data.questions);
@@ -61,7 +58,7 @@ export default function TestCreatePage() {
           }
 
           try {
-            const surveyRes = await axios.get(`/api/videos/${paramVideoId}/survey/`, { headers });
+            const surveyRes = await axiosClient.get(`videos/${paramVideoId}/survey/`);
             setSurveyQuestions(surveyRes.data.questions.map(q => ({
               type: q.question_type,
               text: q.text,
@@ -137,8 +134,7 @@ export default function TestCreatePage() {
     };
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.post("/api/tests/create/", payload, { headers: { Authorization: `Token ${token}` } });
+      await axiosClient.post("tests/create/", payload);
       alert("保存しました！");
       navigate("/admin/tests");
     } catch (err) {

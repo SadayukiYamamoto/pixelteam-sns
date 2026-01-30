@@ -18,7 +18,7 @@ const NoticeDetailPage = () => {
             try {
                 // publicなのでToken不要だが、閲覧制限があるならTokenありで取得
                 // ここでは公開のお知らせと仮定して取得（Tokenあっても問題ない）
-                const res = await axiosClient.get(`/notices/${id}/`);
+                const res = await axiosClient.get(`notices/${id}/`);
                 setNotice(res.data);
 
                 // 🔥 ミッション進捗更新（事務局だよりを確認する）

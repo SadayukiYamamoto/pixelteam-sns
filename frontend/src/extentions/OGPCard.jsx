@@ -1,5 +1,5 @@
 import { Node, mergeAttributes } from "@tiptap/core";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 
 export const OGPCard = Node.create({
   name: "ogpCard",
@@ -94,9 +94,8 @@ export const OGPCard = Node.create({
         (url) =>
           async ({ editor }) => {
             try {
-              const API_URL = import.meta.env.VITE_API_URL || "";
-              const res = await axios.post(
-                `${API_URL}/api/fetch-ogp/`,
+              const res = await axiosClient.post(
+                `fetch-ogp/`,
                 { url }
               );
 

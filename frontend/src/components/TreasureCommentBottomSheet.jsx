@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoClose, IoImageOutline } from "react-icons/io5";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 import { storage, auth } from "../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -25,7 +25,6 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = React.useRef(null);
-    const API_URL = import.meta.env.VITE_API_URL || "";
     const user = JSON.parse(localStorage.getItem("user")) || {};
     const navigate = useNavigate();
 
@@ -75,12 +74,9 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
 
     // 🔹 コメント一覧取得
     const fetchComments = async () => {
-        const token = localStorage.getItem("token");
         try {
-            const res = await axios.get(`${API_URL}/api/treasure_posts/${postId}/comments/`, {
-                headers: { Authorization: `Token ${token}` }
-            });
-            setComments(res.data);
+            const res = await axiosClient.get(`treasure_posts/${postId}/comments/`);
+            setComments(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error("コメント取得エラー:", err);
         } finally {
@@ -125,18 +121,13 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
         if (!editor || editor.isEmpty) return;
 
         const htmlContent = editor.getHTML();
-        const token = localStorage.getItem("token");
-
         try {
-            await axios.post(
-                `${API_URL}/api/treasure_posts/${postId}/comments/`,
+            await axiosClient.post(
+                `treasure_posts/${postId}/comments/`,
                 {
                     content: htmlContent,
                     user_name: user.displayName || "匿名",
                     image_url: selectedImage
-                },
-                {
-                    headers: { Authorization: `Token ${token}` }
                 }
             );
 

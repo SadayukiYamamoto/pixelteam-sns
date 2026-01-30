@@ -73,7 +73,8 @@ const Posts = () => {
         `posts_with_user/?offset=${offset}&limit=${limit}${tag ? `&tag=${tag}` : ''}${selectedCategory ? `&category=${selectedCategory}` : ''}`
       );
 
-      const fetchedPosts = response.data.results.map((p) => ({
+      const results = response.data?.results || [];
+      const fetchedPosts = results.map((p) => ({
         id: p.id,
         content: p.content,
         createdAt: new Date(p.created_at),
@@ -91,14 +92,15 @@ const Posts = () => {
       }));
 
       setPosts((prev) => {
+        const postsArray = Array.isArray(prev) ? prev : [];
         if (offset === 0) return fetchedPosts;
-        const existingIds = new Set(prev.map(p => p.id));
+        const existingIds = new Set(postsArray.map(p => p.id));
         const newPosts = fetchedPosts.filter(p => !existingIds.has(p.id));
-        return [...prev, ...newPosts];
+        return [...postsArray, ...newPosts];
       });
 
-      setHasNext(response.data.has_next);
-      setHasMore(response.data.has_next);
+      setHasNext(response.data?.has_next || false);
+      setHasMore(response.data?.has_next || false);
     } catch (err) {
       console.error("Django APIからの取得エラー:", err);
     } finally {
