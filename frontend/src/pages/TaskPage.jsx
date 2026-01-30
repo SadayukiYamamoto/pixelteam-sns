@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import * as LucideIcons from "lucide-react"; // アイコン動的読み込み
 import Header from "../components/Header";
@@ -15,6 +16,7 @@ const LoadingSpinner = () => (
 
 // ★ 業務カード（PokéPokéスタイル適用）
 const BusinessCard = ({ item }) => {
+  const navigate = useNavigate();
   // item.icon_name から Lucide アイコンを取得
   const Icon = LucideIcons[item.icon_name] || LucideIcons.HelpCircle;
 
@@ -57,7 +59,7 @@ const BusinessCard = ({ item }) => {
     }
     if (!item.url) return;
     if (item.url.startsWith("/")) {
-      window.location.href = item.url;
+      navigate(item.url);
     } else {
       window.open(item.url, "_blank");
     }

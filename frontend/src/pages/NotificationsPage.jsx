@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosClient from '../api/axiosClient';
 import { Heart, MessageCircle, AtSign, Award, CircleDollarSign, ChevronLeft, Bell, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { handleNotificationRedirection } from '../utils/notification-handler';
@@ -20,10 +20,7 @@ const NotificationsPage = () => {
 
     const fetchNotifications = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.get('/api/notifications/', {
-                headers: { Authorization: `Token ${token}` }
-            });
+            const res = await axiosClient.get('notifications/');
             setNotifications(res.data);
         } catch (err) {
             console.error('通知の取得に失敗しました:', err);
@@ -38,10 +35,7 @@ const NotificationsPage = () => {
 
     const markAllAsRead = async () => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.post('/api/notifications/read/', {}, {
-                headers: { Authorization: `Token ${token}` }
-            });
+            await axiosClient.post('notifications/read/', {});
         } catch (err) {
             console.error('既読処理に失敗しました:', err);
         }
@@ -50,10 +44,7 @@ const NotificationsPage = () => {
     const handleDelete = async (e, id) => {
         e.stopPropagation(); // 親要素のクリックイベント（遷移）を防止
         try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`/api/notifications/${id}/delete/`, {
-                headers: { Authorization: `Token ${token}` }
-            });
+            await axiosClient.delete(`notifications/${id}/delete/`);
             // 状態を更新して一覧から削除
             setNotifications(notifications.filter(n => n.id !== id));
         } catch (err) {

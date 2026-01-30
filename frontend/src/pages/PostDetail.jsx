@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import axiosClient from '../api/axiosClient';
 import Header from '../components/Header';
 import Navigation from '../components/Navigation';
 import PostItem from '../components/PostItem';
@@ -24,9 +24,7 @@ const PostDetail = () => {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const token = localStorage.getItem('token');
-                const config = token ? { headers: { Authorization: `Token ${token}` } } : {};
-                const res = await axios.get(`/api/posts/${id}/`, config);
+                const res = await axiosClient.get(`posts/${id}/`);
 
                 const formattedPost = {
                     id: res.data.id,
@@ -42,7 +40,7 @@ const PostDetail = () => {
 
                 setPost(formattedPost);
 
-                // URLパラメータに showComments があればシートを開く
+                // URLパラメータに openComments があればシートを開く
                 const params = new URLSearchParams(location.search);
                 if (params.get('openComments') === 'true') {
                     setShowCommentSheet(true);
@@ -59,14 +57,7 @@ const PostDetail = () => {
 
     const handleLike = async (postId) => {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                alert('ログインが必要です');
-                return;
-            }
-            const res = await axios.post(`/api/posts/${postId}/like/`, {}, {
-                headers: { Authorization: `Token ${token}` }
-            });
+            const res = await axiosClient.post(`posts/${postId}/like/`, {});
 
             setPost(prev => ({
                 ...prev,

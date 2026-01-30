@@ -12,10 +12,36 @@ import '../components/VideoThumbnailCard.css'; // Badge styles
 
 import PullToRefresh from '../components/PullToRefresh';
 
+const VIDEO_CATEGORIES = [
+  {
+    name: '全て',
+    subcategories: []
+  },
+  {
+    name: 'Pixel 知識',
+    subcategories: ['応用知識', '基礎知識']
+  },
+  {
+    name: '接客 知識',
+    subcategories: ['上級編', '中級編', '初級編']
+  },
+  {
+    name: 'ポートフォリオ',
+    subcategories: ['応用知識', '基礎知識']
+  },
+  {
+    name: 'コミュニケーション技術',
+    subcategories: ['上級編', '中級編', '初級編']
+  }
+];
+
 const PixTubeHome = () => {
   const [videos, setVideos] = useState([]);
+  const [filteredVideos, setFilteredVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('videos');
+  const [selectedCategory, setSelectedCategory] = useState('全て');
+  const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [transitionLoading, setTransitionLoading] = useState(false);
 
@@ -25,7 +51,6 @@ const PixTubeHome = () => {
   const fetchVideos = async () => {
     try {
       const response = await axiosClient.get('videos/');
-      // 🔽 response.data が配列であることを確認してからソート
       const rawData = Array.isArray(response.data) ? response.data :
         (response.data && Array.isArray(response.data.results) ? response.data.results : []);
 
@@ -33,6 +58,7 @@ const PixTubeHome = () => {
         (a, b) => new Date(b.created_at) - new Date(a.created_at)
       );
       setVideos(sorted);
+      setFilteredVideos(sorted);
     } catch (error) {
       console.error('動画取得エラー:', error);
     } finally {
@@ -44,21 +70,39 @@ const PixTubeHome = () => {
     fetchVideos();
   }, []);
 
+  useEffect(() => {
+    let filtered = [...videos];
+    if (selectedCategory !== '全て') {
+      filtered = filtered.filter(v => {
+        // New structure check
+        if (v.parent_category === selectedCategory) {
+          if (!selectedSubcategory) return true;
+          return v.category === selectedSubcategory;
+        }
+
+        // Legacy compatibility check (e.g., category is "Pixel 基礎知識")
+        if (!v.parent_category && v.category) {
+          if (v.category.includes(selectedCategory)) {
+            if (!selectedSubcategory) return true;
+            return v.category.includes(selectedSubcategory);
+          }
+        }
+        return false;
+      });
+    }
+    setFilteredVideos(filtered);
+  }, [selectedCategory, selectedSubcategory, videos]);
+
   const handleRefresh = async () => {
     await fetchVideos();
   };
 
   // ✅ 注目の動画（is_featured=true のものがあればそれ、なければ最新）
-  const featuredVideo = videos.find(v => v.is_featured);
-  const heroVideo = featuredVideo || videos[0]; // なければ最新を代替
+  const featuredVideo = filteredVideos.find(v => v.is_featured);
+  const heroVideo = featuredVideo || filteredVideos[0]; // なければ最新を代替
 
-  // ヒーロー以外をショート動画リストなどにするなら除外が必要だが、
-  // 現状は「ショート動画」セクションは別途定義されている？
-  // 元のコード: shortVideos = videos.slice(1) なので、ヒーロー以外の残り全部としていた
-
-  // 修正案:
   // heroVideo が決まったら、それ以外の動画をリストにする
-  const otherVideos = videos.filter(v => v.id !== (heroVideo?.id));
+  const otherVideos = filteredVideos.filter(v => v.id !== (heroVideo?.id));
 
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % 1); // カルーセル機能は実質1枚なら不要だが維持
 
@@ -129,6 +173,44 @@ const PixTubeHome = () => {
                     </div>
                   </section>
                 )}
+
+                {/* 🏷 カテゴリー選択 */}
+                <div className="category-section">
+                  <div className="category-scroll-container">
+                    {VIDEO_CATEGORIES.map((cat) => (
+                      <button
+                        key={cat.name}
+                        className={`category-button ${selectedCategory === cat.name ? 'active' : ''}`}
+                        onClick={() => {
+                          setSelectedCategory(cat.name);
+                          setSelectedSubcategory(null);
+                        }}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {selectedCategory !== '全て' && (
+                    <div className="subcategory-scroll-container">
+                      <button
+                        className={`subcategory-button ${selectedSubcategory === null ? 'active' : ''}`}
+                        onClick={() => setSelectedSubcategory(null)}
+                      >
+                        全て
+                      </button>
+                      {VIDEO_CATEGORIES.find(c => c.name === selectedCategory)?.subcategories.map(sub => (
+                        <button
+                          key={sub}
+                          className={`subcategory-button ${selectedSubcategory === sub ? 'active' : ''}`}
+                          onClick={() => setSelectedSubcategory(sub)}
+                        >
+                          {sub}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 {/* 🎬 その他の動画 (以前のショート動画セクション) */}
                 <section className="short-video-section">

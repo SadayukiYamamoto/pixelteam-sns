@@ -9,17 +9,23 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import "../admin/AdminCommon.css";
 
-const CATEGORIES = [
-    "Pixel 基礎知識",
-    "Pixel 応用知識",
-    "接客初級編",
-    "接客中級編",
-    "接客上級編",
-    "ポートフォリオ基礎知識",
-    "ポーチフォリオ応用知識",
-    "コミュニケーション初級技術",
-    "コミュニケーション中級技術",
-    "コミュニケーション上級技術"
+const VIDEO_CATEGORIES = [
+    {
+        name: 'Pixel 知識',
+        subcategories: ['応用知識', '基礎知識']
+    },
+    {
+        name: '接客 知識',
+        subcategories: ['上級編', '中級編', '初級編']
+    },
+    {
+        name: 'ポートフォリオ',
+        subcategories: ['応用知識', '基礎知識']
+    },
+    {
+        name: 'コミュニケーション技術',
+        subcategories: ['上級編', '中級編', '初級編']
+    }
 ];
 
 const VideoAdminPage = () => {
@@ -44,7 +50,11 @@ const VideoAdminPage = () => {
     };
 
     const handleEditClick = (video) => {
-        setEditingVideo({ ...video, category: video.category || "" });
+        setEditingVideo({
+            ...video,
+            category: video.category || "",
+            parent_category: video.parent_category || ""
+        });
         setThumbFile(null);
     };
 
@@ -150,7 +160,7 @@ const VideoAdminPage = () => {
                                     </div>
                                     <div className="video-card-info">
                                         <h2 className="video-card-title">{video.title}</h2>
-                                        <p className="video-card-category">Cat: {video.category || "未設定"}</p>
+                                        <p className="video-card-category">{video.parent_category || "未分類"} &gt; {video.category || "未設定"}</p>
                                     </div>
                                 </div>
 
@@ -211,15 +221,30 @@ const VideoAdminPage = () => {
                             </div>
 
                             <div className="modal-field">
-                                <label>カテゴリ</label>
+                                <label>メインカテゴリー</label>
+                                <select
+                                    value={editingVideo.parent_category}
+                                    onChange={(e) => setEditingVideo({ ...editingVideo, parent_category: e.target.value, category: "" })}
+                                    className="modal-select"
+                                >
+                                    <option value="">カテゴリーを選択してください</option>
+                                    {VIDEO_CATEGORIES.map(cat => (
+                                        <option key={cat.name} value={cat.name}>{cat.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="modal-field">
+                                <label>子カテゴリー</label>
                                 <select
                                     value={editingVideo.category}
                                     onChange={(e) => setEditingVideo({ ...editingVideo, category: e.target.value })}
                                     className="modal-select"
+                                    disabled={!editingVideo.parent_category}
                                 >
-                                    <option value="">カテゴリを選択してください</option>
-                                    {CATEGORIES.map(cat => (
-                                        <option key={cat} value={cat}>{cat}</option>
+                                    <option value="">子カテゴリーを選択してください</option>
+                                    {VIDEO_CATEGORIES.find(c => c.name === editingVideo.parent_category)?.subcategories.map(sub => (
+                                        <option key={sub} value={sub}>{sub}</option>
                                     ))}
                                 </select>
                             </div>

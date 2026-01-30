@@ -10,9 +10,30 @@ import { v4 as uuidv4 } from 'uuid';
 import { FiUploadCloud, FiCheck } from 'react-icons/fi';
 import "./VideoUploadPage.css";
 
+const VIDEO_CATEGORIES = [
+    {
+        name: 'Pixel 知識',
+        subcategories: ['応用知識', '基礎知識']
+    },
+    {
+        name: '接客 知識',
+        subcategories: ['上級編', '中級編', '初級編']
+    },
+    {
+        name: 'ポートフォリオ',
+        subcategories: ['応用知識', '基礎知識']
+    },
+    {
+        name: 'コミュニケーション技術',
+        subcategories: ['上級編', '中級編', '初級編']
+    }
+];
+
 const VideoUploadPage = () => {
     const navigate = useNavigate();
     const [title, setTitle] = useState("");
+    const [category, setCategory] = useState("");
+    const [parentCategory, setParentCategory] = useState("");
     const [file, setFile] = useState(null);
     const [thumbFile, setThumbFile] = useState(null);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -54,7 +75,7 @@ const VideoUploadPage = () => {
                 },
                 async () => {
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    await saveVideoMetadata(videoId, title, downloadURL, thumbUrl);
+                    await saveVideoMetadata(videoId, title, downloadURL, thumbUrl, category, parentCategory);
                 }
             );
         } catch (error) {
@@ -64,12 +85,20 @@ const VideoUploadPage = () => {
         }
     };
 
-    const saveVideoMetadata = async (id, title, url, thumbUrl) => {
+    const saveVideoMetadata = async (id, title, url, thumbUrl, category, parentCategory) => {
         try {
             const token = localStorage.getItem("token");
             await axios.post(
                 "/api/videos/create/",
-                { id, title, video_url: url, duration: "0:00", thumb: thumbUrl },
+                {
+                    id,
+                    title,
+                    video_url: url,
+                    duration: "0:00",
+                    thumb: thumbUrl,
+                    category,
+                    parent_category: parentCategory
+                },
                 { headers: { Authorization: `Token ${token}` } }
             );
             alert("動画をアップロードしました！");
@@ -107,6 +136,38 @@ const VideoUploadPage = () => {
                                     placeholder="タイトルを入力"
                                     className="premium-text-input"
                                 />
+                            </div>
+
+                            <div className="input-group">
+                                <label>メインカテゴリー</label>
+                                <select
+                                    value={parentCategory}
+                                    onChange={(e) => {
+                                        setParentCategory(e.target.value);
+                                        setCategory("");
+                                    }}
+                                    className="premium-text-input"
+                                >
+                                    <option value="">カテゴリーを選択してください</option>
+                                    {VIDEO_CATEGORIES.map(cat => (
+                                        <option key={cat.name} value={cat.name}>{cat.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="input-group">
+                                <label>子カテゴリー</label>
+                                <select
+                                    value={category}
+                                    onChange={(e) => setCategory(e.target.value)}
+                                    className="premium-text-input"
+                                    disabled={!parentCategory}
+                                >
+                                    <option value="">子カテゴリーを選択してください</option>
+                                    {VIDEO_CATEGORIES.find(c => c.name === parentCategory)?.subcategories.map(sub => (
+                                        <option key={sub} value={sub}>{sub}</option>
+                                    ))}
+                                </select>
                             </div>
 
                             {/* 動画ファイル */}

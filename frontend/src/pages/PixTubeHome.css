@@ -23,6 +23,87 @@
   box-sizing: border-box;
 }
 
+/* 🏷 カテゴリー選択 */
+.category-section {
+  padding: 0.8rem 0;
+  background: transparent;
+  margin: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* メインとサブの間の余白 */
+}
+
+.category-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 0 1rem 0.8rem;
+  scrollbar-width: none;
+  /* Hide scrollbar for Firefox */
+}
+
+.category-scroll-container::-webkit-scrollbar {
+  display: none;
+  /* Hide scrollbar for Chrome/Safari */
+}
+
+.category-button {
+  white-space: nowrap;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background-color: #ffffff;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  flex-shrink: 0;
+}
+
+.category-button.active {
+  background: linear-gradient(135deg, #25a94b 0%, #1d8e3d 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(37, 169, 75, 0.25);
+  transform: translateY(-1px);
+}
+
+.subcategory-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 0 1rem 0.5rem;
+  margin-top: -4px;
+  scrollbar-width: none;
+}
+
+.subcategory-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.subcategory-button {
+  white-space: nowrap;
+  padding: 6px 14px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.subcategory-button.active {
+  background-color: #ffffff;
+  color: #25a94b;
+  border-color: #25a94b;
+  box-shadow: 0 2px 6px rgba(37, 169, 75, 0.1);
+}
+
 /* 🔹 セクション共通 */
 .section-title {
   font-size: 1rem;

@@ -236,7 +236,56 @@ const Signup = () => {
                     />
                 </Box>
 
+                {error && (
+                    <Box sx={{ bgcolor: 'rgba(211, 47, 47, 0.1)', p: 2, borderRadius: 2, border: '1px solid #d32f2f', mb: 1 }}>
+                        <Typography color="error" align="center" variant="body2" fontWeight="medium">
+                            {error}
+                        </Typography>
+                    </Box>
+                )}
+
+                <TextField
+                    label="ユーザーID (半角英数)"
+                    value={userId}
+                    onChange={(e) => setUserId(e.target.value)}
+                    required
+                    helperText="ログインに使用します"
+                />
+                <TextField
+                    label="表示名 (ニックネーム)"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                />
+                <TextField
+                    label="メールアドレス"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                />
+                <TextField
+                    label="パスワード"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+
+                <Button type="submit" variant="contained" color="primary" fullWidth sx={{ py: 1.5, mt: 1, borderRadius: '30px', fontWeight: 'bold' }}>
+                    アカウント作成
+                </Button>
+
+                <Box textAlign="center" mt={2}>
+                    <Typography variant="body2">
+                        既にアカウントをお持ちですか？ <Link to="/login" style={{ textDecoration: 'none', color: '#1976d2', fontWeight: 'bold' }}>ログイン</Link>
+                    </Typography>
+                </Box>
+
+                <Divider sx={{ my: 2 }}>または</Divider>
+
                 <Button
+                    type="button"
                     variant="outlined"
                     fullWidth
                     onClick={handleGoogleSignup}
@@ -247,57 +296,13 @@ const Signup = () => {
                         textTransform: 'none',
                         fontWeight: 500,
                         display: 'flex',
-                        gap: 1,
-                        mb: 1
+                        borderRadius: '30px',
+                        gap: 1
                     }}
                 >
                     <FcGoogle size={20} />
                     Googleで登録
                 </Button>
-
-                <Box sx={{ display: showAdminFields ? 'flex' : 'none', flexDirection: 'column', gap: 2 }}>
-                    <Divider>または</Divider>
-
-                    {error && <Alert severity="error">{error}</Alert>}
-
-                    <TextField
-                        label="ユーザーID (半角英数)"
-                        value={userId}
-                        onChange={(e) => setUserId(e.target.value)}
-                        required
-                        helperText="ログインに使用します"
-                    />
-                    <TextField
-                        label="表示名 (ニックネーム)"
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        required
-                    />
-                    <TextField
-                        label="メールアドレス"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                    <TextField
-                        label="パスワード"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-
-                    <Button type="submit" variant="contained" color="primary" sx={{ py: 1.5, mt: 1 }}>
-                        アカウント作成
-                    </Button>
-                </Box>
-
-                <Box textAlign="center" mt={2}>
-                    <Typography variant="body2">
-                        既にアカウントをお持ちですか？ <Link to="/login" style={{ textDecoration: 'none', color: '#1976d2' }}>ログイン</Link>
-                    </Typography>
-                </Box>
             </Box>
         </Container>
     );

@@ -4,14 +4,16 @@ import Navigation from "../Navigation";
 
 export default function SwingManagement() {
   const items = [
-    { name: "Akiba", url: "https://docs.google.com/spreadsheets/d/13899BiQpMehwhqlPEVB6A7RdjBYe7haSWp67kqMIoRc/edit?gid=1362822343#gid=1362822343" },
-    { name: "Yokohama", url: "https://docs.google.com/spreadsheets/d/1gV7MVkjc64HJTuNNpGMcL9BWGOakQo9sMgU-6O2PPDI/edit?gid=1716537036#gid=1716537036" },
-    { name: "Umeda", url: "https://docs.google.com/spreadsheets/d/1kSMeyXV25nvxnJfsUsruBvACAj3t9-H7ry8X141jyRQ/edit?usp=drive_link" },
-    { name: "Kyoto", url: "https://docs.google.com/spreadsheets/d/1kVhUrf-VD1RDFjORshvic11e3X2jUzTp1MS5r-rpdiA/edit?usp=drive_link" },
-    { name: "Hakata", url: "https://docs.google.com/spreadsheets/d/1nMHTH-vR0qPq9Q3178Yg_DQQfzjX_8Fgk0IJvD30rNU/edit?usp=drive_link" },
-    { name: "Sendai", url: "https://docs.google.com/spreadsheets/d/1e6NgrVhZsq5b1wESftxyI0zbIGoEgv8FXOx4-VpZxCw/edit?usp=drive_link" },
-    { name: "Kichijoji", url: "https://docs.google.com/spreadsheets/d/1hyfDW91xJvbr_j8Ge3O2CTHRQSY-rAtxBodRxUJMx_A/edit?usp=drive_link" },
-    { name: "Kawasaki", url: "https://docs.google.com/spreadsheets/d/17IFkdmYKAV5Mr7tlyr4D36K6C8CHhlFm4zHYuwPtb9M/edit?usp=drive_link" }
+    { name: "Akiba", url: "https://docs.google.com/spreadsheets/d/1KQ70H5YbBSAw7OYfTOiZeFxesgu0hNiC8YxcUGg_RqM/edit?usp=drive_link" },
+    { name: "Yokohama", url: "https://docs.google.com/spreadsheets/d/1KQ70H5YbBSAw7OYfTOiZeFxesgu0hNiC8YxcUGg_RqM/edit?usp=drive_link" },
+    { name: "Umeda", url: "https://docs.google.com/spreadsheets/d/1maz_FOfaiYSwU03IBsZb2hXu4xXGwO4k3S5E8_XYuQQ/edit?usp=drive_link" },
+    { name: "Kyoto", url: "https://docs.google.com/spreadsheets/d/1kmIW3UA_2wbhaBqO9JgtPRk2AkrHtS42Y2O7OX522J8/edit?usp=drive_link" },
+    { name: "Hakata", url: "https://docs.google.com/spreadsheets/d/1gtRGrN0p-r6SMJzKccMZpoQVScluivmNHjmzWHfl6Hk/edit?usp=drive_link" },
+    { name: "Sendai", url: "https://docs.google.com/spreadsheets/d/1UjZS5BmQWkPS_yzoHlsswgxIU9TYUvDp7KzNmn_j7K0/edit?usp=drive_link" },
+    { name: "Shinjuku", url: "" },
+    { name: "Kichijoji", url: "https://docs.google.com/spreadsheets/d/1ttVnm6Kb2kfvPjHRZZF30zc7rLNrpFJO92eWPiMuFGM/edit?usp=drive_link" },
+    { name: "Kawasaki", url: "https://docs.google.com/spreadsheets/d/1b1QX85guYK7uxkIVo7tRy5WxkzGh51q4wagIQkUFRPI/edit?usp=drive_link" },
+    { name: "Sapporo", url: "" }
   ];
 
   return (

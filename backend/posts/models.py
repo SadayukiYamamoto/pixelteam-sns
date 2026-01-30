@@ -69,6 +69,7 @@ class Video(models.Model):
     
     # 管理用フィールド
     category = models.CharField(max_length=100, default="未分類", blank=True)
+    parent_category = models.CharField(max_length=100, blank=True, null=True)
     order = models.IntegerField(default=0)
     is_short = models.BooleanField(default=False) # ← ショート動画フラグ
     is_featured = models.BooleanField(default=False) # ← 注目の動画フラグ

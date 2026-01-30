@@ -43,6 +43,7 @@ const Posts = () => {
   const highlightId = queryParams.get("highlight");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [userProfile, setUserProfile] = useState(null);
+  const commentsRequested = queryParams.get("comments");
 
   const currentUserId = localStorage.getItem("userId");
 
@@ -153,10 +154,13 @@ const Posts = () => {
 
     if (highlightId) {
       loadHighlightedPost();
+      if (commentsRequested === "1") {
+        setShowCommentSheet(highlightId);
+      }
     } else {
       loadPostsFromDjango(0);
     }
-  }, [tag, selectedCategory, highlightId]);
+  }, [tag, selectedCategory, highlightId, commentsRequested]);
 
   useEffect(() => {
     const fetchProfile = async () => {

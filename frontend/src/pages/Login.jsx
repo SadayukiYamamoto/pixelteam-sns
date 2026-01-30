@@ -33,14 +33,14 @@ const Login = () => {
     // 🔹 ローカルストレージに保存
     localStorage.setItem("token", data.token);
     localStorage.setItem("userId", data.user_id);
-    localStorage.setItem("display_name", data.display_name);
-    localStorage.setItem("profile_image", data.profile_image);
+    localStorage.setItem("display_name", data.display_name || "ユーザー");
+    localStorage.setItem("profile_image", data.profile_image || "");
 
     const userInfo = {
       userId: data.user_id,
-      displayName: data.display_name,
+      displayName: data.display_name || "ユーザー",
       email: data.email,
-      profileImage: data.profile_image,
+      profileImage: data.profile_image || "",
       team: data.team,
       token: data.token
     };
@@ -59,21 +59,6 @@ const Login = () => {
 
     // ✅ 規約同意チェック（既存ユーザーは同意不要に変更）
     localStorage.setItem("terms_agreed", data.terms_agreed ? "true" : "false");
-    /*
-    const hasAgreed = data.terms_agreed === true;
-
-    if (!hasAgreed) {
-      console.log("➡️ 規約同意が必要なため TermsAgreement へ遷移");
-      navigate("/terms-agreement", {
-        state: {
-          nextPath: !data.team ? `/profile-edit/${data.user_id}` : from,
-          userId: data.user_id
-        },
-        replace: true
-      });
-      return;
-    }
-    */
 
     if (!data.team) {
       console.log("➡️ チーム未設定のためプロフィール編集へ遷移");
@@ -115,7 +100,7 @@ const Login = () => {
         } catch (nativeErr) {
           console.error("❌ Native Sign-In Error:", nativeErr);
           setError(`Googleログイン(Native)でエラーが発生しました: ${nativeErr.message || JSON.stringify(nativeErr)}`);
-          throw nativeErr;
+          return;
         }
       } else {
         console.log("🌐 Web platform detected, calling signInWithPopup...");
@@ -134,7 +119,6 @@ const Login = () => {
           "login/google/",
           {
             id_token: idToken,
-            // action 'login' を削除（バックエンド側で「なければ作成」させる）
           }
         );
 
@@ -152,17 +136,12 @@ const Login = () => {
       console.error("Google Login Error:", err);
       const errorMsg = err.message || JSON.stringify(err);
       setError(`Googleログインに失敗しました: ${errorMsg}`);
-      // alert(`詳細なエラー: ${errorMsg}`);
     }
   };
 
   const handleLogoClick = () => {
     const newCount = logoClickCount + 1;
     setLogoClickCount(newCount);
-    if (newCount >= 10) {
-      setShowAdminFields(true);
-      console.log("🔓 Admin fields revealed");
-    }
   };
 
   const handleLogin = async (e) => {
@@ -187,16 +166,10 @@ const Login = () => {
         setError(res.data.error || "ログインに失敗しました。");
       }
     } catch (err) {
-      // ... (Error handling remains same, reusing logic)
-      if (err.response) {
-        console.error("❌ ログインエラー詳細:", err.response.data);
-      } else {
-        console.error("❌ ログインエラー詳細:", err);
-      }
       if (err.response) {
         setError(err.response.data.error || `ログイン失敗 (${err.response.status})`);
       } else {
-        setError("ログインエラーが発生しました。");
+        setError("ログインエラーが発生しました。サーバーに接続できません。");
       }
     }
   };
@@ -212,7 +185,7 @@ const Login = () => {
           display="flex"
           justifyContent="center"
           mt={{ xs: 2, sm: 4 }}
-          mb={{ xs: 3, sm: 6 }}
+          mb={{ xs: 3, sm: 4 }}
           onClick={handleLogoClick}
           sx={{
             cursor: 'pointer',
@@ -227,15 +200,53 @@ const Login = () => {
         </Box>
 
         {message && (
-          <Box sx={{ bgcolor: 'rgba(255, 152, 0, 0.1)', p: 2, borderRadius: 2, border: '1px solid #ff9800' }}>
+          <Box sx={{ bgcolor: 'rgba(255, 152, 0, 0.1)', p: 2, borderRadius: 2, border: '1px solid #ff9800', mb: 1 }}>
             <Typography color="#e65100" variant="body2" align="center" fontWeight="bold">
               {message}
             </Typography>
           </Box>
         )}
 
+        {error && (
+          <Box sx={{ bgcolor: 'rgba(211, 47, 47, 0.1)', p: 2, borderRadius: 2, border: '1px solid #d32f2f', mb: 1 }}>
+            <Typography color="error" align="center" variant="body2" fontWeight="medium">
+              {error}
+            </Typography>
+          </Box>
+        )}
+
+        <TextField
+          label="ユーザーID"
+          variant="outlined"
+          fullWidth
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
+          required
+        />
+        <TextField
+          label="パスワード"
+          type="password"
+          variant="outlined"
+          fullWidth
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
+        <Button type="submit" variant="contained" color="primary" fullWidth sx={{ py: 1.5, mt: 1, borderRadius: '30px', fontWeight: 'bold' }}>
+          ログイン
+        </Button>
+
+        <Box textAlign="center" mt={2}>
+          <Typography variant="body2">
+            アカウントをお持ちでないですか？ <Link to="/signup" style={{ textDecoration: 'none', color: '#1976d2', fontWeight: 'bold' }}>新規作成</Link>
+          </Typography>
+        </Box>
+
+        <Divider sx={{ my: 2 }}>または</Divider>
+
         <Button
-          type="button" // ⬅️ 重要：送信ボタンとして動かないようにする
+          type="button"
           variant="outlined"
           fullWidth
           onClick={(e) => handleGoogleLogin(e)}
@@ -246,6 +257,7 @@ const Login = () => {
             textTransform: 'none',
             fontWeight: 500,
             display: 'flex',
+            borderRadius: '30px',
             gap: 1,
             '&:hover': {
               borderColor: '#d2e3fc',
@@ -256,34 +268,6 @@ const Login = () => {
           <FcGoogle size={20} />
           Googleでログイン
         </Button>
-
-        <Box sx={{ display: showAdminFields ? 'flex' : 'none', flexDirection: 'column', gap: 2 }}>
-          <Divider>または</Divider>
-
-          {error && <Typography color="error" align="center">{error}</Typography>}
-          <TextField
-            label="ユーザーID"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            required
-          />
-          <TextField
-            label="パスワード"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <Button type="submit" variant="contained" color="primary" sx={{ py: 1.5 }}>
-            ログイン
-          </Button>
-
-          <Box textAlign="center" mt={2}>
-            <Typography variant="body2">
-              アカウントをお持ちでないですか？ <Link to="/signup" style={{ textDecoration: 'none', color: '#1976d2' }}>新規作成</Link>
-            </Typography>
-          </Box>
-        </Box>
       </Box>
     </Container>
   );

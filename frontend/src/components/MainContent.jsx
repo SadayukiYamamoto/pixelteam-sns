@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Archive, Play } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
 import PostItem from './PostItem';
@@ -8,6 +9,7 @@ import { logInteraction } from '../utils/analytics';
 import PullToRefresh from './PullToRefresh';
 
 const MainContent = ({ setActiveTab }) => {
+  const navigate = useNavigate();
   const [data, setData] = React.useState({
     news: [],
     shorts: [],
@@ -59,7 +61,7 @@ const MainContent = ({ setActiveTab }) => {
   };
 
   const handleComment = (postId) => {
-    window.location.href = `/posts?post_id=${postId}`;
+    navigate(`/posts?highlight=${postId}&comments=1`);
   };
 
   // 過去ボタン共通スタイル
@@ -174,7 +176,7 @@ const MainContent = ({ setActiveTab }) => {
               <button
                 onClick={() => {
                   logInteraction('news', 'archive_news', '過去の事務局だより');
-                  window.location.href = '/past-secretariat-news';
+                  navigate('/past-secretariat-news');
                 }}
                 className="archive-button"
               >
@@ -203,7 +205,7 @@ const MainContent = ({ setActiveTab }) => {
                     key={v.id}
                     onClick={() => {
                       logInteraction('video', v.id, v.title);
-                      window.location.href = `/video/${v.id}`;
+                      navigate(`/video/${v.id}`);
                     }}
                     className="pokepoke-card block group cursor-pointer"
                   >
@@ -225,7 +227,7 @@ const MainContent = ({ setActiveTab }) => {
               <button
                 onClick={() => {
                   logInteraction('video', 'archive_videos', '過去の動画');
-                  window.location.href = '/videos';
+                  navigate('/videos');
                 }}
                 className="archive-button"
               >

@@ -409,6 +409,20 @@ def video_list(request):
     FIREBASE_PROJECT_ID = "pixelshopsns"
     firestore_url = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/pixtubePosts"
 
+    # カテゴリの正規化マップ
+    CATEGORY_MAP = {
+        "Pixel 基礎知識": ("Pixel 知識", "基礎知識"),
+        "Pixel 応用知識": ("Pixel 知識", "応用知識"),
+        "接客初級編": ("接客 知識", "初級編"),
+        "接客中級編": ("接客 知識", "中級編"),
+        "接客上級編": ("接客 知識", "上級編"),
+        "ポートフォリオ基礎知識": ("ポートフォリオ", "基礎知識"),
+        "ポーチフォリオ応用知識": ("ポートフォリオ", "応用知識"),
+        "コミュニケーション初級技術": ("コミュニケーション技術", "初級編"),
+        "コミュニケーション中級技術": ("コミュニケーション技術", "中級編"),
+        "コミュニケーション上級技術": ("コミュニケーション技術", "上級編"),
+    }
+
     # 1. Django から動画取得
     django_videos = Video.objects.all()
     django_map = {v.id: v for v in django_videos}
@@ -439,7 +453,9 @@ def video_list(request):
                     "userAvatar": get_str("userAvatar"),
                     "created_at": get_str("createdAt"),
                     "is_featured": False,
-                    "is_short": False
+                    "is_short": False,
+                    "category": get_str("category") or "未分類",
+                    "parent_category": get_str("parent_category") or ""
                 })
     except Exception as e:
         print("Firestore fetch error:", e)
@@ -462,6 +478,7 @@ def video_list(request):
                 "is_featured": dv.is_featured,
                 "is_short": dv.is_short,
                 "category": dv.category,
+                "parent_category": dv.parent_category,
                 "order": dv.order,
                 "created_at": dv.created_at.isoformat() if dv.created_at else fv["created_at"]
             })
@@ -482,6 +499,7 @@ def video_list(request):
                 "is_featured": dv.is_featured,
                 "is_short": dv.is_short,
                 "category": dv.category,
+                "parent_category": dv.parent_category,
                 "order": dv.order
             }
 
@@ -497,6 +515,14 @@ def video_list(request):
 
     results = []
     for vid, vdata in final_videos_map.items():
+        # カテゴリの正規化 (互換性のため)
+        cat = vdata.get("category", "未分類")
+        pcat = vdata.get("parent_category", "")
+        if cat in CATEGORY_MAP and not pcat:
+            pcat, cat = CATEGORY_MAP[cat]
+            vdata["parent_category"] = pcat
+            vdata["category"] = cat
+
         vdata.update({
             "is_watched": vid in watched_ids,
             "is_test_passed": vid in passed_ids,
@@ -612,6 +638,8 @@ def video_detail(request, video_id):
         "watch_time": total_watch_time,
         "is_featured": video_obj.is_featured if video_obj else False,
         "is_short": video_obj.is_short if video_obj else False,
+        "category": video_obj.category if video_obj else "未分類",
+        "parent_category": video_obj.parent_category if video_obj else "",
     }
 
     return Response(video)
@@ -1716,6 +1744,8 @@ def create_video(request):
                 "video_url": video_url,
                 "thumb": data.get("thumb", ""),
                 "duration": data.get("duration", "0:00"),
+                "category": data.get("category", "未分類"),
+                "parent_category": data.get("parent_category", ""),
                 "views": 0,
                 "watch_time": 0
             }
@@ -1753,6 +1783,7 @@ def update_video(request, video_id):
         video.title = data.get("title", video.title)
         video.thumb = data.get("thumb", video.thumb)
         video.category = data.get("category", video.category)
+        video.parent_category = data.get("parent_category", video.parent_category)
         video.order = data.get("order", video.order)
         
         video.save()
