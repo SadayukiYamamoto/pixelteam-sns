@@ -1,31 +1,50 @@
 import { ReactRenderer } from '@tiptap/react'
 import tippy from 'tippy.js'
+import axiosClient from '../api/axiosClient'
 import MentionList from '../components/MentionList.jsx'
-import axios from 'axios'
 
 export default {
     items: async ({ query }) => {
-        // ユーザー検索 API を叩く (ここでは全件取得してJSでフィルタリングする簡易実装)
-        // 実運用ではサーバーサイド検索 (?search=query) が望ましい
         try {
-            const token = localStorage.getItem("token");
-            const res = await axios.get("/api/users/all/", {
-                headers: { Authorization: `Token ${token}` },
-            });
+            const q = String(query || "");
+            const qLower = q.toLowerCase().trim();
+            const suggestions = [];
 
-            const users = res.data.map(u => ({
-                id: u.user_id,
-                display_name: u.display_name,
-                image: u.profile_image
-            })).filter(item =>
-                item.id.toLowerCase().startsWith(query.toLowerCase()) ||
-                item.display_name.toLowerCase().includes(query.toLowerCase())
-            ).slice(0, 5); // 上位5件
+            // Add ALL suggestion
+            if (!qLower || "all".startsWith(qLower) || "全員".includes(qLower)) {
+                suggestions.push({
+                    id: "ALL",
+                    label: "全員",
+                    avatar: null,
+                });
+            }
 
-            return users;
-        } catch (e) {
-            console.error(e);
-            return [];
+            // Android/Capacitor needs trailing slash and proper encoding
+            const url = `search/?q=${encodeURIComponent(q)}`;
+            const res = await axiosClient.get(url);
+
+            if (res.data && Array.isArray(res.data)) {
+                const users = res.data.slice(0, 5).map(u => ({
+                    id: u.user_id,
+                    label: u.display_name,
+                    avatar: u.profile_image
+                }));
+                return [...suggestions, ...users];
+            }
+
+            return suggestions;
+        } catch (err) {
+            console.error("Mention suggestion error (utils):", err);
+            const qLower = String(query || "").toLowerCase().trim();
+            const fallbacks = [];
+            if (!qLower || "all".startsWith(qLower) || "全員".includes(qLower)) {
+                fallbacks.push({
+                    id: "ALL",
+                    label: "全員",
+                    avatar: null,
+                });
+            }
+            return fallbacks;
         }
     },
 

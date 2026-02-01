@@ -349,8 +349,46 @@ const CommentBottomSheet = ({ postId, onClose }) => {
     if (!editor || editor.isEmpty || isSubmitting) return;
 
     setIsSubmitting(true);
-    const htmlContent = editor.getHTML();
-    const token = localStorage.getItem("token");
+    // --- Robust conversion for plain text hashtags/mentions ---
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, "text/html");
+
+    const textNodes = [];
+    const walk = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
+    let n;
+    while (n = walk.nextNode()) {
+      // Skip text already inside links or mentions
+      if (n.parentElement.closest('a') || n.parentElement.closest('.mention') || n.parentElement.closest('.hashtag')) {
+        continue;
+      }
+      textNodes.push(n);
+    }
+
+    textNodes.forEach(node => {
+      const text = node.nodeValue;
+      const combinedRegex = /(^|\s)(#[^\s!@#$%^&*()=+.\/,\[\]{};:'"?><]+|@[^\s!@#$%^&*()=+.\/,\[\]{};:'"?><]+)/g;
+
+      if (combinedRegex.test(text)) {
+        const span = document.createElement('span');
+        span.innerHTML = text.replace(combinedRegex, (match, space, tag) => {
+          if (tag.startsWith('#')) {
+            const tagName = tag.replace(/^#/, '');
+            return `${space}<a href="/search?tag=${tagName}" class="hashtag-link" style="color:#1d9bf0; text-decoration:none;">${tag}</a>`;
+          } else {
+            // Mention without ID (fallback link to search)
+            const name = tag.replace(/^@/, '');
+            return `${space}<a href="/search?q=${name}" class="mention" style="color:#1d9bf0; background-color:rgba(29,155,240,0.1); border-radius:4px; padding:0 4px; text-decoration:none;">${tag}</a>`;
+          }
+        });
+
+        while (span.firstChild) {
+          node.parentNode.insertBefore(span.firstChild, node);
+        }
+        node.parentNode.removeChild(node);
+      }
+    });
+
+    const finalContent = doc.body.innerHTML;
 
     try {
       if (editingComment) {
@@ -358,7 +396,7 @@ const CommentBottomSheet = ({ postId, onClose }) => {
         await axiosClient.put(
           `comments/${editingComment.id}/`,
           {
-            content: htmlContent,
+            content: finalContent,
             image_url: selectedImage
           }
         );
@@ -367,7 +405,7 @@ const CommentBottomSheet = ({ postId, onClose }) => {
         await axiosClient.post(
           `posts/${postId}/comments/`,
           {
-            content: htmlContent,
+            content: finalContent,
             image_url: selectedImage,
             parent: replyingTo?.id || null
           }

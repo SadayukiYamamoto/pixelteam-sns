@@ -55,7 +55,14 @@ export default forwardRef((props, ref) => {
                     <button
                         className={`mention-item ${index === selectedIndex ? 'is-selected' : ''}`}
                         key={index}
-                        onClick={() => selectItem(index)}
+                        onMouseDown={e => {
+                            e.preventDefault()
+                            selectItem(index)
+                        }}
+                        onTouchStart={e => {
+                            e.preventDefault()
+                            selectItem(index)
+                        }}
                     >
                         {item.avatar ? (
                             <img src={item.avatar} alt="" className="mention-avatar" />

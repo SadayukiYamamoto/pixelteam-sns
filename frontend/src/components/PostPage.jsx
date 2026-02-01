@@ -280,27 +280,45 @@ export default function PostPage() {
       }
     });
 
-    // 2. Convert Tiptap Hashtags (using Mention extension named 'hashtag')
-    // They are also spans with class="hashtag" based on our config
-    const hashtags = doc.querySelectorAll('span.hashtag');
-    hashtags.forEach(tag => {
-      const label = tag.innerText; // #tag
-      // remove # from ID if needed, or keep it. Search usually needs plain text.
-      // label is "#test", we want "test" for url query
-      const tagName = label.replace(/^#/, '');
+    // 3. Robust conversion for plain text hashtags (for cases where suggestion dropdown isn't used)
+    // We only do this for hashtags where we don't need a specific ID (just the tag name).
+    // iterate over text nodes that are not inside links
+    const textNodes = [];
+    const walk = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
+    let n;
+    while (n = walk.nextNode()) {
+      if (n.parentElement.closest('a') || n.parentElement.closest('.mention') || n.parentElement.closest('.hashtag')) {
+        continue;
+      }
+      textNodes.push(n);
+    }
 
-      const link = document.createElement('a');
-      link.href = `/search?tag=${tagName}`;
-      link.className = 'hashtag-link';
-      link.style.color = '#1d9bf0';
-      link.style.textDecoration = 'none';
-      link.innerText = label;
+    textNodes.forEach(node => {
+      const text = node.nodeValue;
+      const combinedRegex = /(^|\s)(#[^\s!@#$%^&*()=+.\/,\[\]{};:'"?><]+|@[^\s!@#$%^&*()=+.\/,\[\]{};:'"?><]+)/g;
 
-      tag.replaceWith(link);
+      if (combinedRegex.test(text)) {
+        const span = document.createElement('span');
+        span.innerHTML = text.replace(combinedRegex, (match, space, tag) => {
+          if (tag.startsWith('#')) {
+            const tagName = tag.replace(/^#/, '');
+            return `${space}<a href="/search?tag=${tagName}" class="hashtag-link" style="color:#1d9bf0; text-decoration:none;">${tag}</a>`;
+          } else {
+            // Plain text mention (fallback)
+            const name = tag.replace(/^@/, '');
+            return `${space}<a href="/search?q=${name}" class="mention" style="color:#1d9bf0; background-color:rgba(29,155,240,0.1); border-radius:4px; padding:0 4px; text-decoration:none;">${tag}</a>`;
+          }
+        });
+
+        // Replace node with span's children
+        while (span.firstChild) {
+          node.parentNode.insertBefore(span.firstChild, node);
+        }
+        node.parentNode.removeChild(node);
+      }
     });
 
-    // 3. Serialize back to HTML string
-    // doc.body.innerHTML gives the content
+    // 4. Serialize back to HTML string
     finalContent = doc.body.innerHTML;
 
     formData.append("content", finalContent);

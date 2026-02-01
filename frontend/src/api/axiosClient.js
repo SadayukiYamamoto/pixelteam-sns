@@ -25,7 +25,11 @@ const axiosClient = axios.create({
 
 // リクエスト時に localStorage の accessToken を Authorization ヘッダに付与
 axiosClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  let token = localStorage.getItem("token");
+  if (token) {
+    // クォートや余計な空白を除去 (Android/Storageのバグ対策)
+    token = token.replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1').trim();
+  }
 
   // ログインやサインアップ時はトークンを送らない
   // url.endsWith または完全一致で判定し、user/login-popup などが誤判定されないようにする

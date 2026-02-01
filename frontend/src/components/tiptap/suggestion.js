@@ -1,13 +1,12 @@
 
 import { ReactRenderer } from '@tiptap/react'
 import tippy from 'tippy.js'
-import axios from 'axios'
+import axiosClient from '../../api/axiosClient'
 import MentionList from './MentionList.jsx' // We need to create this React component
 
 export default {
     items: async ({ query }) => {
         try {
-            const token = localStorage.getItem("token");
             // Using the search API we created earlier
             const queryLower = query.toLowerCase();
             const suggestions = [];
@@ -22,20 +21,34 @@ export default {
             }
 
             // Using the search API we created earlier
-            const res = await axios.get(`/api/search/?query=${query}`, {
-                headers: { Authorization: `Token ${token}` },
-            });
+            const q = String(query || "");
+            // Android/Capacitor needs trailing slash and proper encoding
+            const url = `search/?q=${encodeURIComponent(q)}`;
+            const res = await axiosClient.get(url);
 
-            const users = res.data.slice(0, 5).map(u => ({
-                id: u.user_id,
-                label: u.display_name,
-                avatar: u.icon_url
-            }));
+            if (res.data && Array.isArray(res.data)) {
+                const users = res.data.slice(0, 5).map(u => ({
+                    id: u.user_id,
+                    label: u.display_name,
+                    avatar: u.profile_image
+                }));
+                return [...suggestions, ...users];
+            }
 
-            return [...suggestions, ...users];
+            return suggestions;
         } catch (err) {
             console.error("Mention suggestion error:", err);
-            return [];
+            // Defensive fallback for Android
+            const qLower = String(query || "").toLowerCase().trim();
+            const fallbacks = [];
+            if (!qLower || "all".startsWith(qLower) || "全員".includes(qLower)) {
+                fallbacks.push({
+                    id: "ALL",
+                    label: "全員",
+                    avatar: null,
+                });
+            }
+            return fallbacks;
         }
     },
 
