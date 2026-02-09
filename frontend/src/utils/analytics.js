@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || "";
+import axiosClient from '../api/axiosClient';
 
 /**
  * ユーザーのインタラクション（タップ・クリック）を記録する
@@ -10,14 +8,15 @@ const API_URL = import.meta.env.VITE_API_URL || "";
  */
 export const logInteraction = async (category, itemId, itemTitle) => {
     try {
-        const token = localStorage.getItem('token');
-        const config = token ? { headers: { Authorization: `Token ${token}` } } : {};
-        await axios.post(`${API_URL}/api/log/interaction/`, {
+        await axiosClient.post(`/log/interaction/`, {
             category,
             item_id: String(itemId),
             item_title: itemTitle
-        }, config);
+        });
+
     } catch (error) {
         console.error("Failed to log interaction:", error);
+
     }
+
 };

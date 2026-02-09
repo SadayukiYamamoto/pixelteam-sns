@@ -65,6 +65,14 @@ import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAgreement from "./pages/TermsAgreement";
 
+import { Capacitor } from '@capacitor/core';
+
+const platform = Capacitor.getPlatform();
+if (platform !== 'web') {
+  document.documentElement.classList.add('is-native');
+  document.documentElement.classList.add(`is-${platform}`);
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <BackButtonHandler />

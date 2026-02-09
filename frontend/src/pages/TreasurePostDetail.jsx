@@ -48,6 +48,13 @@ export default function TreasurePostDetail() {
     markAsRead();
   }, [postId]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('openComments') === 'true') {
+      setIsCommentOpen(true);
+    }
+  }, [location.search]);
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -234,11 +241,12 @@ export default function TreasurePostDetail() {
 
               <div className={styles.interactionBar}>
                 <button
-                  className={`${styles.actionBtn} ${post.liked ? styles.liked : ""}`}
+                  type="button"
+                  className={`${styles.actionBtn} ${post.liked ? styles.liked : ""} p-2 -m-2 touch-manipulation`}
                   onClick={handleLike}
                 >
-                  <FaHeart />
-                  <span>{post.likes_count || 0}</span>
+                  <FaHeart className="pointer-events-none" />
+                  <span className="pointer-events-none">{post.likes_count || 0}</span>
                 </button>
                 <button
                   className={styles.actionBtn}

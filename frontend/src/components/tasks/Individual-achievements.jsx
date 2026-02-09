@@ -34,12 +34,13 @@ export const items = [
   { name: "上原 隆徳", url: "https://docs.google.com/spreadsheets/d/1VcK9O7GfqypB-r9WzeN7AySn5SmK_CKoVPdEJ9_qVl0/edit" },
   { name: "新郷 友輝", url: "https://docs.google.com/spreadsheets/d/1v3zw4xUHo-j_Tl-IaCNDDC_sef5txuvGh_esxYi7tmo/edit" },
   { name: "藤 京助", url: "https://docs.google.com/spreadsheets/d/18buZznla_ernKKsm6kMTcrz8lkZMcLANQJKiCzb_ZHA/edit" },
-  { name: "築地 志織", url: "https://docs.google.com/spreadsheets/d/1TDCS43ZgPw5DaPi4fhm7g26KorhmeLz_K6ZZod2fKSQ/edit" },
   { name: "本郷 みづき", url: "https://docs.google.com/spreadsheets/d/1ZWrPhW_S_xV9w-pzXbhj673oWl4dz0_uq8qWQ8MNAfc/edit" },
   { name: "佐藤 未来", url: "https://docs.google.com/spreadsheets/d/1PL_Z5mExep0SYiOJ8xK2nSpG3n8yPQLjQhMTlF9iL3Y/edit" },
   { name: "安野 悠斗", url: "https://docs.google.com/spreadsheets/d/1JKAgQnFBoDsbUi-NQbKQJm85qNtmbF6_31eneAV7hqg/edit" },
   { name: "前田 理絵", url: "https://docs.google.com/spreadsheets/d/14M7niNZjnLbcAHqGh8uK4d4Dn_CpUMUFVGMh5w5Gr5o/edit" },
-  { name: "古畑 萌音", url: "https://docs.google.com/spreadsheets/d/1b0GjRkM4BfZdLOZ3Yf_I5pEEQx2aBxxtp1S7yTIweZQ/edit" }
+  { name: "古畑 萌音", url: "https://docs.google.com/spreadsheets/d/1b0GjRkM4BfZdLOZ3Yf_I5pEEQx2aBxxtp1S7yTIweZQ/edit" },
+  { name: "横村 篤哉", url: "https://docs.google.com/spreadsheets/d/1H_ezfC9CkGUHXHOE0Swknsx8eZ9lf4CD9y3SYw7e6hQ/edit?usp=drive_link" },
+  { name: "野田 祐樹", url: "https://docs.google.com/spreadsheets/d/1mSJTlqZotyNRXruwakWTuApTKT7emWm3VGSZf9pExp4/edit?gid=594771872#gid=594771872" }
 ];
 
 export default function IndividualAchievements() {

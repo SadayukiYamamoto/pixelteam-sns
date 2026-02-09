@@ -84,7 +84,7 @@ const PostItem = ({ post, onLike, onComment, hideReactions = false, disableCardC
 
         {/* 投稿本文 */}
         <div className="post-content-wrapper">
-          {renderPostContent(post.content, isExpanded, () => setIsExpanded(!isExpanded), post.category)}
+          {renderPostContent(post.content, isExpanded, () => setIsExpanded(!isExpanded), post.category, post.shop_name)}
         </div>
 
         {/* 画像 */}
@@ -105,25 +105,27 @@ const PostItem = ({ post, onLike, onComment, hideReactions = false, disableCardC
         {!hideReactions && (
           <div className="reaction-bar mt-3">
             <button
+              type="button"
               onClick={handleLikeClick}
-              className="reaction-btn transition-all active:scale-95 group"
+              className="reaction-btn transition-all active:scale-95 group px-3 py-2 -m-1 touch-manipulation"
             >
               <Heart
-                size={18}
+                size={20}
                 fill="currentColor"
-                className={`heart ${post.liked ? "red" : ""}`}
+                className={`heart ${post.liked ? "red" : ""} pointer-events-none`}
               />
-              <span className="text-[13px] font-bold">
+              <span className="text-[13px] font-bold pointer-events-none">
                 {post.likes}
               </span>
             </button>
 
             <button
+              type="button"
               onClick={handleCommentClick}
-              className="reaction-btn transition-all active:scale-95 group"
+              className="reaction-btn transition-all active:scale-95 group px-3 py-2 -m-1 touch-manipulation"
             >
-              <MessageCircleMore size={18} />
-              <span className="text-[13px] font-bold">{post.comments}</span>
+              <MessageCircleMore size={20} className="pointer-events-none" />
+              <span className="text-[13px] font-bold pointer-events-none">{post.comments}</span>
             </button>
 
             <div className="flex-1" />

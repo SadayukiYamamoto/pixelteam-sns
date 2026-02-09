@@ -26,3 +26,5 @@ pixelshopsns-firebase-adminsdk-fbsvc-1be279ef70.json
 backend/firebase-key.json
 *.p8
 frontend/ios/App/App/Pikumaru/
+backend/service-account-key.json
+frontend/src/api/*.json

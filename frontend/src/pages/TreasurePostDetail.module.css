@@ -12,9 +12,17 @@
   background: #ffffff;
   border-radius: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-  padding: 48px;
+  padding: 40px;
   max-width: 720px;
   width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
 }
 
 .headerRow {
@@ -148,6 +156,8 @@
   line-height: 1.8;
   color: #334155;
   margin-top: 24px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .contentLabel {
@@ -178,11 +188,24 @@
 .contentArea pre {
   background: #f8fafc;
   color: #334155;
-  padding: 24px;
-  border-radius: 16px;
+  padding: 16px;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
-  margin: 32px 0;
+  margin: 24px 0;
   font-family: 'ui-monospace', monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.contentArea code {
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'ui-monospace', monospace;
+  font-size: 0.9em;
+  word-break: break-word;
 }
 
 .interactionBar {

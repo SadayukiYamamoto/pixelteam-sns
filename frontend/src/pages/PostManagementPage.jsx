@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosClient from '../api/axiosClient';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Edit, Search, User, Filter, Calendar, MapPin } from 'lucide-react';
+import { Trash2, Edit, Search, User, Filter, Calendar, MapPin, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Header from '../components/Header';
 import Navigation from '../components/Navigation';
@@ -36,9 +36,7 @@ const PostManagementPage = () => {
             if (filters.start_date) params.append('start_date', filters.start_date);
             if (filters.end_date) params.append('end_date', filters.end_date);
 
-            const res = await axios.get(`/api/admin/posts/list/?${params.toString()}`, {
-                headers: { Authorization: `Token ${token}` }
-            });
+            const res = await axiosClient.get(`admin/posts/list/?${params.toString()}`);
             setPosts(res.data);
         } catch (error) {
             console.error("Error fetching posts:", error);
@@ -51,10 +49,8 @@ const PostManagementPage = () => {
         if (!window.confirm("本当にこの投稿を削除しますか？")) return;
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`/api/posts/${postId}/delete/`, {
-                headers: { Authorization: `Token ${token}` }
-            });
-            setPosts(posts.filter(p => p.id !== postId));
+            await axiosClient.delete(`posts/${postId}/delete/`);
+            fetchPosts(); // リフレッシュ
         } catch (error) {
             console.error("Error deleting post:", error);
             alert("削除に失敗しました");
@@ -68,6 +64,52 @@ const PostManagementPage = () => {
     const handleSearch = (e) => {
         e.preventDefault();
         fetchPosts();
+    };
+
+    const handleExportCSV = () => {
+        if (posts.length === 0) {
+            alert("エクスポートするデータがありません");
+            return;
+        }
+
+        const headers = ["日時", "ユーザー名", "ユーザーID", "カテゴリー", "内容", "ステータス"];
+        const csvRows = [headers.join(",")];
+
+        posts.forEach(post => {
+            const date = new Date(post.created_at).toLocaleString();
+            const userName = `"${(post.display_name || '').replace(/"/g, '""')}"`;
+            const userId = `"${(post.user_uid || '').replace(/"/g, '""')}"`;
+            const category = `"${(post.category || '').replace(/"/g, '""')}"`;
+            const content = `"${(post.content || '').replace(/<[^>]+>/g, '').replace(/"/g, '""')}"`;
+
+            const status = post.is_deleted ? "削除済み" : "公開中";
+
+            csvRows.push([date, userName, userId, category, content, status].join(","));
+        });
+
+        const csvContent = "\ufeff" + csvRows.join("\n"); // Add BOM for Excel
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `posts_export_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleSyncToSheets = async () => {
+        try {
+            setLoading(true);
+            const res = await axiosClient.post('admin/posts/export_gsheet/', {});
+            alert("スプレッドシートへの同期が完了しました！");
+            console.log("Sheet sync success:", res.data);
+        } catch (error) {
+            console.error("Error syncing to sheets:", error);
+            alert("スプレッドシートへの同期に失敗しました: " + (error.response?.data?.error || error.message));
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -177,10 +219,29 @@ const PostManagementPage = () => {
 
                     {/* リストセクション */}
                     <div className="premium-results-card">
-                        <div className="results-summary">
+                        <div className="results-summary flex justify-between items-center">
                             <span className="results-count">
                                 検索結果: <span className="count-number">{posts.length}</span> 件
                             </span>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleSyncToSheets}
+                                    className="sync-sheets-btn"
+                                    disabled={loading}
+                                    title="Googleスプレッドシートに直接書き出し"
+                                >
+                                    <MapPin size={18} />
+                                    シート同期
+                                </button>
+                                <button
+                                    onClick={handleExportCSV}
+                                    className="export-csv-btn"
+                                    title="CSV形式でダウンロード"
+                                >
+                                    <Download size={18} />
+                                    CSV出力
+                                </button>
+                            </div>
                         </div>
 
                         <div className="premium-table-wrapper">
@@ -188,8 +249,9 @@ const PostManagementPage = () => {
                                 <thead>
                                     <tr>
                                         <th className="w-[180px]">日時</th>
-                                        <th className="w-[240px]">ユーザー</th>
-                                        <th className="w-[160px]">カテゴリー</th>
+                                        <th className="w-[200px]">ユーザー</th>
+                                        <th className="w-[180px]">店舗</th>
+                                        <th className="w-[140px]">カテゴリー</th>
                                         <th>内容</th>
                                         <th className="text-center w-[120px]">操作</th>
                                     </tr>
@@ -220,9 +282,19 @@ const PostManagementPage = () => {
                                                     </div>
                                                 </td>
                                                 <td>
+                                                    <span className="mgmt-shop-name">
+                                                        {post.shop_name || '-'}
+                                                    </span>
+                                                </td>
+                                                <td>
                                                     <span className={`mgmt-category-badge ${post.category === '個人報告' ? 'orange' : 'blue'}`}>
                                                         {post.category || '未分類'}
                                                     </span>
+                                                    {post.is_deleted && (
+                                                        <span className="mgmt-status-badge deleted">
+                                                            削除済み
+                                                        </span>
+                                                    )}
                                                 </td>
                                                 <td>
                                                     <p className="cell-content-text">

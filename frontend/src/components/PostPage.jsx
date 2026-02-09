@@ -50,8 +50,22 @@ export default function PostPage() {
   const [imageFile, setImageFile] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const currentUserId = localStorage.getItem("userId");
+  const [shopName, setShopName] = useState("");
   // 🔹 一度キャンセル（拒否）したURLを記録するリスト
   const dismissedUrls = useRef(new Set());
+
+  const STORES = [
+    "ヨドバシカメラ マルチメディアAkiba",
+    "ヨドバシカメラ マルチメディア横浜",
+    "ヨドバシカメラ マルチメディア梅田",
+    "ヨドバシカメラ マルチメディア京都",
+    "ヨドバシカメラ マルチメディア博多",
+    "ヨドバシカメラ マルチメディア仙台",
+    "ヨドバシカメラ新宿西口本店",
+    "ヨドバシカメラ マルチメディア吉祥寺",
+    "ヨドバシカメラ マルチメディア川崎ルフロン",
+    "ヨドバシカメラ マルチメディア札幌"
+  ];
 
 
   // 🟦 Editor 設定
@@ -146,6 +160,7 @@ export default function PostPage() {
           editor.commands.setContent(res.data.content);
         }
         setCategory(res.data.category || "雑談");
+        setShopName(res.data.shop_name || "");
       } catch (err) {
         console.error("❌ 投稿取得失敗:", err);
       }
@@ -323,6 +338,9 @@ export default function PostPage() {
 
     formData.append("content", finalContent);
     formData.append("category", category);
+    if (category === "個人報告") {
+      formData.append("shop_name", shopName);
+    }
 
     try {
       if (id) {
@@ -367,17 +385,38 @@ export default function PostPage() {
         <form onSubmit={handleSubmit} className="post-form">
           {/* カテゴリー選択 */}
           <div className="post-category-section">
-            <div className="category-select-wrapper">
-              <FiLayout className="category-icon" />
-              <select
-                className="premium-category-select notranslate"
-                translate="no"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                <option value="雑談">雑談</option>
-                <option value="個人報告">個人報告</option>
-              </select>
+            <div className="category-row">
+              <div className="category-select-wrapper">
+                <FiLayout className="category-icon" />
+                <select
+                  className="premium-category-select notranslate"
+                  translate="no"
+                  value={category}
+                  onChange={(e) => {
+                    const newCat = e.target.value;
+                    setCategory(newCat);
+                    if (newCat === "個人報告" && userProfile?.shop_name && !shopName) {
+                      setShopName(userProfile.shop_name);
+                    }
+                  }}
+                >
+                  <option value="雑談">雑談</option>
+                  <option value="個人報告">個人報告</option>
+                </select>
+              </div>
+
+              {category === "個人報告" && (
+                <div className="shop-select-wrapper animate-fade-in">
+                  <select
+                    className="premium-shop-select"
+                    value={shopName}
+                    onChange={(e) => setShopName(e.target.value)}
+                  >
+                    <option value="">店舗を選択</option>
+                    {STORES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              )}
             </div>
           </div>
 

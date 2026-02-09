@@ -1,8 +1,9 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .models import Mission, UserMissionProgress
-from .utils import get_period_start
+from .models import Mission, UserMissionProgress, LevelReward
+from .utils import get_period_start, update_mission_progress
+from .serializers import LevelRewardSerializer
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -10,6 +11,9 @@ def mission_list_view(request):
     user = request.user
     if not user.team:
         return Response([])
+
+    # ログインミッションを自動実行（アプリを開いている状態で日を跨いでも、ここが呼ばれればログイン扱いにする）
+    update_mission_progress(user, 'login')
 
     missions = Mission.objects.filter(team=user.team).order_by('mission_type', 'order')
     
@@ -81,8 +85,6 @@ def claim_mission_view(request, pk):
         "new_level": user.level
     })
 
-from .serializers import LevelRewardSerializer
-from .models import LevelReward
 
 # === 管理者用: レベル報酬一覧 & 作成 ===
 @api_view(['GET', 'POST'])
@@ -126,7 +128,6 @@ def admin_level_reward_detail(request, pk):
         reward.delete()
         return Response({"message": "Deleted"}, status=204)
 
-from .utils import update_mission_progress
 
 # === 汎用ミッショントリガー ===
 @api_view(['POST'])

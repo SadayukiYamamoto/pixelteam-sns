@@ -46,7 +46,7 @@ export default function NoticePage() {
                   )}
 
                   {/* カテゴリー */}
-                  <span className={`notice-category ${item.category}`}>
+                  <span className={`notice-label ${item.category}`}>
                     {item.category}
                   </span>
 

@@ -16,7 +16,7 @@
   justify-content: space-around;
   align-items: center;
   height: auto;
-  min-height: 68px;
+  min-height: var(--footer-height);
   max-width: 548px;
   margin: 0 auto;
 }

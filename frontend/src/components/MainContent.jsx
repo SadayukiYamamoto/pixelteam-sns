@@ -113,7 +113,8 @@ const MainContent = ({ setActiveTab }) => {
                     profileImage: post.profile_image,
                     likes: post.likes_count,
                     comments: post.comments_count,
-                    liked: post.liked
+                    liked: post.liked,
+                    shop_name: post.shop_name
                   }}
                   onLike={handleLike}
                   onComment={handleComment}

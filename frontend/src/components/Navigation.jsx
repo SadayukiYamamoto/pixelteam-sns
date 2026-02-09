@@ -11,6 +11,7 @@ const API_URL = import.meta.env.VITE_API_URL || "";
 const Navigation = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
   const isIos = Capacitor.getPlatform() === 'ios';
+  const isAndroid = Capacitor.getPlatform() === 'android';
 
   const triggerMission = async (actionType) => {
     try {
@@ -51,8 +52,10 @@ const Navigation = ({ activeTab, setActiveTab }) => {
     <nav
       className="navbar"
       style={{
-        height: 'calc(68px + env(safe-area-inset-bottom, 0px))',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+        height: 'calc(var(--footer-height) + var(--footer-safe-area-bottom))',
+        paddingTop: isAndroid ? '0px' : '6px',
+        borderTopWidth: isAndroid ? '0px' : undefined,
+        paddingBottom: 'var(--footer-safe-area-bottom)'
       }}
     >
       {navItems.map(({ name, icon: Icon, tab }) => (

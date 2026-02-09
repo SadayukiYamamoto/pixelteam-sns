@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Edit, Search, Calendar, Filter, MapPin, ExternalLink } from 'lucide-react';
+import { Trash2, Edit, Search, Calendar, Filter, MapPin, ExternalLink, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Header from '../components/Header';
 import Navigation from '../components/Navigation';
@@ -54,7 +54,7 @@ const TreasureAdminPage = () => {
     const handleDelete = async (postId) => {
         if (!window.confirm("本当にこの投稿を削除しますか？")) return;
         try {
-            await axiosClient.delete(`/api/treasure_posts/${postId}/`);
+            await axiosClient.delete(`treasure_posts/${postId}/`);
             setPosts(posts.filter(p => p.id !== postId));
         } catch (error) {
             console.error("Error deleting post:", error);
@@ -69,6 +69,56 @@ const TreasureAdminPage = () => {
     const handleSearch = (e) => {
         e.preventDefault();
         fetchPosts();
+    };
+
+    const handleExportCSV = () => {
+        if (posts.length === 0) {
+            alert("エクスポートするデータがありません");
+            return;
+        }
+
+        const headers = ["日付", "カテゴリー", "投稿者", "店舗", "タイトル", "年齢", "性別", "端末", "不安要素・ニーズ", "訴求ポイント", "トークの流れ"];
+        const csvRows = [headers.join(",")];
+
+        posts.forEach(post => {
+            const date = new Date(post.created_at).toLocaleString();
+            const category = `"${(post.category || '').replace(/"/g, '""')}"`;
+            const author = `"${(post.display_name || '').replace(/"/g, '""')}"`;
+            const shop = `"${(post.shop_name || '').replace(/"/g, '""')}"`;
+            const title = `"${(post.title || '').replace(/"/g, '""')}"`;
+            const age = `"${(post.age || '').replace(/"/g, '""')}"`;
+            const gender = `"${(post.gender || '').replace(/"/g, '""')}"`;
+            const device = `"${(post.device_used || '').replace(/"/g, '""')}"`;
+            const anxiety = `"${(post.anxiety_needs || '').replace(/"/g, '""')}"`;
+            const appeal = `"${(post.appeal_points || '').replace(/"/g, '""')}"`;
+            const content = `"${stripHtml(post.content || '').replace(/"/g, '""')}"`;
+
+            csvRows.push([date, category, author, shop, title, age, gender, device, anxiety, appeal, content].join(","));
+        });
+
+        const csvContent = "\ufeff" + csvRows.join("\n"); // BOM for Excel
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `treasure_export_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleSyncToSheets = async () => {
+        try {
+            setLoading(true);
+            const res = await axiosClient.post('admin/treasure_posts/export_gsheet/', {});
+            alert("スプレッドシートへの同期が完了しました！");
+            console.log("Sheet sync success:", res.data);
+        } catch (error) {
+            console.error("Error syncing to sheets:", error);
+            alert("スプレッドシートへの同期に失敗しました: " + (error.response?.data?.error || error.message));
+        } finally {
+            setLoading(false);
+        }
     };
 
     const stripHtml = (html) => {
@@ -160,10 +210,41 @@ const TreasureAdminPage = () => {
 
                     {/* リストセクション */}
                     <div className="premium-results-card">
-                        <div className="results-summary">
+                        <div className="results-summary" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span className="results-count">
                                 投稿件数: <span className="count-number">{posts.length}</span> 件
                             </span>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button
+                                    onClick={handleSyncToSheets}
+                                    className="sync-sheets-btn"
+                                    disabled={loading}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        background: '#10b981',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        padding: '8px 16px',
+                                        fontSize: '14px',
+                                        fontWeight: '700',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <MapPin size={18} />
+                                    シート同期
+                                </button>
+                                <button
+                                    onClick={handleExportCSV}
+                                    className="export-csv-btn"
+                                    title="CSV形式でダウンロード"
+                                >
+                                    <Download size={18} />
+                                    CSV出力
+                                </button>
+                            </div>
                         </div>
 
                         <div className="premium-table-wrapper">

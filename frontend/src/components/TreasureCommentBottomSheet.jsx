@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { IoClose, IoImageOutline } from "react-icons/io5";
+import { IoClose, IoImageOutline, IoHeart, IoHeartOutline } from "react-icons/io5";
 import axiosClient from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 import { storage, auth } from "../firebase";
@@ -141,6 +141,18 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
         }
     };
 
+    // 🔹 いいねハンドラ
+    const handleLikeComment = async (commentId) => {
+        try {
+            const res = await axiosClient.post(`treasure_comments/${commentId}/like/`);
+            setComments(prev => prev.map(c =>
+                String(c.id) === String(commentId) ? { ...c, liked: res.data.liked, likes_count: res.data.likes_count } : c
+            ));
+        } catch (err) {
+            console.error("コメントいいねエラー:", err);
+        }
+    };
+
     // コメント内のリンク処理
     const handleCommentClick = (e) => {
         const target = e.target.closest('span.mention');
@@ -227,6 +239,24 @@ const TreasureCommentBottomSheet = ({ postId, onClose, onCommentAdded }) => {
                                                         />
                                                     </div>
                                                 )}
+                                            </div>
+                                            <div className="mt-1 flex items-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        handleLikeComment(c.id);
+                                                    }}
+                                                    className="flex items-center gap-1 text-[11px] font-bold transition-all bg-transparent border-none p-2 -m-2 cursor-pointer hover:opacity-70 touch-manipulation"
+                                                    style={{ color: c.liked ? '#ff4b4b' : '#94a3b8' }}
+                                                >
+                                                    {c.liked ?
+                                                        <IoHeart size={18} className="pointer-events-none" /> :
+                                                        <IoHeartOutline size={18} className="pointer-events-none" />
+                                                    }
+                                                    <span className={`pointer-events-none ${c.liked ? "font-black" : ""}`}>{c.likes_count || 0}</span>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>

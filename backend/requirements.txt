@@ -49,3 +49,4 @@ urllib3==2.5.0
 dj-database-url==2.1.0
 whitenoise==6.6.0
 gunicorn==21.2.0
+google-api-python-client==2.160.0

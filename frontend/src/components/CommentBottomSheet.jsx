@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { IoClose, IoImageOutline, IoEllipsisVerticalOutline } from "react-icons/io5";
+import { IoClose, IoImageOutline, IoEllipsisVerticalOutline, IoHeart, IoHeartOutline } from "react-icons/io5";
 import { HiDotsVertical } from "react-icons/hi";
 import { FiCamera } from "react-icons/fi";
 import axiosClient from "../api/axiosClient";
@@ -22,7 +22,7 @@ import Avatar from "./Avatar";
 
 
 // 🔹 再帰的にレンダリングするコンポーネント（レンダリング毎の再生成を防ぐため外側に定義）
-const CommentNode = ({ comment, depth = 0, hasNextSibling = false, expandedReplies, toggleReplies, handleReplyBtnClick, handleCommentClick, currentUserUid, isAdmin, onEdit, onDelete }) => {
+const CommentNode = ({ comment, depth = 0, hasNextSibling = false, expandedReplies, toggleReplies, handleReplyBtnClick, handleCommentClick, currentUserUid, isAdmin, onEdit, onDelete, onLike }) => {
   const isExpanded = expandedReplies[comment.id];
   const replies = comment.replies || [];
   const hasReplies = replies.length > 0;
@@ -142,6 +142,25 @@ const CommentNode = ({ comment, depth = 0, hasNextSibling = false, expandedRepli
               返信する
             </button>
 
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onLike(comment.id);
+              }}
+              className="flex items-center gap-1 text-[11px] font-black hover:opacity-70 transition-all bg-transparent border-none p-2 -m-2 cursor-pointer touch-manipulation"
+              style={{ color: comment.liked ? '#ff4b4b' : '#94a3b8' }}
+            >
+              {comment.liked ?
+                <IoHeart size={18} className="pointer-events-none" /> :
+                <IoHeartOutline size={18} className="pointer-events-none" />
+              }
+              <span className={`pointer-events-none ${comment.liked ? "font-black" : "font-bold"}`}>
+                {comment.likes_count || 0}
+              </span>
+            </button>
+
             {hasReplies && !isExpanded && (
               <button
                 onClick={() => toggleReplies(comment.id)}
@@ -187,6 +206,7 @@ const CommentNode = ({ comment, depth = 0, hasNextSibling = false, expandedRepli
                   isAdmin={isAdmin}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  onLike={onLike}
                 />
               ))}
               <div style={{ paddingLeft: '44px' }} className="py-1">
@@ -332,6 +352,18 @@ const CommentBottomSheet = ({ postId, onClose }) => {
     }
   };
 
+  // 🔹 いいねハンドラ
+  const handleLikeComment = async (commentId) => {
+    try {
+      const res = await axiosClient.post(`comments/${commentId}/like/`);
+      setComments(prev => prev.map(c =>
+        String(c.id) === String(commentId) ? { ...c, liked: res.data.liked, likes_count: res.data.likes_count } : c
+      ));
+    } catch (err) {
+      console.error("コメントいいねエラー:", err);
+    }
+  };
+
   // 🔹 編集モード開始ハンドラ
   const handleEditComment = (comment) => {
     setEditingComment({ id: comment.id, content: comment.content, image_url: comment.image_url });
@@ -351,7 +383,7 @@ const CommentBottomSheet = ({ postId, onClose }) => {
     setIsSubmitting(true);
     // --- Robust conversion for plain text hashtags/mentions ---
     const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlContent, "text/html");
+    const doc = parser.parseFromString(editor.getHTML(), "text/html");
 
     const textNodes = [];
     const walk = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
@@ -525,6 +557,7 @@ const CommentBottomSheet = ({ postId, onClose }) => {
                     isAdmin={currentUser?.is_admin}
                     onEdit={handleEditComment}
                     onDelete={handleDeleteComment}
+                    onLike={handleLikeComment}
                   />
                 ))}
                 <div className="h-20" />

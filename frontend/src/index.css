@@ -43,6 +43,33 @@
   --radius-md: 12px;
   --shadow-soft: 0 4px 12px rgba(60, 64, 67, .08);
   --shadow-hover: 0 8px 16px rgba(60, 64, 67, .12);
+  --header-height: 54px;
+  --footer-height: 60px;
+  --header-safe-area-top: env(safe-area-inset-top, 0px);
+  --footer-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --content-padding-top: 104px;
+  --content-padding-bottom: 90px;
+  --floating-button-bottom: calc(var(--footer-height) + var(--footer-safe-area-bottom) + 51px);
+}
+
+.is-native {
+  --header-height: 48px;
+  --footer-height: 54px;
+  --content-padding-top: 96px;
+  --content-padding-bottom: 90px;
+}
+
+.is-android {
+  --header-safe-area-top: 24px !important;
+  --footer-safe-area-bottom: 48px !important;
+  --footer-height: 40px !important;
+  --content-padding-top: 112px !important;
+  --content-padding-bottom: 110px !important;
+}
+
+.is-android .navbar {
+  padding-top: 0px !important;
+  padding-bottom: var(--footer-safe-area-bottom) !important;
 }
 
 h1,
@@ -657,8 +684,15 @@ code {
   border: 1.3333px solid #fecdd3 !important;
 }
 
+.badge-text.shop {
+  background-color: #f0fdf4 !important;
+  color: #16a34a !important;
+  border: 1.3333px solid #dcfce7 !important;
+}
+
 .post-category-badge {
   display: flex !important;
+  gap: 8px !important;
   margin-bottom: calc(var(--spacing, .25rem) * 2) !important;
 }
 

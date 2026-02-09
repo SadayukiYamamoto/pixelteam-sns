@@ -16,7 +16,7 @@ export default function TreasurePixelPage() {
 
         <div
           className="overflow-y-auto pb-32"
-          style={{ height: "calc(100vh - 120px)", paddingTop: "calc(112px + env(safe-area-inset-top, 0px))" }}
+          style={{ height: "calc(100vh - (var(--header-height) + var(--footer-height)))", paddingTop: "calc(var(--content-padding-top) + var(--header-safe-area-top))" }}
         >
           <main className={styles.pixelPageContainer}>
             {/* Pixel グリーンの大きなバナー */}

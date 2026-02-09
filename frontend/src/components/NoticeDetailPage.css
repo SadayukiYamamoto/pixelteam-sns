@@ -18,7 +18,7 @@
   background: #fff;
   border-radius: 18px;
   padding: 18px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
 }
 
 .notice-detail-category {
@@ -32,13 +32,45 @@
 }
 
 /* カテゴリ色 */
-.notice-detail-category.事務局だより { background: #f5dd42; color: #000; }
-.notice-detail-category.イベント { background: #ff66cc; color: #fff; }
-.notice-detail-category.キャンペーン { background: #42a5f5; color: #fff; }
-.notice-detail-category.PixelDrop { background: #6e8efb; color: #fff; }
-.notice-detail-category.商品情報 { background: #58c6a6; color: #fff; }
-.notice-detail-category.アップデート { background: #b47cff; color: #fff; }
-.notice-detail-category.その他 { background: #ccc; color: #000; }
+.notice-detail-category.事務局だより {
+  background: #f5dd42;
+  color: #000;
+}
+
+.notice-detail-category.動画 {
+  background: #ef4444;
+  color: #fff;
+}
+
+.notice-detail-category.イベント {
+  background: #ff66cc;
+  color: #fff;
+}
+
+.notice-detail-category.キャンペーン {
+  background: #42a5f5;
+  color: #fff;
+}
+
+.notice-detail-category.PixelDrop {
+  background: #6e8efb;
+  color: #fff;
+}
+
+.notice-detail-category.商品情報 {
+  background: #58c6a6;
+  color: #fff;
+}
+
+.notice-detail-category.アップデート {
+  background: #b47cff;
+  color: #fff;
+}
+
+.notice-detail-category.その他 {
+  background: #ccc;
+  color: #000;
+}
 
 .notice-detail-title {
   font-size: 24px;
@@ -127,4 +159,3 @@
   font-size: 13px;
   color: #536471;
 }
-

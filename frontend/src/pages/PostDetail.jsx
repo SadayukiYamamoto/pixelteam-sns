@@ -35,7 +35,9 @@ const PostDetail = () => {
                     profileImage: res.data.profile_image,
                     likes: res.data.likes_count,
                     comments: res.data.comments_count,
-                    liked: res.data.liked
+                    liked: res.data.liked,
+                    category: res.data.category,
+                    shop_name: res.data.shop_name
                 };
 
                 setPost(formattedPost);
@@ -95,10 +97,10 @@ const PostDetail = () => {
                 <Header />
 
                 <div
-                    className="overflow-y-auto px-4 pb-[100px]"
+                    className="overflow-y-auto px-4 pb-[var(--content-padding-bottom)]"
                     style={{
-                        height: "calc(100vh - 120px)",
-                        paddingTop: "calc(112px + env(safe-area-inset-top, 0px))",
+                        height: "calc(100vh - (var(--header-height) + var(--footer-height)))",
+                        paddingTop: "calc(var(--content-padding-top) + var(--header-safe-area-top))",
                         backgroundColor: "#f6f7f9"
                     }}
                 >

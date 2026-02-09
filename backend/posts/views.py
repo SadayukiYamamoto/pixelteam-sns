@@ -7,7 +7,12 @@ from rest_framework.permissions import AllowAny
 from rest_framework.pagination import PageNumberPagination
 from .models import Post, Comment, Video, VideoViewLog, UserInteractionLog, TreasurePost, Notice, VideoTest, Question, Choice, UserTestResult, UserTestAnswer, Survey, SurveyQuestion, SurveyChoice, SurveyResponse, SurveyAnswer, Hashtag, OfficeNews, TaskButton
 from users.models import User, Notification
-from .serializers import PostSerializer, CommentSerializer, VideoSerializer, TreasurePostSerializer, NoticeSerializer, SurveySerializer, OfficeNewsSerializer, TaskButtonSerializer
+from .serializers import (
+    PostSerializer, CommentSerializer, VideoSerializer, TreasurePostSerializer, 
+    NoticeSerializer, SurveySerializer, OfficeNewsSerializer, TaskButtonSerializer,
+    TreasureCommentSerializer
+)
+from .google_sheets import export_to_sheet, append_row_to_sheet
 from django.shortcuts import get_object_or_404
 import firebase_admin
 from firebase_admin import firestore
@@ -36,18 +41,28 @@ def posts_with_user(request):
         limit = int(request.GET.get('limit', 5))
         tag_param = request.GET.get('tag')
         category_param = request.GET.get('category')
+        shop_param = request.GET.get('shop_name')
         
         user = request.user
-        posts = Post.objects.all()
+        posts = Post.objects.filter(is_deleted=False)
 
         # カテゴリフィルタ
         if category_param:
             posts = posts.filter(category=category_param)
         
-        # 事務局（is_secretary）でない場合は制限（雑談・カテゴリなしを許可）
-        if not user.is_secretary:
+        # 店舗名フィルタ
+        if shop_param:
+            posts = posts.filter(shop_name=shop_param)
+        
+        # 事務局でない場合は制限（雑談・自分の個人報告を許可）
+        if not user.is_admin_or_secretary:
             from django.db.models import Q
-            posts = posts.filter(Q(category='雑談') | Q(category='') | Q(category__isnull=True))
+            posts = posts.filter(
+                Q(category='雑談') | 
+                Q(category='') | 
+                Q(category__isnull=True) |
+                Q(category='個人報告', user_uid=user.user_id)
+            )
         
         # タグフィルタ
         if tag_param:
@@ -103,7 +118,7 @@ def comments_view(request, pk):
 
     if request.method == 'GET':
         comments = post.comments.order_by('-created_at')
-        serializer = CommentSerializer(comments, many=True)
+        serializer = CommentSerializer(comments, many=True, context={'request': request})
         return Response(serializer.data)
 
     elif request.method == 'POST':
@@ -202,7 +217,7 @@ def comments_view(request, pk):
                             message=f"{user.display_name}さんがコメントであなたをメンションしました。"
                         )
 
-        serializer = CommentSerializer(comment)
+        serializer = CommentSerializer(comment, context={'request': request})
 
         # ミッション進捗
         update_mission_progress(user, 'comment')
@@ -261,12 +276,17 @@ def toggle_like(request, pk):
 def update_post(request, pk):
     try:
         post = Post.objects.get(pk=pk)
-        if str(post.user_uid) != str(request.user.user_id):
+        if str(post.user_uid) != str(request.user.user_id) and not getattr(request.user, 'is_admin_or_secretary', False):
             return Response({'error': '編集権限がありません'}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = PostSerializer(post, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            # Google Sheets 同期
+            try:
+                perform_post_sync_to_gsheet()
+            except Exception as e:
+                print("Sheets sync error (update):", e)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Post.DoesNotExist:
@@ -282,9 +302,17 @@ def delete_post(request, pk):
         if post.user_uid != request.user.user_id and not request.user.is_admin_or_secretary:
             return Response({"error": "この投稿を削除する権限がありません。"}, status=status.HTTP_403_FORBIDDEN)
 
-        print(f"🗑 Deleting post: {pk} (user: {request.user.user_id})")
-        post.delete()
-        print(f"✅ Successfully deleted post: {pk}")
+        print(f"🗑 Soft deleting post: {pk} (user: {request.user.user_id})")
+        post.is_deleted = True
+        post.save()
+        
+        # Google Sheets 同期
+        try:
+            perform_post_sync_to_gsheet()
+        except Exception as e:
+            print("Sheets sync error (delete):", e)
+
+        print(f"✅ Successfully soft deleted post: {pk}")
         return Response({"message": "投稿を削除しました。"}, status=status.HTTP_200_OK)
     except Post.DoesNotExist:
         return Response({"error": "投稿が見つかりませんでした。"}, status=status.HTTP_404_NOT_FOUND)
@@ -303,6 +331,11 @@ def post_detail(request, pk):
         return Response({'error': 'Post not found'}, status=404)
 
     if request.method == 'GET':
+        # 事務局でない場合、かつ個人報告の場合は、本人以外は閲覧不可にする
+        if not getattr(request.user, 'is_admin_or_secretary', False) and post.category == '個人報告':
+            if str(post.user_uid) != str(request.user.user_id):
+                return Response({'error': 'この投稿を閲覧する権限がありません'}, status=403)
+            
         serializer = PostSerializer(post, context={'request': request})
         return Response(serializer.data)
 
@@ -323,6 +356,16 @@ def posts_list_create(request):
     if request.method == "GET":
         posts = Post.objects.order_by("-created_at")
 
+        # 事務局でない場合は個人報告を除外（自分の投稿は許可）
+        if not request.user.is_admin_or_secretary:
+            from django.db.models import Q
+            posts = posts.filter(
+                Q(category='雑談') | 
+                Q(category='') | 
+                Q(category__isnull=True) |
+                Q(category='個人報告', user_uid=request.user.user_id)
+            )
+
         # タグ検索 ?tag=xxx
         tag_param = request.GET.get('tag')
         if tag_param:
@@ -332,6 +375,8 @@ def posts_list_create(request):
 
     elif request.method == "POST":
         data = request.data.copy()
+        # 投稿制限は解除
+
         data["user_uid"] = str(request.user.user_id)  # ✅ ここで強制付与(文字列化)
         serializer = PostSerializer(data=data, context={'request': request})
         if serializer.is_valid():
@@ -393,6 +438,12 @@ def posts_list_create(request):
 
             # ミッション進捗
             update_mission_progress(request.user, 'post')
+
+            # --- Google Sheets リアルタイム同期 ---
+            try:
+                perform_post_sync_to_gsheet()
+            except Exception as e:
+                print("Sheets sync error (create):", e)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         print(serializer.errors)
@@ -718,12 +769,17 @@ def treasure_list(request):
     """
     try:
         category = request.GET.get("category", None)
-        posts = Post.objects.all().order_by("-created_at")
+        posts = TreasurePost.objects.filter(is_deleted=False).order_by("-created_at") # 削除されていないもののみ
 
         if category:
             posts = posts.filter(category=category)
 
-        serializer = PostSerializer(posts, many=True, context={'request': request})
+        # 事務局（is_secretary）でない場合は個人報告を除外
+        if not getattr(request.user, 'is_admin_or_secretary', False):
+            from django.db.models import Q
+            posts = posts.exclude(category='個人報告') # TreasurePostには個人報告カテゴリはないかもしれないが、念のため
+
+        serializer = TreasurePostSerializer(posts, many=True, context={'request': request})
         return Response(serializer.data, status=200)
 
     except Exception as e:
@@ -768,11 +824,26 @@ def treasure_post_detail(request, pk):
         serializer = TreasurePostSerializer(post, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            # Google Sheets 同期
+            try:
+                perform_treasure_sync_to_gsheet()
+            except Exception as e:
+                print("Sheets sync error (treasure update):", e)
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
 
 # --- DELETE（削除） ---
     elif request.method == 'DELETE':
+        # 管理者または事務局の場合は無条件で削除可能
+        if getattr(request.user, 'is_admin_or_secretary', False):
+            post.is_deleted = True # ソフトデリート
+            post.save()
+            try:
+                perform_treasure_sync_to_gsheet()
+            except Exception as e:
+                print("Sheets sync error (treasure delete by admin):", e)
+            return Response({'message': '投稿を削除しました（管理者権限）'}, status=200)
+
         try:
             # request.data がない場合に備えて .get を安全に呼ぶ
             user_uid = None
@@ -781,18 +852,24 @@ def treasure_post_detail(request, pk):
             if not user_uid:
                 user_uid = request.query_params.get("user_uid")
 
-            # 🔹 user_uid が存在しない場合（＝投稿時にnullだった場合）は全員削除可
+            # 🔹 user_uid が存在しない場合（＝投稿時にnullだった場合）は本人確認不能のため、
+            # 管理者以外は削除不可
             if not post.user_uid:
-                post.delete()
-                return Response({'message': '投稿を削除しました（全員削除可）'}, status=200)
+                return Response({'error': '削除権限がありません（本人確認不能）'}, status=403)
 
             # 🔹 投稿者チェック
             if not user_uid:
                 return Response({'error': 'user_uid が必要です'}, status=400)
-            if post.user_uid != user_uid:
+            if str(post.user_uid) != str(user_uid):
                 return Response({'error': '削除権限がありません'}, status=403)
 
-            post.delete()
+            post.is_deleted = True
+            post.save()
+            # Google Sheets 同期
+            try:
+                perform_treasure_sync_to_gsheet()
+            except Exception as e:
+                print("Sheets sync error (treasure delete):", e)
             return Response({'message': '投稿を削除しました'}, status=200)
 
         except Exception as e:
@@ -852,7 +929,7 @@ class TreasurePostPagination(PageNumberPagination):
 @permission_classes([AllowAny])
 def treasure_post_list(request):
     if request.method == 'GET':
-        posts = TreasurePost.objects.all().order_by('-created_at')
+        posts = TreasurePost.objects.filter(is_deleted=False).order_by('-created_at')
 
         paginator = TreasurePostPagination()
         paginated_posts = paginator.paginate_queryset(posts, request)
@@ -906,6 +983,12 @@ def treasure_post_list(request):
             # --- ミッション進捗 ---
             update_mission_progress(request.user, 'treasure_post')
 
+            # --- Google Sheets リアルタイム同期 ---
+            try:
+                perform_treasure_sync_to_gsheet()
+            except Exception as e:
+                print("Sheets sync error (treasure create):", e)
+
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
@@ -920,26 +1003,8 @@ def treasure_comments_view(request, pk):
 
     if request.method == 'GET':
         comments = post.comments.order_by('-created_at')
-        data = []
-        for c in comments:
-            profile_image = None
-            display_name = c.user_name or "匿名"
-            if c.user_uid:
-                user = User.objects.filter(user_id=c.user_uid).first()
-                if user:
-                    profile_image = user.profile_image
-                    display_name = user.display_name or display_name
-            
-            data.append({
-                "user_name": display_name,
-                "display_name": display_name,
-                "content": c.content,
-                "image_url": c.image_url,
-                "created_at": c.created_at,
-                "profile_image": profile_image,
-                "user_uid": c.user_uid,
-            })
-        return Response(data, status=200)
+        serializer = TreasureCommentSerializer(comments, many=True, context={'request': request})
+        return Response(serializer.data)
 
     elif request.method == 'POST':
         user = request.user if request.user.is_authenticated else None
@@ -1012,7 +1077,8 @@ def treasure_comments_view(request, pk):
         # ミッション進捗
         update_mission_progress(user, 'comment')
 
-        return Response({"message": "コメントを追加しました"}, status=201)
+        serializer = TreasureCommentSerializer(comment, context={'request': request})
+        return Response(serializer.data, status=201)
 
 # posts/views.py
 from django.db.models import Count
@@ -1964,12 +2030,10 @@ def admin_post_list(request):
         from django.db.models import Q
         posts = posts.filter(Q(content__icontains=keyword) | Q(title__icontains=keyword))
     if shop_name:
-        # user_uid は Post モデルにある文字列ID。
-        # ユーザーモデルの shop_name で絞り込むには、user_uid (Post) == user_id (User) の関係を利用
-        # ただし Post.user_uid は CharField なので、
-        # User.objects.filter(shop_name__icontains=shop_name) でユーザーIDリストを取得し、そのIDリストに含まれる投稿を探す
+        # 新しい Post.shop_name または ユーザーの shop_name で検索
+        from django.db.models import Q
         target_users = User.objects.filter(shop_name__icontains=shop_name).values_list('user_id', flat=True)
-        posts = posts.filter(user_uid__in=target_users)
+        posts = posts.filter(Q(shop_name__icontains=shop_name) | Q(user_uid__in=target_users))
 
     # 日付フィルタ
     if start_date:
@@ -2303,6 +2367,37 @@ def comment_detail(request, pk):
         comment.delete()
         return Response(status=204)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_comment_like(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    user = request.user
+
+    if user in comment.likes.all():
+        comment.likes.remove(user)
+        liked = False
+    else:
+        comment.likes.add(user)
+        liked = True
+
+        # 通知の作成
+        if str(comment.user_uid) != str(user.user_id):
+            author = User.objects.filter(user_id=comment.user_uid).first()
+            if author:
+                Notification.objects.create(
+                    recipient=author,
+                    sender=user,
+                    notification_type='LIKE',
+                    post_id=str(comment.post.id),
+                    comment_id=comment.id,
+                    message=f"{user.display_name}さんがあなたのコメントにいいねしました。"
+                )
+
+    return Response({
+        "liked": liked,
+        "likes_count": comment.likes.count()
+    })
+
 # 🟦 お宝コメント編集・削除
 @api_view(['PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
@@ -2324,3 +2419,259 @@ def treasure_comment_detail(request, pk):
     elif request.method == 'DELETE':
         comment.delete()
         return Response(status=204)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_treasure_comment_like(request, pk):
+    comment = get_object_or_404(TreasureComment, pk=pk)
+    user = request.user
+
+    if user in comment.likes.all():
+        comment.likes.remove(user)
+        liked = False
+    else:
+        comment.likes.add(user)
+        liked = True
+
+        # 通知の作成
+        if str(comment.user_uid) != str(user.user_id):
+            author = User.objects.filter(user_id=comment.user_uid).first()
+            if author:
+                Notification.objects.create(
+                    recipient=author,
+                    sender=user,
+                    notification_type='LIKE',
+                    post_id=str(comment.post.id),
+                    comment_id=comment.id,
+                    is_treasure_post=True,
+                    message=f"{user.display_name}さんがあなたのコメント(お宝)にいいねしました。"
+                )
+
+    return Response({
+        "liked": liked,
+        "likes_count": comment.likes.count()
+    })
+
+def perform_post_sync_to_gsheet():
+    spreadsheet_id = "1SC0mHuk_U45I5cF65EZYQJOzcjyYEzxoAmILcO7gr7M"
+    posts = Post.objects.all().order_by("-created_at")
+    headers = ["日時", "ユーザーID", "ユーザー名", "カテゴリー", "店舗", "タイトル", "内容", "ステータス"]
+    categories_map = {"雑談": "雑談", "個人報告": "個人報告"}
+    
+    sheets_data = {"投稿一覧(全体)": []}
+    for cat_name in categories_map.values():
+        sheets_data[cat_name] = []
+    sheets_data["その他"] = []
+
+    for post in posts:
+        from users.models import User
+        u = User.objects.filter(user_id=post.user_uid).first()
+        display_name = u.display_name if u else "Unknown"
+        
+        import re
+        clean_content = re.sub('<[^>]*>', '', post.content or "")
+        
+        row = [
+            post.created_at.strftime("%Y/%m/%d %H:%M"),
+            str(post.user_uid),
+            display_name,
+            post.category or "未分類",
+            post.shop_name or "",
+            post.title or "",
+            clean_content,
+            "削除済み" if post.is_deleted else "公開中"
+        ]
+        
+        sheets_data["投稿一覧(全体)"].append(row)
+        target_sheet = categories_map.get(post.category, "その他")
+        if target_sheet in sheets_data:
+            sheets_data[target_sheet].append(row)
+
+    for sheet_name, data in sheets_data.items():
+        export_to_sheet(spreadsheet_id, sheet_name, headers, data)
+
+def perform_treasure_sync_to_gsheet():
+    spreadsheet_id = "1SC0mHuk_U45I5cF65EZYQJOzcjyYEzxoAmILcO7gr7M"
+    treasures = TreasurePost.objects.all().order_by("-created_at")
+    headers = ["日付", "カテゴリー", "投稿者", "店舗", "タイトル", "年齢", "性別", "端末", "不安要素・ニーズ", "訴求ポイント", "トークの流れ", "ステータス"]
+    target_categories = [
+        "Google-Pixel", "iOS-Switch", "Gemini", "Google-AI", "Design-talk", "Portfolio"
+    ]
+    
+    sheets_data = {"知恵袋(全体)": []}
+    for cat in target_categories:
+        sheets_data[cat] = []
+    sheets_data["その他"] = []
+
+    for t in treasures:
+        from users.models import User
+        u = User.objects.filter(user_id=t.user_uid).first()
+        display_name = u.display_name if u else "Unknown"
+        shop_name = u.shop_name if u else ""
+        
+        import re
+        clean_content = re.sub('<[^>]*>', '', t.content or "")
+        
+        row = [
+            t.created_at.strftime("%Y/%m/%d %H:%M"),
+            t.category or "未分類",
+            display_name,
+            shop_name,
+            t.title or "",
+            t.age or "",
+            t.gender or "",
+            t.device_used or "",
+            t.anxiety_needs or "",
+            t.appeal_points or "",
+            clean_content,
+            "削除済み" if t.is_deleted else "公開中"
+        ]
+        
+        sheets_data["知恵袋(全体)"].append(row)
+        if t.category in target_categories:
+            sheets_data[t.category].append(row)
+        else:
+            sheets_data["その他"].append(row)
+
+    for sheet_name, data in sheets_data.items():
+        export_to_sheet(spreadsheet_id, sheet_name, headers, data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def export_posts_to_gsheet(request):
+    if not getattr(request.user, 'is_admin_or_secretary', False):
+        return Response({'error': 'Permission denied'}, status=403)
+    try:
+        perform_post_sync_to_gsheet()
+        return Response({'message': 'Successfully exported to Google Sheets with multiple tabs'})
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def export_treasures_to_gsheet(request):
+    if not getattr(request.user, 'is_admin_or_secretary', False):
+        return Response({'error': 'Permission denied'}, status=403)
+    try:
+        perform_treasure_sync_to_gsheet()
+        return Response({'message': 'Successfully exported to Google Sheets with multiple tabs'})
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def scheduled_analytics_sync(request):
+    """
+    6時間ごとの自動更新用。
+    視聴マトリクス、視聴ログ、ユーザー別統計、テスト・アンケート結果をエクスポート。
+    """
+    provided_key = request.GET.get('key') or request.data.get('key')
+    SECRET_KEY = "pixelshop_sync_secret_6h" 
+    
+    if provided_key != SECRET_KEY and not getattr(request.user, 'is_admin_or_secretary', False):
+        return Response({'error': 'Unauthorized'}, status=403)
+
+    spreadsheet_id = "1OrEfRd4yctwLWgHNU7e1IiISXQZjD-l6X5xuMSV5bFU"
+    from django.db.models import Sum, Count
+    from django.utils import timezone
+
+    try:
+        # 1. 視聴マトリクス
+        users_all = User.objects.all().order_by("display_name")
+        videos_all = Video.objects.all().order_by("title")
+        logs_agg = VideoViewLog.objects.values('user_id', 'video_id').annotate(
+            total_time=Sum('watch_time'),
+            view_count=Count('id')
+        )
+        matrix_lookup = {}
+        for item in logs_agg:
+            if item['user_id']:
+                matrix_lookup[f"{item['user_id']}_{item['video_id']}"] = {
+                    "time": item['total_time'],
+                    "views": item['view_count']
+                }
+        
+        matrix_headers = ["ユーザー / 動画"] + [v.title for v in videos_all]
+        matrix_data = []
+        for u in users_all:
+            row = [u.display_name]
+            for v in videos_all:
+                key = f"{u.id}_{v.id}"
+                data = matrix_lookup.get(key)
+                if data:
+                    row.append(f"{data['time']}秒 ({data['views']}回)")
+                else:
+                    row.append("-")
+            matrix_data.append(row)
+        export_to_sheet(spreadsheet_id, "視聴マトリクス", matrix_headers, matrix_data)
+
+        # 2. 視聴ログ
+        logs_all = VideoViewLog.objects.all().order_by("-last_watched_at")[:5000]
+        logs_headers = ["日付", "動画タイトル", "視聴時間(秒)", "ユーザー名", "店舗"]
+        logs_data = []
+        for l in logs_all:
+            u = l.user
+            logs_data.append([
+                l.last_watched_at.strftime("%Y/%m/%d %H:%M"),
+                l.video.title,
+                l.watch_time,
+                u.display_name if u else "Unknown",
+                u.shop_name if u else "-"
+            ])
+        export_to_sheet(spreadsheet_id, "視聴ログ", logs_headers, logs_data)
+
+        # 3. ユーザー別統計
+        user_headers = ["ユーザーID", "ユーザー名", "店舗", "投稿数", "動画視聴数", "合計視聴時間(秒)", "テスト受講数", "テスト合格数", "ノウハウ投稿数", "保有ポイント"]
+        user_data = []
+        for u in users_all:
+            post_count = Post.objects.filter(user_uid=u.user_id).count()
+            u_logs = VideoViewLog.objects.filter(user=u)
+            v_views = u_logs.count()
+            v_time = sum(log.watch_time for log in u_logs)
+            test_res = UserTestResult.objects.filter(user=u)
+            t_taken = test_res.count()
+            t_passed = test_res.filter(is_passed=True).count()
+            kh_count = TreasurePost.objects.filter(user_uid=u.user_id).count()
+            user_data.append([
+                u.user_id, u.display_name, u.shop_name, post_count, v_views, v_time, t_taken, t_passed, kh_count, u.points
+            ])
+        export_to_sheet(spreadsheet_id, "ユーザー別統計", user_headers, user_data)
+
+        # 4. 動画テスト・アンケート分析
+        feedback_headers = ["回答日時", "動画タイトル", "ユーザー名", "点数", "満点", "合否", "満足度", "アンケート内容"]
+        feedback_data = []
+        results = UserTestResult.objects.all().order_by('-created_at')[:2000]
+        for r in results:
+            video = Video.objects.filter(id=r.video_id).first()
+            if not video: continue
+            
+            sat = ""
+            ans_text = ""
+            survey_resp = SurveyResponse.objects.filter(test__video=video, user_id=r.user.user_id).first()
+            if survey_resp:
+                ans_list = []
+                for ans in SurveyAnswer.objects.filter(response=survey_resp):
+                    q_text = ans.question.text if (ans.question and hasattr(ans.question, 'text')) else "項目"
+                    a_text = (ans.choice.text if ans.choice else ans.answer_text) or ""
+                    ans_list.append(f"{q_text}: {a_text}")
+                    if "満足度" in q_text:
+                        sat = a_text
+                ans_text = " / ".join(ans_list)
+            
+            feedback_data.append([
+                r.created_at.strftime("%Y/%m/%d %H:%M"),
+                video.title,
+                r.user.display_name,
+                r.score,
+                r.max_score,
+                "合格" if r.is_passed else "不合格",
+                sat,
+                ans_text
+            ])
+        export_to_sheet(spreadsheet_id, "動画テスト・アンケート", feedback_headers, feedback_data)
+
+        return Response({'message': 'Analytics exported successfully to the new spreadsheet.'})
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return Response({'error': str(e)}, status=500)

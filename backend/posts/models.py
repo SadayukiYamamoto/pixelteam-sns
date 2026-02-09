@@ -20,7 +20,9 @@ class Post(models.Model):
     likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)
     mentions = models.ManyToManyField(User, related_name='mentioned_posts', blank=True)
     hashtags = models.ManyToManyField('Hashtag', related_name='posts', blank=True)
+    shop_name = models.CharField(max_length=255, blank=True, null=True)
     is_featured = models.BooleanField(default=False) # ← 事務局おすすめ
+    is_deleted = models.BooleanField(default=False)
 
 
     def __str__(self):
@@ -38,7 +40,8 @@ class Comment(models.Model):
     content = models.TextField()
     image_url = models.URLField(max_length=1000, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)  # ✅ スキーマに合わせて追加
+    updated_at = models.DateTimeField(auto_now=True)
+    likes = models.ManyToManyField(User, related_name='liked_comments', blank=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -107,6 +110,7 @@ class TreasurePost(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     likes = models.ManyToManyField(User, related_name='liked_treasure_posts', blank=True)
+    is_deleted = models.BooleanField(default=False)
 
     # 🔹 新規追加フィールド
     age = models.CharField(max_length=50, blank=True, null=True)
@@ -132,7 +136,8 @@ class TreasureComment(models.Model):
     content = models.TextField()
     image_url = models.URLField(max_length=1000, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)  # ✅ スキーマに合わせて追加
+    updated_at = models.DateTimeField(auto_now=True)
+    likes = models.ManyToManyField(User, related_name='liked_treasure_comments', blank=True)
 
     class Meta:
         ordering = ['-created_at']

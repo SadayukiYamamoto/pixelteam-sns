@@ -12,6 +12,7 @@ import FloatingWriteButton from '../components/FloatingWriteButton';
 import { ClipboardList } from 'lucide-react';
 import { logInteraction } from '../utils/analytics';
 import { handleNotificationRedirection } from '../utils/notification-handler';
+import { Capacitor } from '@capacitor/core';
 
 
 const Home = () => {
@@ -34,26 +35,28 @@ const Home = () => {
 
   useEffect(() => {
     checkMissionStatus();
-    initializePushNotifications().catch(err => {
-      console.error("Push notification initialization error:", err);
-    });
 
-    // Capacitor Native Push Notification Click Handler
-    import('@capacitor/push-notifications').then(({ PushNotifications }) => {
-      PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-        console.log('Push notification action performed:', JSON.stringify(notification));
-        const data = notification.notification.data;
-        if (data) {
-          // data format based on backend trigger_push_notification
-          const notif = {
-            post_id: data.post_id,
-            notification_type: data.type,
-            is_treasure_post: data.is_treasure === 'true' || data.is_treasure === true
-          };
-          handleNotificationRedirection(notif, navigate);
-        }
+    if (Capacitor.isNativePlatform()) {
+      initializePushNotifications().catch(err => {
+        console.error("Push notification initialization error:", err);
       });
-    });
+
+      // Capacitor Native Push Notification Click Handler
+      import('@capacitor/push-notifications').then(({ PushNotifications }) => {
+        PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
+          console.log('Push notification action performed:', JSON.stringify(notification));
+          const data = notification.notification.data;
+          if (data) {
+            const notif = {
+              post_id: data.post_id,
+              notification_type: data.type,
+              is_treasure_post: data.is_treasure === 'true' || data.is_treasure === true
+            };
+            handleNotificationRedirection(notif, navigate);
+          }
+        });
+      }).catch(err => console.error("Error loading PushNotifications plugin:", err));
+    }
   }, []);
 
   const handleMissionClick = () => {
@@ -76,8 +79,8 @@ const Home = () => {
           <div
             style={{
               backgroundColor: '#f9fafb',
-              paddingTop: 'calc(112px + env(safe-area-inset-top, 0px))',
-              paddingBottom: '100px'
+              paddingTop: 'calc(var(--content-padding-top) + var(--header-safe-area-top))',
+              paddingBottom: 'var(--content-padding-bottom)'
             }}
           >
             <MainContent setActiveTab={setActiveTab} />
@@ -87,14 +90,14 @@ const Home = () => {
       </div >
 
       <div
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[548px] h-0 pointer-events-none z-[60]"
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[548px] h-0 pointer-events-none z-[10000]"
         style={{ bottom: '0px' }}
       >
         <button
           onClick={handleMissionClick}
           className={`absolute right-[20px] pointer-events-auto w-[60px] h-[60px] rounded-full flex items-center justify-center shadow-xl transition-all transform hover:scale-110 active:scale-95 border-none ${hasUnclaimed ? 'bg-[#10b981] text-white' : 'bg-white text-[#10b981]'
             }`}
-          style={{ bottom: 'calc(110px + env(safe-area-inset-bottom, 0px))' }}
+          style={{ bottom: 'var(--floating-button-bottom, 110px)' }}
         >
           <ClipboardList
             size={28}

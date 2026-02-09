@@ -94,11 +94,11 @@ const Header = ({ onProfileClick, className = "" }) => {
       <div
         className={`fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[548px] flex justify-between items-center bg-white shadow-sm z-[9999] px-4 border-b border-gray-100 ${className}`}
         style={{
-          height: 'calc(60px + env(safe-area-inset-top, 0px))',
-          paddingTop: 'env(safe-area-inset-top, 0px)'
+          height: 'calc(var(--header-height) + var(--header-safe-area-top))',
+          paddingTop: 'var(--header-safe-area-top)'
         }}
       >
-        <div className="flex items-center">
+        <div className="flex items-center" style={{ marginLeft: '4px' }}>
           <button
             onClick={() => navigate('/')}
             className="flex items-center flex-shrink-0 cursor-pointer"
@@ -117,7 +117,7 @@ const Header = ({ onProfileClick, className = "" }) => {
         </div>
 
         {/* 右側アイコン */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3" style={{ marginRight: '4px' }}>
           <button
             onClick={handleNoticeClick}
             className="header-icon relative"

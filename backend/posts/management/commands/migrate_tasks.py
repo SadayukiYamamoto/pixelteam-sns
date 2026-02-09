@@ -33,7 +33,7 @@ class Command(BaseCommand):
             {"title": "個人報告", "icon_name": "UserCheck", "team": "pixel-shop", "section": "申請・報告", "color": "text-blue-500", "url": "https://docs.google.com/forms/d/e/1FAIpQLSft85d9Im3wkS1yzv0BqjfxepfKE-cHIM351Rqy20Nb3HrOkg/viewform"},
             {"title": "勤怠報告", "icon_name": "ClipboardList", "team": "pixel-shop", "section": "申請・報告", "color": "text-red-500", "url": "https://docs.google.com/forms/d/e/1FAIpQLScLsB7BxGpyGKGhk-o5q05Fft9_DKk_1ZcSWm5437wUU9Qm_w/viewform"},
             {"title": "接客レポート", "icon_name": "MessageSquare", "team": "pixel-shop", "section": "申請・報告", "color": "text-pink-500", "url": "https://docs.google.com/forms/d/e/1FAIpQLSc-khMem4gPwmHHj92u023EyUksXYAYMI4H2GkgE_sHUkbO0w/viewform?usp=header"},
-            {"title": "施策入力フォーム", "icon_name": "ListChecks", "team": "pixel-shop", "section": "申請・報告", "color": "text-green-600", "url": "https://docs.google.com/forms/d/e/1FAIpQLScXWz7eEi1Em3ya8HcG6D8Hd86kE5mRz-52hTPp5STMHwfEAw/viewform"},
+            {"title": "施策入力フォーム", "icon_name": "ListChecks", "team": "pixel-shop", "section": "申請・報告", "color": "text-green-600", "url": "https://script.google.com/a/macros/agent-network.com/s/AKfycbw0sm2JkYNfTQWOspxzzjGduudB48O7T94rdgX4ueGA8oY_5pLMbPCG1nmI8fnaeJW98w/exec"},
             
             {"title": "個人実績", "icon_name": "Activity", "team": "pixel-shop", "section": "実績・管理", "color": "text-blue-600", "url": "/components/tasks/Individual-achievements"},
             {"title": "店舗実績", "icon_name": "TrendingUp", "team": "pixel-shop", "section": "実績・管理", "color": "text-purple-500", "url": "https://drive.google.com/drive/u/0/folders/1Qml4GNplF44Hi6bg5A8oVFdw4sBOphx4"},

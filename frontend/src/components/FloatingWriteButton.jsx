@@ -18,7 +18,7 @@ const FloatingWriteButton = ({ userTeam, isAbsolute = false }) => {
       style={{
         width: '60px',
         height: '60px',
-        bottom: 'calc(110px + env(safe-area-inset-bottom, 0px))'
+        bottom: 'var(--floating-button-bottom, 110px)'
       }}
     >
       <FaPen size={24} />
@@ -28,7 +28,7 @@ const FloatingWriteButton = ({ userTeam, isAbsolute = false }) => {
   if (isAbsolute) return buttonContent;
 
   return (
-    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[548px] h-0 pointer-events-none z-50">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[548px] h-0 pointer-events-none z-[10000]">
       {buttonContent}
     </div>
   );

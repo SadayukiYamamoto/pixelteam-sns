@@ -14,12 +14,27 @@ const formats = ['image'];
 const PostForm = () => {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState('雑談');
   const [scheduleDate, setScheduleDate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const navigate = useNavigate();
+  const [isSecretary, setIsSecretary] = useState(false);
+  const currentUserId = localStorage.getItem("userId");
+  const currentDisplayName = localStorage.getItem("display_name") || "匿名";
+
+  React.useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axiosClient.get(`mypage/${currentUserId}/`);
+        setIsSecretary(res.data.is_admin || false);
+      } catch (err) {
+        console.error("プロフィール取得失敗:", err);
+      }
+    };
+    if (currentUserId) fetchProfile();
+  }, [currentUserId]);
 
   // Sanitize removed as we use plain text now
   const sanitizeContent = (text) => text;
@@ -79,8 +94,8 @@ const PostForm = () => {
       formData.append("title", title);
       formData.append("content", sanitizeContent(content));
       formData.append("category", category);
-      formData.append("user_name", "綱島"); // 💡仮のユーザー名（あとでAuth連携OK）
-      formData.append("user_uid", "user123"); // 💡仮のUID
+      formData.append("user_name", currentDisplayName);
+      formData.append("user_uid", currentUserId);
       formData.append("is_scheduled", isScheduled);
       if (scheduleDate) formData.append("scheduled_at", scheduleDate.toISOString());
       if (imageFile) formData.append("image", imageFile);
@@ -135,14 +150,6 @@ const PostForm = () => {
         placeholder="タイトル"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid #ddd', borderRadius: '6px' }}
-      />
-
-      <input
-        type="text"
-        placeholder="カテゴリ"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
         style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid #ddd', borderRadius: '6px' }}
       />
 

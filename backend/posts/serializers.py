@@ -37,8 +37,10 @@ class PostSerializer(serializers.ModelSerializer):
             'comments_count',
             'hashtags',
             'mentions',
+            'shop_name',
             'is_featured',
             'liked',
+            'is_deleted',
         ]
     
     hashtags = serializers.SlugRelatedField(
@@ -95,10 +97,22 @@ class CommentSerializer(serializers.ModelSerializer):
     # user_uid から User モデルを検索してプロフィール画像などを取得
     display_name = serializers.SerializerMethodField()
     profile_image = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
+    liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ['id', 'post', 'parent', 'user_name', 'user_uid', 'content', 'image_url', 'created_at', 'display_name', 'profile_image']
+        fields = ['id', 'post', 'parent', 'user_name', 'user_uid', 'content', 'image_url', 'created_at', 'display_name', 'profile_image', 'likes_count', 'liked']
+
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+
+    def get_liked(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated:
+            return obj.likes.filter(id=user.id).exists()
+        return False
 
     def get_display_name(self, obj):
         user = None
@@ -306,10 +320,22 @@ class TaskButtonSerializer(serializers.ModelSerializer):
 class TreasureCommentSerializer(serializers.ModelSerializer):
     display_name = serializers.SerializerMethodField()
     profile_image = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
+    liked = serializers.SerializerMethodField()
 
     class Meta:
         model = TreasureComment
-        fields = ['id', 'post', 'parent', 'user_name', 'user_uid', 'content', 'image_url', 'created_at', 'display_name', 'profile_image']
+        fields = ['id', 'post', 'parent', 'user_name', 'user_uid', 'content', 'image_url', 'created_at', 'display_name', 'profile_image', 'likes_count', 'liked']
+
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+
+    def get_liked(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated:
+            return obj.likes.filter(id=user.id).exists()
+        return False
 
     def get_display_name(self, obj):
         user = None

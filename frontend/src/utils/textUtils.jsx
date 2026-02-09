@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
  * 2. 画像やOGPカードは常に表示
  * 3. 内部リンクはSPA遷移
  */
-export const PostContent = ({ content, isExpanded, onToggleExpand, category }) => {
+export const PostContent = ({ content, isExpanded, onToggleExpand, category, shopName }) => {
     const navigate = useNavigate();
     const [showFullImage, setShowFullImage] = useState(null);
 
@@ -61,10 +61,15 @@ export const PostContent = ({ content, isExpanded, onToggleExpand, category }) =
     return (
         <div className="post-content-container" onClick={handleLinkClick}>
             {category && (
-                <div className="post-category-badge mb-2">
+                <div className="post-category-badge mb-2 gap-2">
                     <span className={`badge-text ${category === '個人報告' ? 'report' : 'chat'}`}>
                         {category}
                     </span>
+                    {shopName && (
+                        <span className="badge-text shop">
+                            {shopName}
+                        </span>
+                    )}
                 </div>
             )}
             {/* テキスト部分：isExpandedによってクラスを切り替え */}
@@ -124,6 +129,6 @@ export const PostContent = ({ content, isExpanded, onToggleExpand, category }) =
     );
 };
 
-export const renderPostContent = (text, isExpanded, onToggleExpand, category) => {
-    return <PostContent content={text} isExpanded={isExpanded} onToggleExpand={onToggleExpand} category={category} />;
+export const renderPostContent = (text, isExpanded, onToggleExpand, category, shopName) => {
+    return <PostContent content={text} isExpanded={isExpanded} onToggleExpand={onToggleExpand} category={category} shopName={shopName} />;
 };

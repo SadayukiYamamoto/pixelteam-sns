@@ -117,6 +117,12 @@
   color: #000;
 }
 
+.notice-card-mini-label.動画 {
+  background: #ef4444;
+  /* YouTube-like red */
+  color: #fff;
+}
+
 .notice-card-mini-label.アップデート {
   background: #ff66cc;
   color: #fff;

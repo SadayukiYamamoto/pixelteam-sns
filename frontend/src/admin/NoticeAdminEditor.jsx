@@ -319,6 +319,7 @@ export default function NoticeAdminEditor() {
                       onChange={(e) => setCategory(e.target.value)}
                     >
                       <option>事務局だより</option>
+                      <option>動画</option>
                       <option>イベント</option>
                       <option>キャンペーン</option>
                       <option>PixelDrop</option>

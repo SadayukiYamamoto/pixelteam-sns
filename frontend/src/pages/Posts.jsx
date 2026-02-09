@@ -42,7 +42,20 @@ const Posts = () => {
   const tag = queryParams.get("tag");
   const highlightId = queryParams.get("highlight");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedShop, setSelectedShop] = useState("");
   const [userProfile, setUserProfile] = useState(null);
+  const STORES = [
+    "ヨドバシカメラ マルチメディアAkiba",
+    "ヨドバシカメラ マルチメディア横浜",
+    "ヨドバシカメラ マルチメディア梅田",
+    "ヨドバシカメラ マルチメディア京都",
+    "ヨドバシカメラ マルチメディア博多",
+    "ヨドバシカメラ マルチメディア仙台",
+    "ヨドバシカメラ新宿西口本店",
+    "ヨドバシカメラ マルチメディア吉祥寺",
+    "ヨドバシカメラ マルチメディア川崎ルフロン",
+    "ヨドバシカメラ マルチメディア札幌"
+  ];
   const commentsRequested = queryParams.get("comments");
 
   const currentUserId = localStorage.getItem("userId");
@@ -70,7 +83,7 @@ const Posts = () => {
     try {
       const limit = 5;
       const response = await axiosClient.get(
-        `posts_with_user/?offset=${offset}&limit=${limit}${tag ? `&tag=${tag}` : ''}${selectedCategory ? `&category=${selectedCategory}` : ''}`
+        `posts_with_user/?offset=${offset}&limit=${limit}${tag ? `&tag=${tag}` : ''}${selectedCategory ? `&category=${selectedCategory}` : ''}${selectedShop ? `&shop_name=${selectedShop}` : ''}`
       );
 
       const results = response.data?.results || [];
@@ -89,6 +102,7 @@ const Posts = () => {
         liked: p.liked || false,
         comments_count: p.comments_count || 0,
         category: p.category || "",
+        shop_name: p.shop_name || "",
       }));
 
       setPosts((prev) => {
@@ -137,6 +151,7 @@ const Posts = () => {
         liked: p.liked || false,
         comments_count: p.comments_count || 0,
         category: p.category || "",
+        shop_name: p.shop_name || "",
         isHighlighted: true,
       };
 
@@ -162,7 +177,7 @@ const Posts = () => {
     } else {
       loadPostsFromDjango(0);
     }
-  }, [tag, selectedCategory, highlightId, commentsRequested]);
+  }, [tag, selectedCategory, selectedShop, highlightId, commentsRequested]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -275,12 +290,45 @@ const Posts = () => {
           <PullToRefresh onRefresh={handleRefresh} className="min-h-screen">
             <div
               ref={scrollContainerRef}
-              className="posts-content px-4 pb-[100px]"
-              style={{ paddingTop: 'calc(112px + env(safe-area-inset-top, 0px))' }}
+              className="posts-content px-4 pb-[var(--content-padding-bottom)]"
+              style={{ paddingTop: 'calc(var(--content-padding-top) + var(--header-safe-area-top))' }}
             >
-              <h2 className="text-xl font-bold mb-4" style={{ marginTop: '16px' }}>
-                {tag ? `#${tag} の詳細` : "投稿一覧"}
-              </h2>
+              <div className="posts-header-container mb-4" style={{ marginTop: '16px' }}>
+                <h2 className="posts-header-title">
+                  {tag ? `#${tag} の詳細` : "投稿一覧"}
+                </h2>
+
+                {userProfile?.is_admin && (
+                  <div className="posts-filters">
+                    <select
+                      className="posts-filter-select notranslate"
+                      translate="no"
+                      value={selectedCategory}
+                      onChange={(e) => {
+                        setSelectedCategory(e.target.value);
+                        if (e.target.value !== "個人報告") {
+                          setSelectedShop("");
+                        }
+                      }}
+                    >
+                      <option value="">全カテゴリ</option>
+                      <option value="雑談">雑談</option>
+                      <option value="個人報告">個人報告</option>
+                    </select>
+
+                    {selectedCategory === "個人報告" && (
+                      <select
+                        className="posts-filter-select animate-fade-in cursor-pointer"
+                        value={selectedShop}
+                        onChange={(e) => setSelectedShop(e.target.value)}
+                      >
+                        <option value="">全店舗</option>
+                        {STORES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <div className="space-y-4">
                 {posts.map((post, index) => (
@@ -347,7 +395,7 @@ const Posts = () => {
                     </div>
 
                     <div className="post-content-wrapper">
-                      {renderPostContent(post.content, post.isExpanded, () => toggleExpand(post.id), post.category)}
+                      {renderPostContent(post.content, post.isExpanded, () => toggleExpand(post.id), post.category, post.shop_name)}
                     </div>
 
                     {post.imageUrl && (
@@ -425,7 +473,7 @@ const Posts = () => {
 
       {/* 🔴 FLOATING BUTTONS - Standardized Centering Wrapper 🔴 */}
       <div
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[548px] h-0 pointer-events-none z-[60]"
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[548px] h-0 pointer-events-none z-[10000]"
         style={{ bottom: '0px' }}
       >
         <FloatingWriteButton userTeam={userProfile?.team} isAbsolute={true} />

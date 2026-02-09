@@ -3,11 +3,13 @@ export const handleNotificationRedirection = (notif, navigate, onClose = null) =
 
     if (notif.notification_type === 'NEWS') {
         navigate(`/notice/${notif.post_id}`);
-    } else if (notif.is_treasure_post) {
-        navigate(`/treasure/post/${notif.post_id}`);
     } else {
-        const query = (notif.notification_type === 'COMMENT' || notif.notification_type === 'REPLY') ? '?openComments=true' : '';
-        navigate(`/posts/${notif.post_id}${query}`);
+        const query = (notif.notification_type === 'COMMENT' || notif.notification_type === 'REPLY' || notif.comment_id) ? '?openComments=true' : '';
+        if (notif.is_treasure_post) {
+            navigate(`/treasure/post/${notif.post_id}${query}`);
+        } else {
+            navigate(`/posts/${notif.post_id}${query}`);
+        }
     }
 
     if (onClose) onClose();
